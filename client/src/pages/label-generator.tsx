@@ -68,12 +68,12 @@ function EquipmentLabelDesignA({ data, isPreview = false }: { data: EquipmentFor
 
   return (
     <div className="bg-white text-black relative flex flex-col overflow-hidden border-0" style={{ width: `${width}mm`, height: `${height}mm`, boxSizing: "border-box", pageBreakInside: "avoid", border: isPreview ? '1px solid #e5e7eb' : 'none' }}>
-      <div className="bg-black text-white flex items-center justify-center px-2 w-full flex-shrink-0" style={{ height: barH }}>
-        <span className="font-bold uppercase whitespace-nowrap truncate" style={{ fontSize: companyFs }}>Filmværksted København</span>
-        <span className="mx-2 font-bold tracking-widest whitespace-nowrap flex-shrink-0" style={{ fontSize: phoneFs }}>+45 71 99 33 66</span>
+      <div className="bg-black text-white flex items-center justify-center px-2 w-full flex-shrink-0 overflow-hidden" style={{ height: barH }}>
+        <span className="font-bold uppercase whitespace-nowrap" style={{ fontSize: companyFs, overflow: 'hidden', textOverflow: 'ellipsis' }}>Filmværksted København</span>
+        <span className="mx-1 font-bold tracking-widest whitespace-nowrap flex-shrink-0" style={{ fontSize: phoneFs }}>+45 71 99 33 66</span>
       </div>
-      <div className="flex-1 flex items-center justify-center min-h-0 p-1">
-        <div className="flex flex-row items-center gap-2 h-full">
+      <div className="flex-1 flex items-center justify-center min-h-0 p-1 overflow-hidden">
+        <div className="flex flex-row items-center gap-2 h-full max-w-full overflow-hidden">
           <div className="relative flex items-center justify-center flex-shrink-0" style={{ width: `${logoSize}mm`, height: `${logoSize}mm` }}>
             <div className="absolute inset-0 rounded-full" style={{ border: `${stroke}mm solid black` }} />
             <div className="relative flex items-center justify-center" style={{ width: `${sq}mm`, height: `${sq}mm`, border: `${stroke * 0.7}mm solid black` }}>
@@ -83,8 +83,8 @@ function EquipmentLabelDesignA({ data, isPreview = false }: { data: EquipmentFor
             </div>
           </div>
           <div className="flex flex-col justify-center min-w-0 overflow-hidden">
-            <div className="font-bold uppercase leading-tight truncate" style={{ fontSize: titleFs }}>{data.name}</div>
-            <div className="font-mono font-bold tracking-widest truncate" style={{ fontSize: idFs }}>{data.id}</div>
+            <div className="font-bold uppercase leading-tight" style={{ fontSize: titleFs, wordBreak: 'break-word', overflowWrap: 'break-word', lineHeight: 1.1 }}>{data.name}</div>
+            <div className="font-mono font-bold tracking-widest" style={{ fontSize: idFs, wordBreak: 'break-all', overflowWrap: 'break-word', lineHeight: 1.1 }}>{data.id}</div>
             {data.group && (
               <div className="mt-0.5">
                 <span className="bg-black text-white font-bold uppercase tracking-wider rounded inline-block" style={{ fontSize: groupFs, padding: '1px 6px' }}>{data.group}</span>
@@ -112,7 +112,7 @@ function EquipmentLabelDesignB({ data, isPreview = false }: { data: EquipmentFor
 
   return (
     <div className="bg-black text-white relative flex flex-col overflow-hidden border-0" style={{ width: `${width}mm`, height: `${height}mm`, boxSizing: "border-box", pageBreakInside: "avoid", border: isPreview ? '1px solid #e5e7eb' : 'none' }}>
-      <div className="flex-1 flex flex-col items-center justify-center min-h-0 p-1">
+      <div className="flex-1 flex flex-col items-center justify-center min-h-0 p-1 overflow-hidden">
         <div className="relative flex items-center justify-center flex-shrink-0" style={{ width: `${logoSize}mm`, height: `${logoSize}mm` }}>
           <div className="absolute inset-0 rounded-full" style={{ border: `${stroke}mm solid white` }} />
           <div className="relative flex items-center justify-center bg-white" style={{ width: `${sq}mm`, height: `${sq}mm`, border: `${stroke * 0.7}mm solid white` }}>
@@ -122,8 +122,8 @@ function EquipmentLabelDesignB({ data, isPreview = false }: { data: EquipmentFor
           </div>
         </div>
         <div className="flex flex-col items-center text-center w-full mt-1 overflow-hidden px-1">
-          <div className="font-bold uppercase leading-tight truncate w-full" style={{ fontSize: titleFs }}>{data.name}</div>
-          <div className="font-mono font-bold tracking-widest truncate w-full" style={{ fontSize: idFs }}>{data.id}</div>
+          <div className="font-bold uppercase leading-tight w-full" style={{ fontSize: titleFs, wordBreak: 'break-word', overflowWrap: 'break-word', lineHeight: 1.1 }}>{data.name}</div>
+          <div className="font-mono font-bold tracking-widest w-full" style={{ fontSize: idFs, wordBreak: 'break-all', overflowWrap: 'break-word', lineHeight: 1.1 }}>{data.id}</div>
           {data.group && (
             <div className="mt-0.5">
               <span className="bg-white text-black font-bold uppercase tracking-wider rounded inline-block" style={{ fontSize: groupFs, padding: '1px 6px' }}>{data.group}</span>
@@ -131,9 +131,9 @@ function EquipmentLabelDesignB({ data, isPreview = false }: { data: EquipmentFor
           )}
         </div>
       </div>
-      <div className="bg-white text-black flex items-center justify-center px-2 w-full flex-shrink-0" style={{ height: barH }}>
-        <span className="font-bold uppercase whitespace-nowrap truncate" style={{ fontSize: companyFs }}>Filmværksted København</span>
-        <span className="mx-2 font-bold tracking-widest whitespace-nowrap flex-shrink-0" style={{ fontSize: phoneFs }}>+45 71 99 33 66</span>
+      <div className="bg-white text-black flex items-center justify-center px-2 w-full flex-shrink-0 overflow-hidden" style={{ height: barH }}>
+        <span className="font-bold uppercase whitespace-nowrap" style={{ fontSize: companyFs, overflow: 'hidden', textOverflow: 'ellipsis' }}>Filmværksted København</span>
+        <span className="mx-1 font-bold tracking-widest whitespace-nowrap flex-shrink-0" style={{ fontSize: phoneFs }}>+45 71 99 33 66</span>
       </div>
     </div>
   );
@@ -165,16 +165,16 @@ function EquipmentLabelDesignC({ data, isPreview = false }: { data: EquipmentFor
         </div>
       </div>
       <div className="flex-1 flex flex-col justify-center px-2 min-w-0 overflow-hidden">
-        <div className="font-bold uppercase leading-tight truncate w-full" style={{ fontSize: titleFs }}>{data.name}</div>
-        <div className="font-mono font-bold tracking-widest truncate w-full mt-0.5" style={{ fontSize: idFs }}>{data.id}</div>
+        <div className="font-bold uppercase leading-tight w-full" style={{ fontSize: titleFs, wordBreak: 'break-word', overflowWrap: 'break-word', lineHeight: 1.1 }}>{data.name}</div>
+        <div className="font-mono font-bold tracking-widest w-full mt-0.5" style={{ fontSize: idFs, wordBreak: 'break-all', overflowWrap: 'break-word', lineHeight: 1.1 }}>{data.id}</div>
         {data.group && (
           <div className="mt-0.5">
             <span className="bg-black text-white font-bold uppercase tracking-wider rounded inline-block" style={{ fontSize: groupFs, padding: '1px 6px' }}>{data.group}</span>
           </div>
         )}
-        <div className="mt-1 border-t border-black pt-1">
-          <div className="font-bold uppercase truncate" style={{ fontSize: companyFs }}>Filmværksted København</div>
-          <div className="font-bold tracking-widest" style={{ fontSize: phoneFs }}>+45 71 99 33 66</div>
+        <div className="mt-1 border-t border-black pt-1 overflow-hidden">
+          <div className="font-bold uppercase" style={{ fontSize: companyFs, wordBreak: 'break-word', overflowWrap: 'break-word', lineHeight: 1.1 }}>Filmværksted København</div>
+          <div className="font-bold tracking-widest whitespace-nowrap" style={{ fontSize: phoneFs }}>+45 71 99 33 66</div>
         </div>
       </div>
     </div>
