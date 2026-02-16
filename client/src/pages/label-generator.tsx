@@ -61,18 +61,17 @@ function EquipmentLabelDesignA({ data, isPreview = false }: { data: EquipmentFor
   const groupFs = `${Math.max(6, minDim * 0.12)}px`;
   const nameFs = `${Math.max(8, minDim * 0.22)}px`;
   const idFs = `${Math.max(7, minDim * 0.15)}px`;
-  const phoneFs = `${Math.max(5, minDim * 0.1)}px`;
-  const companyFs = `${Math.max(5, minDim * 0.09)}px`;
-  const barH = `${height * 0.14}mm`;
+  const infoFs = `${Math.max(5, width * 0.06)}px`;
+  const barH = `${Math.max(height * 0.14, 4)}mm`;
   const qrSize = Math.min(width * 0.35, height * 0.6);
-  const logoH = `${Math.max(8, height * 0.08)}px`;
+  const logoH = `${Math.max(8, height * 0.1)}px`;
 
   return (
     <div className="bg-white text-black relative flex flex-col overflow-hidden border-0" style={{ width: `${width}mm`, height: `${height}mm`, boxSizing: "border-box", pageBreakInside: "avoid", border: isPreview ? '1px solid #e5e7eb' : 'none' }}>
-      <div className="bg-black text-white flex items-center justify-center px-2 w-full flex-shrink-0 overflow-hidden gap-2" style={{ height: barH }}>
+      <div className="bg-black text-white flex items-center justify-center px-1 w-full flex-shrink-0 gap-1" style={{ height: barH }}>
         <img src="/logo.png" alt="Logo" className="object-contain filter invert brightness-0 saturate-100 invert-[1] flex-shrink-0" style={{ height: logoH }} />
-        <span className="font-bold uppercase whitespace-nowrap" style={{ fontSize: companyFs, overflow: 'hidden', textOverflow: 'ellipsis' }}>Filmværksted København</span>
-        <span className="font-bold tracking-widest whitespace-nowrap flex-shrink-0" style={{ fontSize: phoneFs }}>+45 71 99 33 66</span>
+        <span className="font-bold uppercase whitespace-nowrap flex-shrink-0" style={{ fontSize: infoFs }}>Filmværksted København</span>
+        <span className="font-bold tracking-wider whitespace-nowrap flex-shrink-0" style={{ fontSize: infoFs }}>+45 71 99 33 66</span>
       </div>
       <div className="flex-1 flex items-center justify-center min-h-0 p-2 overflow-hidden">
         <div className="flex flex-row items-center gap-3 h-full max-w-full overflow-hidden">
@@ -102,11 +101,10 @@ function EquipmentLabelDesignB({ data, isPreview = false }: { data: EquipmentFor
   const groupFs = `${Math.max(6, minDim * 0.12)}px`;
   const nameFs = `${Math.max(8, minDim * 0.22)}px`;
   const idFs = `${Math.max(7, minDim * 0.15)}px`;
-  const phoneFs = `${Math.max(5, minDim * 0.1)}px`;
-  const companyFs = `${Math.max(5, minDim * 0.09)}px`;
-  const barH = `${height * 0.14}mm`;
+  const infoFs = `${Math.max(5, width * 0.06)}px`;
+  const barH = `${Math.max(height * 0.14, 4)}mm`;
   const qrSize = Math.min(width * 0.4, height * 0.4);
-  const logoH = `${Math.max(8, height * 0.08)}px`;
+  const logoH = `${Math.max(8, height * 0.1)}px`;
 
   return (
     <div className="bg-black text-white relative flex flex-col overflow-hidden border-0" style={{ width: `${width}mm`, height: `${height}mm`, boxSizing: "border-box", pageBreakInside: "avoid", border: isPreview ? '1px solid #e5e7eb' : 'none' }}>
@@ -125,10 +123,10 @@ function EquipmentLabelDesignB({ data, isPreview = false }: { data: EquipmentFor
           )}
         </div>
       </div>
-      <div className="bg-white text-black flex items-center justify-center px-2 w-full flex-shrink-0 overflow-hidden gap-2" style={{ height: barH }}>
+      <div className="bg-white text-black flex items-center justify-center px-1 w-full flex-shrink-0 gap-1" style={{ height: barH }}>
         <img src="/logo.png" alt="Logo" className="object-contain flex-shrink-0" style={{ height: logoH }} />
-        <span className="font-bold uppercase whitespace-nowrap" style={{ fontSize: companyFs, overflow: 'hidden', textOverflow: 'ellipsis' }}>Filmværksted København</span>
-        <span className="font-bold tracking-widest whitespace-nowrap flex-shrink-0" style={{ fontSize: phoneFs }}>+45 71 99 33 66</span>
+        <span className="font-bold uppercase whitespace-nowrap flex-shrink-0" style={{ fontSize: infoFs }}>Filmværksted København</span>
+        <span className="font-bold tracking-wider whitespace-nowrap flex-shrink-0" style={{ fontSize: infoFs }}>+45 71 99 33 66</span>
       </div>
     </div>
   );
@@ -141,8 +139,7 @@ function EquipmentLabelDesignC({ data, isPreview = false }: { data: EquipmentFor
   const groupFs = `${Math.max(6, minDim * 0.12)}px`;
   const nameFs = `${Math.max(8, minDim * 0.22)}px`;
   const idFs = `${Math.max(7, minDim * 0.15)}px`;
-  const phoneFs = `${Math.max(5, minDim * 0.1)}px`;
-  const companyFs = `${Math.max(5, minDim * 0.09)}px`;
+  const infoFs = `${Math.max(5, width * 0.055)}px`;
   const qrSize = Math.min(width * 0.3, height * 0.55);
   const logoH = `${Math.max(8, height * 0.1)}px`;
   const sideW = `${width * 0.4}mm`;
@@ -167,8 +164,8 @@ function EquipmentLabelDesignC({ data, isPreview = false }: { data: EquipmentFor
           )}
         </div>
         <div className="overflow-hidden mt-1">
-          <div className="font-bold uppercase" style={{ fontSize: companyFs, wordBreak: 'break-word', overflowWrap: 'break-word', lineHeight: 1.1 }}>Filmværksted København</div>
-          <div className="font-bold tracking-widest whitespace-nowrap" style={{ fontSize: phoneFs }}>+45 71 99 33 66</div>
+          <div className="font-bold uppercase whitespace-nowrap" style={{ fontSize: infoFs, lineHeight: 1.2 }}>Filmværksted København</div>
+          <div className="font-bold tracking-wider whitespace-nowrap" style={{ fontSize: infoFs }}>+45 71 99 33 66</div>
         </div>
       </div>
     </div>
