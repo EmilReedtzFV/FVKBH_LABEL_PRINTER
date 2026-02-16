@@ -98,6 +98,10 @@ export default function LabelGenerator() {
     // Logo size - scaled
     const logoHeight = `${Math.max(10, 16 * scale)}px`;
 
+    // Determine layout based on aspect ratio
+    const isPortrait = height > width * 1.2; // If height is significantly larger than width
+    const isSquareish = !isPortrait && (height > width * 0.8); // If it's roughly square
+
     return (
       <div
         className="bg-white text-black relative flex flex-col overflow-hidden border-0"
@@ -130,26 +134,31 @@ export default function LabelGenerator() {
         </div>
 
         {/* Middle Section - White with QR and Text */}
-        <div className="flex-1 flex items-center bg-white p-1 min-h-0">
-          <div className="flex w-full h-full items-center justify-center">
+        <div className="flex-1 flex items-center bg-white p-1 min-h-0 relative">
+          <div className={`flex w-full h-full ${isPortrait || isSquareish ? 'flex-col justify-between py-2' : 'flex-row items-center justify-center'}`}>
+            
             {/* QR Code */}
-            <div className="h-full aspect-square flex items-center justify-center p-1">
+            <div className={`flex items-center justify-center p-1 ${isPortrait || isSquareish ? 'h-[55%] w-full' : 'h-full aspect-square'}`}>
               <QRCode
                 value={data.id}
-                style={{ height: "100%", width: "100%", maxWidth: "100%" }}
+                style={{ height: "100%", width: "100%", maxWidth: "100%", objectFit: "contain" }}
                 viewBox={`0 0 256 256`}
               />
             </div>
             
             {/* Divider */}
-            <div className="h-[80%] w-[2px] bg-black mx-2 rounded-full flex-shrink-0"></div>
+            {isPortrait || isSquareish ? (
+               <div className="w-[80%] h-[2px] bg-black my-1 rounded-full flex-shrink-0"></div>
+            ) : (
+               <div className="h-[80%] w-[2px] bg-black mx-2 rounded-full flex-shrink-0"></div>
+            )}
 
             {/* Text Info */}
-            <div className="flex-1 flex flex-col justify-center h-full overflow-hidden min-w-0">
-               <div className="font-bold uppercase leading-tight truncate" style={{ fontSize: titleFontSize }}>
+            <div className={`flex-1 flex flex-col justify-center overflow-hidden min-w-0 ${isPortrait || isSquareish ? 'w-full items-center text-center px-1' : 'h-full'}`}>
+               <div className="font-bold uppercase leading-tight truncate w-full" style={{ fontSize: titleFontSize }}>
                  {data.name}
                </div>
-               <div className="font-mono font-bold tracking-widest mt-1 truncate" style={{ fontSize: idFontSize }}>
+               <div className="font-mono font-bold tracking-widest mt-1 truncate w-full" style={{ fontSize: idFontSize }}>
                  {data.id}
                </div>
             </div>
