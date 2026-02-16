@@ -53,40 +53,38 @@ const CABLE_PRESETS: Record<string, { width: number; height: number; label: stri
 };
 
 // Equipment Label Component
+
+// Design A: Top bar with company info, QR left, text right (horizontal)
 function EquipmentLabelDesignA({ data, isPreview = false }: { data: EquipmentFormValues; isPreview?: boolean }) {
   const { width, height } = data;
   const minDim = Math.min(width, height);
-  const groupFs = `${Math.max(6, minDim * 0.13)}px`;
-  const titleFs = `${Math.max(7, minDim * 0.16)}px`;
-  const idFs = `${Math.max(8, minDim * 0.2)}px`;
+  const groupFs = `${Math.max(6, minDim * 0.12)}px`;
+  const nameFs = `${Math.max(8, minDim * 0.22)}px`;
+  const idFs = `${Math.max(7, minDim * 0.15)}px`;
   const phoneFs = `${Math.max(5, minDim * 0.1)}px`;
   const companyFs = `${Math.max(5, minDim * 0.09)}px`;
-  const logoSize = Math.min(width * 0.5, height * 0.55);
-  const stroke = Math.max(1.2, logoSize * 0.05);
-  const sq = (logoSize - stroke * 2) * 0.62;
-  const barH = `${height * 0.12}mm`;
+  const barH = `${height * 0.14}mm`;
+  const qrSize = Math.min(width * 0.35, height * 0.6);
+  const logoH = `${Math.max(8, height * 0.08)}px`;
 
   return (
     <div className="bg-white text-black relative flex flex-col overflow-hidden border-0" style={{ width: `${width}mm`, height: `${height}mm`, boxSizing: "border-box", pageBreakInside: "avoid", border: isPreview ? '1px solid #e5e7eb' : 'none' }}>
-      <div className="bg-black text-white flex items-center justify-center px-2 w-full flex-shrink-0 overflow-hidden" style={{ height: barH }}>
+      <div className="bg-black text-white flex items-center justify-center px-2 w-full flex-shrink-0 overflow-hidden gap-2" style={{ height: barH }}>
+        <img src="/logo.png" alt="Logo" className="object-contain filter invert brightness-0 saturate-100 invert-[1] flex-shrink-0" style={{ height: logoH }} />
         <span className="font-bold uppercase whitespace-nowrap" style={{ fontSize: companyFs, overflow: 'hidden', textOverflow: 'ellipsis' }}>Filmværksted København</span>
-        <span className="mx-1 font-bold tracking-widest whitespace-nowrap flex-shrink-0" style={{ fontSize: phoneFs }}>+45 71 99 33 66</span>
+        <span className="font-bold tracking-widest whitespace-nowrap flex-shrink-0" style={{ fontSize: phoneFs }}>+45 71 99 33 66</span>
       </div>
-      <div className="flex-1 flex items-center justify-center min-h-0 p-1 overflow-hidden">
-        <div className="flex flex-row items-center gap-2 h-full max-w-full overflow-hidden">
-          <div className="relative flex items-center justify-center flex-shrink-0" style={{ width: `${logoSize}mm`, height: `${logoSize}mm` }}>
-            <div className="absolute inset-0 rounded-full" style={{ border: `${stroke}mm solid black` }} />
-            <div className="relative flex items-center justify-center" style={{ width: `${sq}mm`, height: `${sq}mm`, border: `${stroke * 0.7}mm solid black` }}>
-              <div className="flex items-center justify-center" style={{ width: '85%', height: '85%' }}>
-                <QRCode value={data.id} style={{ height: "100%", width: "100%", maxWidth: "100%", objectFit: "contain" }} viewBox="0 0 256 256" />
-              </div>
-            </div>
+      <div className="flex-1 flex items-center justify-center min-h-0 p-2 overflow-hidden">
+        <div className="flex flex-row items-center gap-3 h-full max-w-full overflow-hidden">
+          <div className="flex items-center justify-center flex-shrink-0" style={{ width: `${qrSize}mm`, height: `${qrSize}mm` }}>
+            <QRCode value={data.id} style={{ height: "100%", width: "100%", maxWidth: "100%", objectFit: "contain" }} viewBox="0 0 256 256" />
           </div>
+          <div className="h-[70%] w-[2px] bg-black rounded-full flex-shrink-0"></div>
           <div className="flex flex-col justify-center min-w-0 overflow-hidden">
-            <div className="font-bold uppercase leading-tight" style={{ fontSize: titleFs, wordBreak: 'break-word', overflowWrap: 'break-word', lineHeight: 1.1 }}>{data.name}</div>
-            <div className="font-mono font-bold tracking-widest" style={{ fontSize: idFs, wordBreak: 'break-all', overflowWrap: 'break-word', lineHeight: 1.1 }}>{data.id}</div>
+            <div className="font-bold uppercase leading-tight" style={{ fontSize: nameFs, wordBreak: 'break-word', overflowWrap: 'break-word', lineHeight: 1.15 }}>{data.name}</div>
+            <div className="font-mono tracking-widest mt-1 text-gray-600" style={{ fontSize: idFs, wordBreak: 'break-all', overflowWrap: 'break-word', lineHeight: 1.1 }}>#{data.id}</div>
             {data.group && (
-              <div className="mt-0.5">
+              <div className="mt-1">
                 <span className="bg-black text-white font-bold uppercase tracking-wider rounded inline-block" style={{ fontSize: groupFs, padding: '1px 6px' }}>{data.group}</span>
               </div>
             )}
@@ -97,33 +95,29 @@ function EquipmentLabelDesignA({ data, isPreview = false }: { data: EquipmentFor
   );
 }
 
+// Design B: Centered vertical layout, black background, inverted colors
 function EquipmentLabelDesignB({ data, isPreview = false }: { data: EquipmentFormValues; isPreview?: boolean }) {
   const { width, height } = data;
   const minDim = Math.min(width, height);
-  const groupFs = `${Math.max(6, minDim * 0.13)}px`;
-  const titleFs = `${Math.max(7, minDim * 0.16)}px`;
-  const idFs = `${Math.max(8, minDim * 0.2)}px`;
+  const groupFs = `${Math.max(6, minDim * 0.12)}px`;
+  const nameFs = `${Math.max(8, minDim * 0.22)}px`;
+  const idFs = `${Math.max(7, minDim * 0.15)}px`;
   const phoneFs = `${Math.max(5, minDim * 0.1)}px`;
   const companyFs = `${Math.max(5, minDim * 0.09)}px`;
-  const logoSize = Math.min(width * 0.45, height * 0.5);
-  const stroke = Math.max(1.2, logoSize * 0.05);
-  const sq = (logoSize - stroke * 2) * 0.62;
   const barH = `${height * 0.14}mm`;
+  const qrSize = Math.min(width * 0.4, height * 0.4);
+  const logoH = `${Math.max(8, height * 0.08)}px`;
 
   return (
     <div className="bg-black text-white relative flex flex-col overflow-hidden border-0" style={{ width: `${width}mm`, height: `${height}mm`, boxSizing: "border-box", pageBreakInside: "avoid", border: isPreview ? '1px solid #e5e7eb' : 'none' }}>
-      <div className="flex-1 flex flex-col items-center justify-center min-h-0 p-1 overflow-hidden">
-        <div className="relative flex items-center justify-center flex-shrink-0" style={{ width: `${logoSize}mm`, height: `${logoSize}mm` }}>
-          <div className="absolute inset-0 rounded-full" style={{ border: `${stroke}mm solid white` }} />
-          <div className="relative flex items-center justify-center bg-white" style={{ width: `${sq}mm`, height: `${sq}mm`, border: `${stroke * 0.7}mm solid white` }}>
-            <div className="flex items-center justify-center" style={{ width: '85%', height: '85%' }}>
-              <QRCode value={data.id} style={{ height: "100%", width: "100%", maxWidth: "100%", objectFit: "contain" }} viewBox="0 0 256 256" />
-            </div>
-          </div>
+      <div className="flex-1 flex flex-col items-center justify-center min-h-0 p-2 overflow-hidden">
+        <div className="flex items-center justify-center flex-shrink-0 bg-white p-1 rounded" style={{ width: `${qrSize}mm`, height: `${qrSize}mm` }}>
+          <QRCode value={data.id} style={{ height: "100%", width: "100%", maxWidth: "100%", objectFit: "contain" }} viewBox="0 0 256 256" />
         </div>
-        <div className="flex flex-col items-center text-center w-full mt-1 overflow-hidden px-1">
-          <div className="font-bold uppercase leading-tight w-full" style={{ fontSize: titleFs, wordBreak: 'break-word', overflowWrap: 'break-word', lineHeight: 1.1 }}>{data.name}</div>
-          <div className="font-mono font-bold tracking-widest w-full" style={{ fontSize: idFs, wordBreak: 'break-all', overflowWrap: 'break-word', lineHeight: 1.1 }}>{data.id}</div>
+        <div className="w-[60%] h-[1px] bg-white/40 my-1 flex-shrink-0"></div>
+        <div className="flex flex-col items-center text-center w-full overflow-hidden px-1">
+          <div className="font-bold uppercase leading-tight w-full" style={{ fontSize: nameFs, wordBreak: 'break-word', overflowWrap: 'break-word', lineHeight: 1.15 }}>{data.name}</div>
+          <div className="font-mono tracking-widest w-full mt-0.5 text-gray-400" style={{ fontSize: idFs, wordBreak: 'break-all', overflowWrap: 'break-word', lineHeight: 1.1 }}>#{data.id}</div>
           {data.group && (
             <div className="mt-0.5">
               <span className="bg-white text-black font-bold uppercase tracking-wider rounded inline-block" style={{ fontSize: groupFs, padding: '1px 6px' }}>{data.group}</span>
@@ -131,48 +125,48 @@ function EquipmentLabelDesignB({ data, isPreview = false }: { data: EquipmentFor
           )}
         </div>
       </div>
-      <div className="bg-white text-black flex items-center justify-center px-2 w-full flex-shrink-0 overflow-hidden" style={{ height: barH }}>
+      <div className="bg-white text-black flex items-center justify-center px-2 w-full flex-shrink-0 overflow-hidden gap-2" style={{ height: barH }}>
+        <img src="/logo.png" alt="Logo" className="object-contain flex-shrink-0" style={{ height: logoH }} />
         <span className="font-bold uppercase whitespace-nowrap" style={{ fontSize: companyFs, overflow: 'hidden', textOverflow: 'ellipsis' }}>Filmværksted København</span>
-        <span className="mx-1 font-bold tracking-widest whitespace-nowrap flex-shrink-0" style={{ fontSize: phoneFs }}>+45 71 99 33 66</span>
+        <span className="font-bold tracking-widest whitespace-nowrap flex-shrink-0" style={{ fontSize: phoneFs }}>+45 71 99 33 66</span>
       </div>
     </div>
   );
 }
 
+// Design C: Split layout - black left with logo+QR, white right with info
 function EquipmentLabelDesignC({ data, isPreview = false }: { data: EquipmentFormValues; isPreview?: boolean }) {
   const { width, height } = data;
   const minDim = Math.min(width, height);
-  const groupFs = `${Math.max(6, minDim * 0.13)}px`;
-  const titleFs = `${Math.max(7, minDim * 0.16)}px`;
-  const idFs = `${Math.max(8, minDim * 0.2)}px`;
+  const groupFs = `${Math.max(6, minDim * 0.12)}px`;
+  const nameFs = `${Math.max(8, minDim * 0.22)}px`;
+  const idFs = `${Math.max(7, minDim * 0.15)}px`;
   const phoneFs = `${Math.max(5, minDim * 0.1)}px`;
   const companyFs = `${Math.max(5, minDim * 0.09)}px`;
-  const logoSize = Math.min(width * 0.35, height * 0.7);
-  const stroke = Math.max(1.2, logoSize * 0.05);
-  const sq = (logoSize - stroke * 2) * 0.62;
-  const sideW = `${width * 0.45}mm`;
+  const qrSize = Math.min(width * 0.3, height * 0.55);
+  const logoH = `${Math.max(8, height * 0.1)}px`;
+  const sideW = `${width * 0.4}mm`;
 
   return (
     <div className="bg-white text-black relative flex flex-row overflow-hidden border-0" style={{ width: `${width}mm`, height: `${height}mm`, boxSizing: "border-box", pageBreakInside: "avoid", border: isPreview ? '1px solid #e5e7eb' : 'none' }}>
-      <div className="bg-black flex-shrink-0 flex items-center justify-center" style={{ width: sideW, height: '100%' }}>
-        <div className="relative flex items-center justify-center" style={{ width: `${logoSize}mm`, height: `${logoSize}mm` }}>
-          <div className="absolute inset-0 rounded-full" style={{ border: `${stroke}mm solid white` }} />
-          <div className="relative flex items-center justify-center bg-white" style={{ width: `${sq}mm`, height: `${sq}mm`, border: `${stroke * 0.7}mm solid white` }}>
-            <div className="flex items-center justify-center" style={{ width: '85%', height: '85%' }}>
-              <QRCode value={data.id} style={{ height: "100%", width: "100%", maxWidth: "100%", objectFit: "contain" }} viewBox="0 0 256 256" />
-            </div>
-          </div>
+      <div className="bg-black flex-shrink-0 flex flex-col items-center justify-center gap-1" style={{ width: sideW, height: '100%' }}>
+        <img src="/logo.png" alt="Logo" className="object-contain filter invert brightness-0 saturate-100 invert-[1] flex-shrink-0" style={{ height: logoH }} />
+        <div className="flex items-center justify-center flex-shrink-0 bg-white p-0.5 rounded" style={{ width: `${qrSize}mm`, height: `${qrSize}mm` }}>
+          <QRCode value={data.id} style={{ height: "100%", width: "100%", maxWidth: "100%", objectFit: "contain" }} viewBox="0 0 256 256" />
         </div>
       </div>
-      <div className="flex-1 flex flex-col justify-center px-2 min-w-0 overflow-hidden">
-        <div className="font-bold uppercase leading-tight w-full" style={{ fontSize: titleFs, wordBreak: 'break-word', overflowWrap: 'break-word', lineHeight: 1.1 }}>{data.name}</div>
-        <div className="font-mono font-bold tracking-widest w-full mt-0.5" style={{ fontSize: idFs, wordBreak: 'break-all', overflowWrap: 'break-word', lineHeight: 1.1 }}>{data.id}</div>
-        {data.group && (
-          <div className="mt-0.5">
-            <span className="bg-black text-white font-bold uppercase tracking-wider rounded inline-block" style={{ fontSize: groupFs, padding: '1px 6px' }}>{data.group}</span>
-          </div>
-        )}
-        <div className="mt-1 border-t border-black pt-1 overflow-hidden">
+      <div className="flex-1 flex flex-col justify-between py-2 px-2 min-w-0 overflow-hidden">
+        <div className="flex flex-col min-w-0 overflow-hidden">
+          <div className="font-bold uppercase leading-tight w-full" style={{ fontSize: nameFs, wordBreak: 'break-word', overflowWrap: 'break-word', lineHeight: 1.15 }}>{data.name}</div>
+          <div className="w-full h-[1.5px] bg-black my-1 rounded-full"></div>
+          <div className="font-mono tracking-widest w-full text-gray-600" style={{ fontSize: idFs, wordBreak: 'break-all', overflowWrap: 'break-word', lineHeight: 1.1 }}>#{data.id}</div>
+          {data.group && (
+            <div className="mt-1">
+              <span className="bg-black text-white font-bold uppercase tracking-wider rounded inline-block" style={{ fontSize: groupFs, padding: '1px 6px' }}>{data.group}</span>
+            </div>
+          )}
+        </div>
+        <div className="overflow-hidden mt-1">
           <div className="font-bold uppercase" style={{ fontSize: companyFs, wordBreak: 'break-word', overflowWrap: 'break-word', lineHeight: 1.1 }}>Filmværksted København</div>
           <div className="font-bold tracking-widest whitespace-nowrap" style={{ fontSize: phoneFs }}>+45 71 99 33 66</div>
         </div>
