@@ -70,24 +70,24 @@ function EquipmentLabelDesignA({ data, isPreview = false }: { data: EquipmentFor
   const logoH = `${Math.max(8, height * 0.1)}px`;
 
   return (
-    <div className="bg-white text-black relative flex flex-col overflow-hidden border-0" style={{ width: `${width}mm`, height: `${height}mm`, boxSizing: "border-box", pageBreakInside: "avoid", border: isPreview ? '1px solid #e5e7eb' : 'none' }}>
-      <div className="bg-black text-white flex items-center justify-center px-1 w-full flex-shrink-0 gap-1" style={{ height: barH }}>
-        <img src="/logo.png" alt="Logo" className="object-contain filter invert brightness-0 saturate-100 invert-[1] flex-shrink-0" style={{ height: logoH }} />
+    <div className="bg-black text-white relative flex flex-col overflow-hidden border-0" style={{ width: `${width}mm`, height: `${height}mm`, boxSizing: "border-box", pageBreakInside: "avoid", border: isPreview ? '1px solid #e5e7eb' : 'none' }}>
+      <div className="bg-white text-black flex items-center justify-center px-1 w-full flex-shrink-0 gap-1" style={{ height: barH }}>
+        <img src="/logo.png" alt="Logo" className="object-contain flex-shrink-0" style={{ height: logoH }} />
         <span className="font-bold uppercase whitespace-nowrap flex-shrink-0" style={{ fontSize: infoFs }}>Filmværksted København</span>
         <span className="font-bold tracking-wider whitespace-nowrap flex-shrink-0" style={{ fontSize: infoFs }}>+45 71 99 33 66</span>
       </div>
       <div className="flex-1 flex items-center justify-center min-h-0 p-2 overflow-hidden">
         <div className="flex flex-row items-center gap-3 h-full max-w-full overflow-hidden">
-          <div className="flex items-center justify-center flex-shrink-0" style={{ width: `${qrSize}mm`, height: `${qrSize}mm` }}>
+          <div className="flex items-center justify-center flex-shrink-0 bg-white p-0.5 rounded" style={{ width: `${qrSize}mm`, height: `${qrSize}mm` }}>
             <QRCode value={data.id} style={{ height: "100%", width: "100%", maxWidth: "100%", objectFit: "contain" }} viewBox="0 0 256 256" />
           </div>
-          <div className="h-[70%] w-[2px] bg-black rounded-full flex-shrink-0"></div>
+          <div className="h-[70%] w-[2px] bg-white rounded-full flex-shrink-0"></div>
           <div className="flex flex-col justify-center min-w-0 overflow-hidden">
             <div className="font-bold uppercase leading-tight" style={{ fontSize: nameFs, wordBreak: 'break-word', overflowWrap: 'break-word', lineHeight: 1.15 }}>{data.name}</div>
-            <div className="font-mono tracking-widest mt-1 text-gray-600" style={{ fontSize: idFs, wordBreak: 'break-all', overflowWrap: 'break-word', lineHeight: 1.1 }}>#{data.id}</div>
+            <div className="font-mono tracking-widest mt-1 text-gray-400" style={{ fontSize: idFs, wordBreak: 'break-all', overflowWrap: 'break-word', lineHeight: 1.1 }}>#{data.id}</div>
             {data.group && (
               <div className="mt-1">
-                <span className="bg-black text-white font-bold uppercase tracking-wider rounded inline-block" style={{ fontSize: groupFs, padding: '1px 6px' }}>{data.group}</span>
+                <span className="bg-white text-black font-bold uppercase tracking-wider rounded inline-block" style={{ fontSize: groupFs, padding: '1px 6px' }}>{data.group}</span>
               </div>
             )}
           </div>
