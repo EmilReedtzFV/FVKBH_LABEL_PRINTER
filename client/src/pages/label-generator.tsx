@@ -53,102 +53,138 @@ const CABLE_PRESETS: Record<string, { width: number; height: number; label: stri
 };
 
 // Equipment Label Component
-function EquipmentLabelContent({ data, isPreview = false }: { data: EquipmentFormValues; isPreview?: boolean }) {
-  const width = data.width;
-  const height = data.height;
+function EquipmentLabelDesignA({ data, isPreview = false }: { data: EquipmentFormValues; isPreview?: boolean }) {
+  const { width, height } = data;
   const minDim = Math.min(width, height);
-
-  const groupFontSize = `${Math.max(6, minDim * 0.14)}px`;
-  const titleFontSize = `${Math.max(7, minDim * 0.16)}px`;
-  const idFontSize = `${Math.max(8, minDim * 0.2)}px`;
-  const phoneFontSize = `${Math.max(5, minDim * 0.1)}px`;
-  const companyFontSize = `${Math.max(5, minDim * 0.09)}px`;
-
-  const logoAreaSize = Math.min(width * 0.55, height * 0.65);
-  const circleStroke = Math.max(1.5, logoAreaSize * 0.06);
-  const innerSquare = (logoAreaSize - circleStroke * 2) * 0.62;
+  const groupFs = `${Math.max(6, minDim * 0.13)}px`;
+  const titleFs = `${Math.max(7, minDim * 0.16)}px`;
+  const idFs = `${Math.max(8, minDim * 0.2)}px`;
+  const phoneFs = `${Math.max(5, minDim * 0.1)}px`;
+  const companyFs = `${Math.max(5, minDim * 0.09)}px`;
+  const logoSize = Math.min(width * 0.5, height * 0.55);
+  const stroke = Math.max(1.2, logoSize * 0.05);
+  const sq = (logoSize - stroke * 2) * 0.62;
+  const barH = `${height * 0.12}mm`;
 
   return (
-    <div
-      className="bg-white text-black relative flex flex-col overflow-hidden border-0"
-      style={{
-        width: `${width}mm`,
-        height: `${height}mm`,
-        boxSizing: "border-box",
-        pageBreakInside: "avoid",
-        border: isPreview ? '1px solid #e5e7eb' : 'none'
-      }}
-    >
-      {/* Main content */}
-      <div className="flex-1 flex flex-col items-center justify-center p-1 min-h-0">
-        {/* Logo circle with QR code embedded inside */}
-        <div
-          className="relative flex items-center justify-center flex-shrink-0"
-          style={{ width: `${logoAreaSize}mm`, height: `${logoAreaSize}mm` }}
-        >
-          {/* Circle border (mimics the logo ring) */}
-          <div
-            className="absolute inset-0 rounded-full"
-            style={{
-              border: `${circleStroke}mm solid black`,
-            }}
-          />
-          {/* Square with QR code inside (matches logo's inner square) */}
-          <div
-            className="relative flex items-center justify-center"
-            style={{
-              width: `${innerSquare}mm`,
-              height: `${innerSquare}mm`,
-              border: `${circleStroke * 0.8}mm solid black`,
-            }}
-          >
-            <div className="flex items-center justify-center" style={{ width: '88%', height: '88%' }}>
-              <QRCode
-                value={data.id}
-                style={{ height: "100%", width: "100%", maxWidth: "100%", objectFit: "contain" }}
-                viewBox="0 0 256 256"
-              />
-            </div>
-          </div>
-        </div>
-
-        {/* Item info below logo-QR */}
-        <div className="flex flex-col items-center text-center w-full mt-1 overflow-hidden px-1">
-          <div className="font-bold uppercase leading-tight truncate w-full" style={{ fontSize: titleFontSize }}>
-            {data.name}
-          </div>
-          <div className="font-mono font-bold tracking-widest truncate w-full" style={{ fontSize: idFontSize }}>
-            {data.id}
-          </div>
-          {data.group && (
-            <div className="mt-0.5">
-              <span
-                className="bg-black text-white font-bold uppercase tracking-wider rounded inline-block"
-                style={{ fontSize: groupFontSize, padding: '1px 6px', letterSpacing: '0.03em' }}
-              >
-                {data.group}
-              </span>
-            </div>
-          )}
-        </div>
+    <div className="bg-white text-black relative flex flex-col overflow-hidden border-0" style={{ width: `${width}mm`, height: `${height}mm`, boxSizing: "border-box", pageBreakInside: "avoid", border: isPreview ? '1px solid #e5e7eb' : 'none' }}>
+      <div className="bg-black text-white flex items-center justify-center px-2 w-full flex-shrink-0" style={{ height: barH }}>
+        <span className="font-bold uppercase whitespace-nowrap truncate" style={{ fontSize: companyFs }}>Filmværksted København</span>
+        <span className="mx-2 font-bold tracking-widest whitespace-nowrap flex-shrink-0" style={{ fontSize: phoneFs }}>+45 71 99 33 66</span>
       </div>
-
-      {/* Bottom bar - Company + phone */}
-      <div
-        className="bg-black text-white flex items-center justify-center px-2 w-full flex-shrink-0"
-        style={{ height: `${height * 0.12}mm` }}
-      >
-        <div className="flex items-center gap-2 overflow-hidden">
-          <span className="font-bold uppercase whitespace-nowrap truncate" style={{ fontSize: companyFontSize }}>
-            Filmværksted København
-          </span>
-          <span className="font-bold tracking-widest whitespace-nowrap flex-shrink-0" style={{ fontSize: phoneFontSize }}>
-            +45 71 99 33 66
-          </span>
+      <div className="flex-1 flex items-center justify-center min-h-0 p-1">
+        <div className="flex flex-row items-center gap-2 h-full">
+          <div className="relative flex items-center justify-center flex-shrink-0" style={{ width: `${logoSize}mm`, height: `${logoSize}mm` }}>
+            <div className="absolute inset-0 rounded-full" style={{ border: `${stroke}mm solid black` }} />
+            <div className="relative flex items-center justify-center" style={{ width: `${sq}mm`, height: `${sq}mm`, border: `${stroke * 0.7}mm solid black` }}>
+              <div className="flex items-center justify-center" style={{ width: '85%', height: '85%' }}>
+                <QRCode value={data.id} style={{ height: "100%", width: "100%", maxWidth: "100%", objectFit: "contain" }} viewBox="0 0 256 256" />
+              </div>
+            </div>
+          </div>
+          <div className="flex flex-col justify-center min-w-0 overflow-hidden">
+            <div className="font-bold uppercase leading-tight truncate" style={{ fontSize: titleFs }}>{data.name}</div>
+            <div className="font-mono font-bold tracking-widest truncate" style={{ fontSize: idFs }}>{data.id}</div>
+            {data.group && (
+              <div className="mt-0.5">
+                <span className="bg-black text-white font-bold uppercase tracking-wider rounded inline-block" style={{ fontSize: groupFs, padding: '1px 6px' }}>{data.group}</span>
+              </div>
+            )}
+          </div>
         </div>
       </div>
     </div>
   );
+}
+
+function EquipmentLabelDesignB({ data, isPreview = false }: { data: EquipmentFormValues; isPreview?: boolean }) {
+  const { width, height } = data;
+  const minDim = Math.min(width, height);
+  const groupFs = `${Math.max(6, minDim * 0.13)}px`;
+  const titleFs = `${Math.max(7, minDim * 0.16)}px`;
+  const idFs = `${Math.max(8, minDim * 0.2)}px`;
+  const phoneFs = `${Math.max(5, minDim * 0.1)}px`;
+  const companyFs = `${Math.max(5, minDim * 0.09)}px`;
+  const logoSize = Math.min(width * 0.45, height * 0.5);
+  const stroke = Math.max(1.2, logoSize * 0.05);
+  const sq = (logoSize - stroke * 2) * 0.62;
+  const barH = `${height * 0.14}mm`;
+
+  return (
+    <div className="bg-black text-white relative flex flex-col overflow-hidden border-0" style={{ width: `${width}mm`, height: `${height}mm`, boxSizing: "border-box", pageBreakInside: "avoid", border: isPreview ? '1px solid #e5e7eb' : 'none' }}>
+      <div className="flex-1 flex flex-col items-center justify-center min-h-0 p-1">
+        <div className="relative flex items-center justify-center flex-shrink-0" style={{ width: `${logoSize}mm`, height: `${logoSize}mm` }}>
+          <div className="absolute inset-0 rounded-full" style={{ border: `${stroke}mm solid white` }} />
+          <div className="relative flex items-center justify-center bg-white" style={{ width: `${sq}mm`, height: `${sq}mm`, border: `${stroke * 0.7}mm solid white` }}>
+            <div className="flex items-center justify-center" style={{ width: '85%', height: '85%' }}>
+              <QRCode value={data.id} style={{ height: "100%", width: "100%", maxWidth: "100%", objectFit: "contain" }} viewBox="0 0 256 256" />
+            </div>
+          </div>
+        </div>
+        <div className="flex flex-col items-center text-center w-full mt-1 overflow-hidden px-1">
+          <div className="font-bold uppercase leading-tight truncate w-full" style={{ fontSize: titleFs }}>{data.name}</div>
+          <div className="font-mono font-bold tracking-widest truncate w-full" style={{ fontSize: idFs }}>{data.id}</div>
+          {data.group && (
+            <div className="mt-0.5">
+              <span className="bg-white text-black font-bold uppercase tracking-wider rounded inline-block" style={{ fontSize: groupFs, padding: '1px 6px' }}>{data.group}</span>
+            </div>
+          )}
+        </div>
+      </div>
+      <div className="bg-white text-black flex items-center justify-center px-2 w-full flex-shrink-0" style={{ height: barH }}>
+        <span className="font-bold uppercase whitespace-nowrap truncate" style={{ fontSize: companyFs }}>Filmværksted København</span>
+        <span className="mx-2 font-bold tracking-widest whitespace-nowrap flex-shrink-0" style={{ fontSize: phoneFs }}>+45 71 99 33 66</span>
+      </div>
+    </div>
+  );
+}
+
+function EquipmentLabelDesignC({ data, isPreview = false }: { data: EquipmentFormValues; isPreview?: boolean }) {
+  const { width, height } = data;
+  const minDim = Math.min(width, height);
+  const groupFs = `${Math.max(6, minDim * 0.13)}px`;
+  const titleFs = `${Math.max(7, minDim * 0.16)}px`;
+  const idFs = `${Math.max(8, minDim * 0.2)}px`;
+  const phoneFs = `${Math.max(5, minDim * 0.1)}px`;
+  const companyFs = `${Math.max(5, minDim * 0.09)}px`;
+  const logoSize = Math.min(width * 0.35, height * 0.7);
+  const stroke = Math.max(1.2, logoSize * 0.05);
+  const sq = (logoSize - stroke * 2) * 0.62;
+  const sideW = `${width * 0.45}mm`;
+
+  return (
+    <div className="bg-white text-black relative flex flex-row overflow-hidden border-0" style={{ width: `${width}mm`, height: `${height}mm`, boxSizing: "border-box", pageBreakInside: "avoid", border: isPreview ? '1px solid #e5e7eb' : 'none' }}>
+      <div className="bg-black flex-shrink-0 flex items-center justify-center" style={{ width: sideW, height: '100%' }}>
+        <div className="relative flex items-center justify-center" style={{ width: `${logoSize}mm`, height: `${logoSize}mm` }}>
+          <div className="absolute inset-0 rounded-full" style={{ border: `${stroke}mm solid white` }} />
+          <div className="relative flex items-center justify-center bg-white" style={{ width: `${sq}mm`, height: `${sq}mm`, border: `${stroke * 0.7}mm solid white` }}>
+            <div className="flex items-center justify-center" style={{ width: '85%', height: '85%' }}>
+              <QRCode value={data.id} style={{ height: "100%", width: "100%", maxWidth: "100%", objectFit: "contain" }} viewBox="0 0 256 256" />
+            </div>
+          </div>
+        </div>
+      </div>
+      <div className="flex-1 flex flex-col justify-center px-2 min-w-0 overflow-hidden">
+        <div className="font-bold uppercase leading-tight truncate w-full" style={{ fontSize: titleFs }}>{data.name}</div>
+        <div className="font-mono font-bold tracking-widest truncate w-full mt-0.5" style={{ fontSize: idFs }}>{data.id}</div>
+        {data.group && (
+          <div className="mt-0.5">
+            <span className="bg-black text-white font-bold uppercase tracking-wider rounded inline-block" style={{ fontSize: groupFs, padding: '1px 6px' }}>{data.group}</span>
+          </div>
+        )}
+        <div className="mt-1 border-t border-black pt-1">
+          <div className="font-bold uppercase truncate" style={{ fontSize: companyFs }}>Filmværksted København</div>
+          <div className="font-bold tracking-widest" style={{ fontSize: phoneFs }}>+45 71 99 33 66</div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function EquipmentLabelContent({ data, isPreview = false, design = "A" }: { data: EquipmentFormValues; isPreview?: boolean; design?: string }) {
+  if (design === "B") return <EquipmentLabelDesignB data={data} isPreview={isPreview} />;
+  if (design === "C") return <EquipmentLabelDesignC data={data} isPreview={isPreview} />;
+  return <EquipmentLabelDesignA data={data} isPreview={isPreview} />;
 }
 
 // Cable Label Component - narrow strip that wraps around a cable
@@ -627,9 +663,22 @@ export default function LabelGenerator() {
                   : "Kabel-labelen vikles rundt om kablet. Brug print-knappen for at udskrive."}
               </CardDescription>
             </CardHeader>
-            <CardContent className="flex-1 flex items-center justify-center bg-muted/20 p-8 rounded-lg border-dashed border-2 m-6 overflow-auto">
+            <CardContent className="flex-1 flex flex-col items-center justify-center bg-muted/20 p-8 rounded-lg border-dashed border-2 m-6 overflow-auto gap-8">
               {mode === "equipment" ? (
-                <EquipmentLabelContent data={labelData} isPreview={true} />
+                <>
+                  <div className="flex flex-col items-center gap-2">
+                    <span className="text-sm font-bold text-muted-foreground">Design A – Horisontal med sort top-bar</span>
+                    <EquipmentLabelContent data={labelData} isPreview={true} design="A" />
+                  </div>
+                  <div className="flex flex-col items-center gap-2">
+                    <span className="text-sm font-bold text-muted-foreground">Design B – Inverteret (sort baggrund)</span>
+                    <EquipmentLabelContent data={labelData} isPreview={true} design="B" />
+                  </div>
+                  <div className="flex flex-col items-center gap-2">
+                    <span className="text-sm font-bold text-muted-foreground">Design C – Logo-sidebar med info til højre</span>
+                    <EquipmentLabelContent data={labelData} isPreview={true} design="C" />
+                  </div>
+                </>
               ) : (
                 <CableLabelContent data={cableData} isPreview={true} />
               )}
