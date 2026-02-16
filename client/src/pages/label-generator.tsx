@@ -94,6 +94,9 @@ function EquipmentLabelContent({ data, isPreview = false }: { data: EquipmentFor
             className="object-contain filter invert brightness-0 saturate-100 invert-[1]"
             style={{ height: logoHeight }}
           />
+          <span className="font-bold uppercase whitespace-nowrap" style={{ fontSize: phoneFontSize }}>
+            Filmværksted København
+          </span>
           <span className="font-bold tracking-widest whitespace-nowrap" style={{ fontSize: phoneFontSize }}>
             +45 71 99 33 66
           </span>
