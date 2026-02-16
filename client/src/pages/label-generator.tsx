@@ -86,7 +86,7 @@ export default function LabelGenerator() {
     const scale = Math.min(width / 70, height / 40);
     
     // Header/Footer height - scaled but clamped
-    const barHeightMm = Math.max(5, Math.min(8, 7 * scale));
+    const barHeightMm = Math.max(8, Math.min(14, 11 * scale));
     const barHeight = `${barHeightMm}mm`;
     
     // Font sizes - scaled
