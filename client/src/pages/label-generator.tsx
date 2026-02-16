@@ -64,10 +64,10 @@ function EquipmentLabelDesignA({ data, isPreview = false }: { data: EquipmentFor
   const groupFs = `${Math.max(6, minDim * 0.12)}px`;
   const nameFs = `${Math.max(8, minDim * 0.22)}px`;
   const idFs = `${Math.max(7, minDim * 0.15)}px`;
-  const infoFs = `${Math.max(5, width * 0.06)}px`;
-  const barH = `${Math.max(height * 0.14, 4)}mm`;
+  const infoFs = `${Math.max(7, width * 0.09)}px`;
+  const barH = `${Math.max(height * 0.18, 5)}mm`;
   const qrSize = Math.min(width * 0.35, height * 0.6);
-  const logoH = `${Math.max(8, height * 0.1)}px`;
+  const logoH = `${Math.max(10, height * 0.13)}px`;
 
   return (
     <div className="bg-black text-white relative flex flex-col overflow-hidden border-0" style={{ width: `${width}mm`, height: `${height}mm`, boxSizing: "border-box", pageBreakInside: "avoid", border: isPreview ? '1px solid #e5e7eb' : 'none' }}>
