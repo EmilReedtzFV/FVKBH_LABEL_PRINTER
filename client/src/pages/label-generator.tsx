@@ -120,19 +120,17 @@ function EquipmentLabelContent({ data, isPreview = false }: { data: EquipmentFor
             <div className="font-bold uppercase leading-tight truncate w-full" style={{ fontSize: titleFontSize }}>
               {data.name}
             </div>
-            <div className="flex items-center gap-2 mt-1 w-full">
-              <div className="font-mono font-bold tracking-widest truncate" style={{ fontSize: idFontSize }}>
-                {data.id}
-              </div>
-              {data.group && (
-                <div
-                  className="bg-black text-white px-2 py-0.5 font-bold uppercase tracking-wider whitespace-nowrap rounded-sm flex-shrink-0"
-                  style={{ fontSize: groupFontSize }}
-                >
-                  {data.group}
-                </div>
-              )}
+            <div className="font-mono font-bold tracking-widest mt-1 truncate w-full" style={{ fontSize: idFontSize }}>
+              {data.id}
             </div>
+            {data.group && (
+              <div
+                className="bg-black text-white px-2 py-0.5 font-bold uppercase tracking-wider whitespace-nowrap rounded-sm mt-1"
+                style={{ fontSize: groupFontSize }}
+              >
+                {data.group}
+              </div>
+            )}
           </div>
         </div>
       </div>
