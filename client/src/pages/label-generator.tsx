@@ -145,7 +145,7 @@ function CableLabelContent({ data, isPreview = false }: { data: CableFormValues;
 
   const fontSize = `${Math.max(6, height * 0.55)}px`;
   const smallFontSize = `${Math.max(5, height * 0.35)}px`;
-  const logoH = `${Math.max(6, height * 0.6)}px`;
+  const logoH = `${Math.max(10, height * 1.8)}px`;
 
   return (
     <div
