@@ -162,17 +162,20 @@ function CableLabelContent({ data, isPreview = false }: { data: CableFormValues;
         border: isPreview ? '1px solid #e5e7eb' : 'none'
       }}
     >
-      {/* Left black section with logo */}
+      {/* Left black section with logo + phone */}
       <div
-        className="bg-black text-white flex items-center justify-center flex-shrink-0 px-1"
-        style={{ width: `${Math.max(12, width * 0.18)}mm` }}
+        className="bg-black text-white flex items-center justify-center gap-1 flex-shrink-0 px-2"
+        style={{ width: `${Math.max(20, width * 0.3)}mm` }}
       >
         <img
           src="/logo.png"
           alt="Logo"
           className="object-contain filter invert brightness-0 saturate-100 invert-[1]"
-          style={{ height: logoH, maxWidth: '100%' }}
+          style={{ height: logoH, maxWidth: '50%' }}
         />
+        <span className="font-bold whitespace-nowrap" style={{ fontSize: smallFontSize }}>
+          +45 71 99 33 66
+        </span>
       </div>
 
       {/* QR or Barcode section */}
@@ -218,16 +221,6 @@ function CableLabelContent({ data, isPreview = false }: { data: CableFormValues;
             {data.id}
           </span>
         </div>
-      </div>
-
-      {/* Right black section with phone */}
-      <div
-        className="bg-black text-white flex items-center justify-center flex-shrink-0 px-1"
-        style={{ width: `${Math.max(18, width * 0.25)}mm` }}
-      >
-        <span className="font-bold whitespace-nowrap" style={{ fontSize: smallFontSize }}>
-          +45 71 99 33 66
-        </span>
       </div>
     </div>
   );
