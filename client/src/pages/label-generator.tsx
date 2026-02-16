@@ -82,21 +82,21 @@ export default function LabelGenerator() {
     const width = data.width;
     const height = data.height;
     
-    // Scale factors relative to "medium" (70x40)
-    const scale = Math.min(width / 70, height / 40);
-    
-    // Header/Footer height - scaled but clamped
-    const barHeightMm = Math.max(8, Math.min(14, 11 * scale));
+    // Bar height is always ~15% of total height
+    const barHeightMm = height * 0.15;
     const barHeight = `${barHeightMm}mm`;
     
-    // Font sizes - scaled
-    const groupFontSize = `${Math.max(8, 12 * scale)}px`;
-    const titleFontSize = `${Math.max(8, 12 * scale)}px`;
-    const idFontSize = `${Math.max(12, 18 * scale)}px`;
-    const phoneFontSize = `${Math.max(6, 9 * scale)}px`;
+    // Scale factor based on smallest dimension for fonts
+    const minDim = Math.min(width, height);
     
-    // Logo size - scaled
-    const logoHeight = `${Math.max(10, 16 * scale)}px`;
+    // Font sizes proportional to label size
+    const groupFontSize = `${Math.max(7, minDim * 0.18)}px`;
+    const titleFontSize = `${Math.max(7, minDim * 0.18)}px`;
+    const idFontSize = `${Math.max(10, minDim * 0.28)}px`;
+    const phoneFontSize = `${Math.max(5, minDim * 0.12)}px`;
+    
+    // Logo size proportional to bar height
+    const logoHeight = `${Math.max(8, barHeightMm * 2.5)}px`;
 
     // Determine layout based on aspect ratio
     const isPortrait = height > width * 1.2; // If height is significantly larger than width
