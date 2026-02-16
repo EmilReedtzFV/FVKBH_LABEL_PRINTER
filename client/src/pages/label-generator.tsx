@@ -124,10 +124,10 @@ function EquipmentLabelContent({ data, isPreview = false }: { data: EquipmentFor
               {data.id}
             </div>
             {data.group && (
-              <div className="mt-1" style={{ display: 'inline-block' }}>
+              <div className="mt-1">
                 <span
-                  className="bg-black text-white font-bold uppercase tracking-wider rounded"
-                  style={{ fontSize: groupFontSize, padding: '2px 8px', letterSpacing: '0.05em' }}
+                  className="bg-black text-white font-bold uppercase tracking-wider rounded inline-block"
+                  style={{ fontSize: groupFontSize, padding: '1px 6px', letterSpacing: '0.03em' }}
                 >
                   {data.group}
                 </span>
