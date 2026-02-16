@@ -85,10 +85,10 @@ function EquipmentLabelContent({ data, isPreview = false }: { data: EquipmentFor
     >
       {/* Top Bar - Logo, and name+phone if wide enough */}
       <div
-        className="bg-black text-white flex items-center justify-between px-3 w-full flex-shrink-0"
+        className="bg-black text-white flex items-center justify-center px-3 w-full flex-shrink-0"
         style={{ height: barHeight }}
       >
-        <div className="flex items-center gap-2 overflow-hidden w-full">
+        <div className="flex items-center gap-2 overflow-hidden">
           <img
             src="/logo.png"
             alt="Logo"
