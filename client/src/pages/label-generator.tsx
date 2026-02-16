@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import QRCode from "react-qr-code";
+import Barcode from "react-barcode";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -28,6 +29,7 @@ const cableSchema = z.object({
   name: z.string().min(1, "Navn er påkrævet"),
   id: z.string().min(1, "ID nummer er påkrævet"),
   group: z.string().optional(),
+  codeType: z.enum(["qr", "barcode", "none"]),
   width: z.number().min(30, "Minimum bredde er 30mm").max(100, "Maksimum bredde er 100mm"),
   height: z.number().min(5, "Minimum højde er 5mm").max(20, "Maksimum højde er 20mm"),
   preset: z.string().optional(),
@@ -146,6 +148,8 @@ function CableLabelContent({ data, isPreview = false }: { data: CableFormValues;
   const fontSize = `${Math.max(6, height * 0.55)}px`;
   const smallFontSize = `${Math.max(5, height * 0.35)}px`;
   const logoH = `${Math.max(10, height * 1.8)}px`;
+  const hasCode = data.codeType !== "none";
+  const codeSize = height * 0.85;
 
   return (
     <div
@@ -170,6 +174,29 @@ function CableLabelContent({ data, isPreview = false }: { data: CableFormValues;
           style={{ height: logoH, maxWidth: '100%' }}
         />
       </div>
+
+      {/* QR or Barcode section */}
+      {hasCode && (
+        <div className="flex items-center justify-center flex-shrink-0 bg-white px-1"
+          style={{ height: '100%' }}
+        >
+          {data.codeType === "qr" ? (
+            <QRCode
+              value={data.id}
+              style={{ height: `${codeSize}mm`, width: `${codeSize}mm` }}
+              viewBox="0 0 256 256"
+            />
+          ) : (
+            <Barcode
+              value={data.id}
+              height={Math.max(15, codeSize * 2.5)}
+              width={1}
+              displayValue={false}
+              margin={0}
+            />
+          )}
+        </div>
+      )}
 
       {/* Main content - horizontal strip */}
       <div className="flex-1 flex items-center justify-between px-2 min-w-0 overflow-hidden">
@@ -223,6 +250,7 @@ export default function LabelGenerator() {
     name: "SDI Kabel",
     id: "CBL-001",
     group: "Kit 1",
+    codeType: "qr",
     width: 70,
     height: 10,
     preset: "medium",
@@ -491,6 +519,28 @@ export default function LabelGenerator() {
                           <FormControl>
                             <Input placeholder="F.eks. Kit 1, Lyd Kit 2" {...field} data-testid="input-cable-group" />
                           </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={cableForm.control}
+                      name="codeType"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Kode Type</FormLabel>
+                          <Select onValueChange={field.onChange} defaultValue={field.value}>
+                            <FormControl>
+                              <SelectTrigger data-testid="select-cable-codetype">
+                                <SelectValue placeholder="Vælg kode type" />
+                              </SelectTrigger>
+                            </FormControl>
+                            <SelectContent>
+                              <SelectItem value="qr">QR Kode</SelectItem>
+                              <SelectItem value="barcode">Stregkode</SelectItem>
+                              <SelectItem value="none">Ingen kode</SelectItem>
+                            </SelectContent>
+                          </Select>
                           <FormMessage />
                         </FormItem>
                       )}
