@@ -95,8 +95,8 @@ export default function LabelGenerator() {
     const idFontSize = `${Math.max(10, minDim * 0.28)}px`;
     const phoneFontSize = `${Math.max(5, minDim * 0.12)}px`;
     
-    // Logo size proportional to bar height
-    const logoHeight = `${Math.max(8, barHeightMm * 2.5)}px`;
+    // Logo size proportional to bar height - fill most of the bar
+    const logoHeight = `${Math.max(12, barHeightMm * 5)}px`;
 
     // Determine layout based on aspect ratio
     const isPortrait = height > width * 1.2; // If height is significantly larger than width
