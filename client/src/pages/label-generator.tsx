@@ -38,11 +38,14 @@ const cableSchema = z.object({
 type EquipmentFormValues = z.infer<typeof equipmentSchema>;
 type CableFormValues = z.infer<typeof cableSchema>;
 
-const EQUIPMENT_PRESETS: Record<string, { width: number; height: number; label: string }> = {
-  small: { width: 50, height: 30, label: "Lille (50x30mm)" },
-  medium: { width: 70, height: 40, label: "Mellem (70x40mm)" },
-  large: { width: 90, height: 50, label: "Stor (90x50mm)" },
-  custom: { width: 0, height: 0, label: "Brugerdefineret" },
+const ASPECT_RATIOS: Record<string, { w: number; h: number; label: string }> = {
+  "4:3": { w: 4, h: 3, label: "4:3" },
+  "2:1": { w: 2, h: 1, label: "2:1" },
+  "1:1": { w: 1, h: 1, label: "1:1" },
+  "16:9": { w: 16, h: 9, label: "16:9" },
+  "4:5": { w: 4, h: 5, label: "4:5" },
+  "2.35:1": { w: 2.35, h: 1, label: "2.35:1" },
+  custom: { w: 0, h: 0, label: "Fri" },
 };
 
 const CABLE_PRESETS: Record<string, { width: number; height: number; label: string }> = {
@@ -272,9 +275,9 @@ export default function LabelGenerator() {
     name: "Kamera 1",
     id: "CAM-001",
     group: "Kit 1",
-    width: 70,
-    height: 40,
-    preset: "medium",
+    width: 80,
+    height: 60,
+    preset: "4:3",
   });
 
   const [cableData, setCableData] = useState<CableFormValues>({
@@ -302,10 +305,11 @@ export default function LabelGenerator() {
 
   useEffect(() => {
     if (watchEquipmentPreset && watchEquipmentPreset !== "custom") {
-      const preset = EQUIPMENT_PRESETS[watchEquipmentPreset];
-      if (preset) {
-        equipmentForm.setValue("width", preset.width);
-        equipmentForm.setValue("height", preset.height);
+      const ratio = ASPECT_RATIOS[watchEquipmentPreset];
+      if (ratio) {
+        const currentWidth = equipmentForm.getValues("width");
+        const newHeight = Math.round(currentWidth / (ratio.w / ratio.h));
+        equipmentForm.setValue("height", newHeight);
       }
     }
   }, [watchEquipmentPreset, equipmentForm]);
@@ -344,7 +348,6 @@ export default function LabelGenerator() {
     window.print();
   };
 
-  const currentPresets = mode === "equipment" ? EQUIPMENT_PRESETS : CABLE_PRESETS;
 
   return (
     <div className="min-h-screen bg-background p-8 font-sans">
@@ -449,18 +452,17 @@ export default function LabelGenerator() {
                         name="preset"
                         render={({ field }) => (
                           <FormItem className="col-span-2">
-                            <FormLabel>Størrelse Preset</FormLabel>
+                            <FormLabel>Formatforhold</FormLabel>
                             <Select onValueChange={field.onChange} defaultValue={field.value}>
                               <FormControl>
                                 <SelectTrigger data-testid="select-equipment-preset">
-                                  <SelectValue placeholder="Vælg størrelse" />
+                                  <SelectValue placeholder="Vælg formatforhold" />
                                 </SelectTrigger>
                               </FormControl>
                               <SelectContent>
-                                <SelectItem value="small">Lille (50x30mm)</SelectItem>
-                                <SelectItem value="medium">Mellem (70x40mm)</SelectItem>
-                                <SelectItem value="large">Stor (90x50mm)</SelectItem>
-                                <SelectItem value="custom">Brugerdefineret</SelectItem>
+                                {Object.entries(ASPECT_RATIOS).map(([key, val]) => (
+                                  <SelectItem key={key} value={key}>{val.label}</SelectItem>
+                                ))}
                               </SelectContent>
                             </Select>
                             <FormMessage />
@@ -478,7 +480,17 @@ export default function LabelGenerator() {
                                 <Input
                                   type="number"
                                   {...field}
-                                  onChange={e => { field.onChange(Number(e.target.value)); equipmentForm.setValue("preset", "custom"); }}
+                                  onChange={e => {
+                                    const newW = Number(e.target.value);
+                                    field.onChange(newW);
+                                    const preset = equipmentForm.getValues("preset");
+                                    if (preset && preset !== "custom") {
+                                      const ratio = ASPECT_RATIOS[preset];
+                                      if (ratio) {
+                                        equipmentForm.setValue("height", Math.round(newW / (ratio.w / ratio.h)));
+                                      }
+                                    }
+                                  }}
                                   data-testid="input-equipment-width"
                                 />
                               </FormControl>
@@ -512,7 +524,17 @@ export default function LabelGenerator() {
                                 <Input
                                   type="number"
                                   {...field}
-                                  onChange={e => { field.onChange(Number(e.target.value)); equipmentForm.setValue("preset", "custom"); }}
+                                  onChange={e => {
+                                    const newH = Number(e.target.value);
+                                    field.onChange(newH);
+                                    const preset = equipmentForm.getValues("preset");
+                                    if (preset && preset !== "custom") {
+                                      const ratio = ASPECT_RATIOS[preset];
+                                      if (ratio) {
+                                        equipmentForm.setValue("width", Math.round(newH * (ratio.w / ratio.h)));
+                                      }
+                                    }
+                                  }}
                                   data-testid="input-equipment-height"
                                 />
                               </FormControl>
