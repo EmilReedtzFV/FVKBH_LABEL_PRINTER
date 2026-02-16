@@ -82,17 +82,21 @@ function EquipmentLabelContent({ data, isPreview = false }: { data: EquipmentFor
         border: isPreview ? '1px solid #e5e7eb' : 'none'
       }}
     >
+      {/* Top Bar - Logo, Phone, Group */}
       <div
         className="bg-black text-white flex items-center justify-between px-3 w-full flex-shrink-0"
         style={{ height: barHeight }}
       >
-        <div className="flex items-center">
+        <div className="flex items-center gap-2">
           <img
             src="/logo.png"
             alt="Logo"
             className="object-contain filter invert brightness-0 saturate-100 invert-[1]"
             style={{ height: logoHeight }}
           />
+          <span className="font-bold tracking-widest whitespace-nowrap" style={{ fontSize: phoneFontSize }}>
+            +45 71 99 33 66
+          </span>
         </div>
         {data.group && (
           <div className="font-bold tracking-wider uppercase" style={{ fontSize: groupFontSize }}>
@@ -125,15 +129,6 @@ function EquipmentLabelContent({ data, isPreview = false }: { data: EquipmentFor
               {data.id}
             </div>
           </div>
-        </div>
-      </div>
-
-      <div
-        className="bg-black text-white flex items-center justify-center w-full flex-shrink-0"
-        style={{ height: barHeight }}
-      >
-        <div className="font-bold tracking-widest" style={{ fontSize: phoneFontSize }}>
-          +45 71 99 33 66
         </div>
       </div>
     </div>
