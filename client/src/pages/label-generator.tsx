@@ -56,23 +56,17 @@ const CABLE_PRESETS: Record<string, { width: number; height: number; label: stri
 function EquipmentLabelContent({ data, isPreview = false }: { data: EquipmentFormValues; isPreview?: boolean }) {
   const width = data.width;
   const height = data.height;
-
-  const barHeightMm = height * 0.15;
-  const barHeight = `${barHeightMm}mm`;
-
   const minDim = Math.min(width, height);
 
-  const groupFontSize = `${Math.max(7, minDim * 0.18)}px`;
-  const titleFontSize = `${Math.max(7, minDim * 0.18)}px`;
-  const idFontSize = `${Math.max(10, minDim * 0.28)}px`;
-  const phoneFontSize = `${Math.max(5, minDim * 0.12)}px`;
-  const logoHeight = `${Math.max(10, barHeightMm * 3.5)}px`;
+  const groupFontSize = `${Math.max(6, minDim * 0.14)}px`;
+  const titleFontSize = `${Math.max(7, minDim * 0.16)}px`;
+  const idFontSize = `${Math.max(8, minDim * 0.2)}px`;
+  const phoneFontSize = `${Math.max(5, minDim * 0.1)}px`;
+  const companyFontSize = `${Math.max(5, minDim * 0.09)}px`;
 
-  const isPortrait = height > width * 1.2;
-  const isSquareish = !isPortrait && (height > width * 0.8);
-  const isNarrow = width < 40;
-
-  const sidebarWidth = `${Math.max(8, width * 0.12)}mm`;
+  const logoAreaSize = Math.min(width * 0.55, height * 0.65);
+  const circleStroke = Math.max(1.5, logoAreaSize * 0.06);
+  const qrPadding = logoAreaSize * 0.22;
 
   return (
     <div
@@ -85,70 +79,70 @@ function EquipmentLabelContent({ data, isPreview = false }: { data: EquipmentFor
         border: isPreview ? '1px solid #e5e7eb' : 'none'
       }}
     >
-      {/* Top bar - Company name + phone */}
+      {/* Main content */}
+      <div className="flex-1 flex flex-col items-center justify-center p-1 min-h-0">
+        {/* Logo circle with QR code embedded inside */}
+        <div
+          className="relative flex items-center justify-center flex-shrink-0"
+          style={{ width: `${logoAreaSize}mm`, height: `${logoAreaSize}mm` }}
+        >
+          {/* Circle border (mimics the logo ring) */}
+          <div
+            className="absolute inset-0 rounded-full"
+            style={{
+              border: `${circleStroke}mm solid black`,
+            }}
+          />
+          {/* QR code centered inside the circle */}
+          <div
+            className="relative flex items-center justify-center"
+            style={{
+              width: `${logoAreaSize - qrPadding}mm`,
+              height: `${logoAreaSize - qrPadding}mm`,
+            }}
+          >
+            <QRCode
+              value={data.id}
+              style={{ height: "100%", width: "100%", maxWidth: "100%", objectFit: "contain" }}
+              viewBox="0 0 256 256"
+            />
+          </div>
+        </div>
+
+        {/* Item info below logo-QR */}
+        <div className="flex flex-col items-center text-center w-full mt-1 overflow-hidden px-1">
+          <div className="font-bold uppercase leading-tight truncate w-full" style={{ fontSize: titleFontSize }}>
+            {data.name}
+          </div>
+          <div className="font-mono font-bold tracking-widest truncate w-full" style={{ fontSize: idFontSize }}>
+            {data.id}
+          </div>
+          {data.group && (
+            <div className="mt-0.5">
+              <span
+                className="bg-black text-white font-bold uppercase tracking-wider rounded inline-block"
+                style={{ fontSize: groupFontSize, padding: '1px 6px', letterSpacing: '0.03em' }}
+              >
+                {data.group}
+              </span>
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Bottom bar - Company + phone */}
       <div
         className="bg-black text-white flex items-center justify-center px-2 w-full flex-shrink-0"
-        style={{ height: barHeight }}
+        style={{ height: `${height * 0.12}mm` }}
       >
         <div className="flex items-center gap-2 overflow-hidden">
-          <span className="font-bold uppercase whitespace-nowrap truncate" style={{ fontSize: phoneFontSize }}>
+          <span className="font-bold uppercase whitespace-nowrap truncate" style={{ fontSize: companyFontSize }}>
             Filmværksted København
           </span>
           <span className="font-bold tracking-widest whitespace-nowrap flex-shrink-0" style={{ fontSize: phoneFontSize }}>
             +45 71 99 33 66
           </span>
         </div>
-      </div>
-
-      {/* Content area - QR + info */}
-      <div className="flex-1 flex items-center bg-white p-1 min-h-0 relative">
-        <div className={`flex w-full h-full ${isPortrait || isSquareish ? 'flex-col justify-between py-2' : 'flex-row items-center justify-center'}`}>
-          <div className={`flex items-center justify-center p-1 ${isPortrait || isSquareish ? 'h-[55%] w-full' : 'h-full aspect-square'}`}>
-            <QRCode
-              value={data.id}
-              style={{ height: "100%", width: "100%", maxWidth: "100%", objectFit: "contain" }}
-              viewBox={`0 0 256 256`}
-            />
-          </div>
-
-          {isPortrait || isSquareish ? (
-            <div className="w-[80%] h-[2px] bg-black my-1 rounded-full flex-shrink-0"></div>
-          ) : (
-            <div className="h-[80%] w-[2px] bg-black mx-2 rounded-full flex-shrink-0"></div>
-          )}
-
-          <div className={`flex-1 flex flex-col justify-center overflow-hidden min-w-0 ${isPortrait || isSquareish ? 'w-full items-center text-center px-1' : 'h-full'}`}>
-            <div className="font-bold uppercase leading-tight truncate w-full" style={{ fontSize: titleFontSize }}>
-              {data.name}
-            </div>
-            <div className="font-mono font-bold tracking-widest mt-1 truncate w-full" style={{ fontSize: idFontSize }}>
-              {data.id}
-            </div>
-            {data.group && (
-              <div className="mt-1">
-                <span
-                  className="bg-black text-white font-bold uppercase tracking-wider rounded inline-block"
-                  style={{ fontSize: groupFontSize, padding: '1px 6px', letterSpacing: '0.03em' }}
-                >
-                  {data.group}
-                </span>
-              </div>
-            )}
-          </div>
-        </div>
-      </div>
-
-      {/* Bottom bar - Logo */}
-      <div
-        className="bg-black text-white flex items-center justify-center w-full flex-shrink-0"
-        style={{ height: barHeight }}
-      >
-        <img
-          src="/logo.png"
-          alt="Logo"
-          className="object-contain filter invert brightness-0 saturate-100 invert-[1]"
-          style={{ height: logoHeight }}
-        />
       </div>
     </div>
   );
