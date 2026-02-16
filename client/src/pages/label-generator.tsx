@@ -15,6 +15,7 @@ import { useToast } from "@/hooks/use-toast";
 const labelSchema = z.object({
   name: z.string().min(1, "Navn er påkrævet"),
   id: z.string().min(1, "ID nummer er påkrævet"),
+  group: z.string().optional(),
   size: z.enum(["small", "medium", "large"]),
 });
 
@@ -31,6 +32,7 @@ export default function LabelGenerator() {
   const [labelData, setLabelData] = useState<LabelFormValues>({
     name: "Kamera 1",
     id: "CAM-001",
+    group: "Kit 1",
     size: "medium",
   });
 
@@ -90,12 +92,22 @@ export default function LabelGenerator() {
             >
               {data.name}
             </h3>
-            <p 
-              className="font-mono text-gray-600 truncate" 
-              style={{ fontSize: data.size === 'small' ? '8px' : '10px' }}
-            >
-              ID: {data.id}
-            </p>
+            <div className="flex items-center gap-2">
+              <p 
+                className="font-mono text-gray-600 truncate" 
+                style={{ fontSize: data.size === 'small' ? '8px' : '10px' }}
+              >
+                ID: {data.id}
+              </p>
+              {data.group && (
+                <span 
+                  className="bg-black text-white px-1 rounded-[1px] font-bold uppercase truncate"
+                  style={{ fontSize: data.size === 'small' ? '6px' : '8px' }}
+                >
+                  {data.group}
+                </span>
+              )}
+            </div>
           </div>
           
           <div className="mt-auto space-y-1">
@@ -188,6 +200,20 @@ export default function LabelGenerator() {
                       <RefreshCw className="h-4 w-4" />
                     </Button>
                   </div>
+
+                  <FormField
+                    control={form.control}
+                    name="group"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Gruppe / Kit</FormLabel>
+                        <FormControl>
+                          <Input placeholder="F.eks. Kit 1, Lyd Kit 2" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
 
                   <FormField
                     control={form.control}
