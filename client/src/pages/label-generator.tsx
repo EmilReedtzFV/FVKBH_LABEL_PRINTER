@@ -61,81 +61,93 @@ export default function LabelGenerator() {
   const currentSize = SIZES[labelData.size];
 
   // Component for the actual label content to be reused
-  const LabelContent = ({ data, size, isPreview = false }: { data: LabelFormValues; size: typeof currentSize; isPreview?: boolean }) => (
-    <div
-      className="bg-white text-black relative flex overflow-hidden border border-gray-200"
-      style={{
-        width: size.width,
-        height: size.height,
-        padding: "2mm",
-        boxSizing: "border-box",
-        pageBreakInside: "avoid", // Prevent breaking inside label
-        border: isPreview ? '1px solid #e5e7eb' : 'none'
-      }}
-    >
-      <div className="flex h-full w-full gap-2">
-        {/* Left Side: QR Code */}
-        <div className="flex-shrink-0 flex items-center justify-center h-full aspect-square bg-white">
-          <QRCode
-            value={data.id}
-            style={{ height: "100%", width: "100%", maxWidth: "100%" }}
-            viewBox={`0 0 256 256`}
-          />
+  const LabelContent = ({ data, size, isPreview = false }: { data: LabelFormValues; size: typeof currentSize; isPreview?: boolean }) => {
+    // Calculate layout values based on size
+    const isSmall = data.size === 'small';
+    const isMedium = data.size === 'medium';
+    
+    // Header/Footer height
+    const barHeight = isSmall ? '5mm' : isMedium ? '7mm' : '8mm';
+    
+    // Font sizes
+    const groupFontSize = isSmall ? '10px' : isMedium ? '12px' : '14px';
+    const titleFontSize = isSmall ? '10px' : isMedium ? '12px' : '14px';
+    const idFontSize = isSmall ? '14px' : isMedium ? '18px' : '20px';
+    const phoneFontSize = isSmall ? '8px' : isMedium ? '9px' : '10px';
+    
+    // Logo size
+    const logoHeight = isSmall ? '12px' : isMedium ? '16px' : '20px';
+
+    return (
+      <div
+        className="bg-white text-black relative flex flex-col overflow-hidden border-0"
+        style={{
+          width: size.width,
+          height: size.height,
+          boxSizing: "border-box",
+          pageBreakInside: "avoid",
+          border: isPreview ? '1px solid #e5e7eb' : 'none'
+        }}
+      >
+        {/* Top Bar - Black */}
+        <div 
+          className="bg-black text-white flex items-center justify-between px-3 w-full"
+          style={{ height: barHeight }}
+        >
+           <div className="flex items-center">
+             <img 
+                src="/logo.png" 
+                alt="Logo" 
+                className="object-contain filter invert brightness-0 saturate-100 invert-[1]"
+                style={{ height: logoHeight }} 
+             />
+           </div>
+           {data.group && (
+             <div className="font-bold tracking-wider uppercase" style={{ fontSize: groupFontSize }}>
+               {data.group}
+             </div>
+           )}
         </div>
 
-        {/* Right Side: Info */}
-        <div className="flex flex-col justify-between flex-1 min-w-0 h-full pl-1">
-          <div className="space-y-0.5">
-            <h3 
-              className="font-bold leading-tight truncate uppercase tracking-tight" 
-              style={{ fontSize: data.size === 'small' ? '10px' : '14px' }}
-            >
-              {data.name}
-            </h3>
-            <div className="flex items-center gap-2">
-              <p 
-                className="font-mono text-gray-600 truncate" 
-                style={{ fontSize: data.size === 'small' ? '8px' : '10px' }}
-              >
-                ID: {data.id}
-              </p>
-              {data.group && (
-                <span 
-                  className="bg-black text-white px-1 rounded-[1px] font-bold uppercase truncate"
-                  style={{ fontSize: data.size === 'small' ? '6px' : '8px' }}
-                >
-                  {data.group}
-                </span>
-              )}
+        {/* Middle Section - White with QR and Text */}
+        <div className="flex-1 flex items-center bg-white p-1">
+          <div className="flex w-full h-full items-center">
+            {/* QR Code */}
+            <div className="h-full aspect-square flex items-center justify-center p-1">
+              <QRCode
+                value={data.id}
+                style={{ height: "100%", width: "100%", maxWidth: "100%" }}
+                viewBox={`0 0 256 256`}
+              />
             </div>
-          </div>
-          
-          <div className="mt-auto space-y-1">
-            <div className="flex items-end justify-between w-full">
-               <div className="flex flex-col">
-                  <p className="text-[6px] font-semibold text-gray-500 uppercase leading-none mb-0.5">Kontakt:</p>
-                  <p 
-                    className="font-bold leading-none whitespace-nowrap" 
-                    style={{ fontSize: data.size === 'small' ? '7px' : '9px' }}
-                  >
-                    +45 71 99 33 66
-                  </p>
+            
+            {/* Divider */}
+            <div className="h-[80%] w-[2px] bg-black mx-2 rounded-full"></div>
+
+            {/* Text Info */}
+            <div className="flex-1 flex flex-col justify-center h-full overflow-hidden">
+               <div className="font-bold uppercase leading-tight" style={{ fontSize: titleFontSize }}>
+                 {data.name}
                </div>
-               <img 
-                  src="/logo.png" 
-                  alt="Logo" 
-                  className="object-contain ml-1"
-                  style={{ 
-                      height: data.size === 'small' ? '12px' : '18px',
-                      maxWidth: '40%'
-                  }} 
-               />
+               <div className="font-mono font-bold tracking-widest mt-1" style={{ fontSize: idFontSize }}>
+                 {data.id}
+               </div>
             </div>
           </div>
         </div>
+
+        {/* Bottom Bar - Black */}
+        <div 
+          className="bg-black text-white flex items-center justify-center w-full"
+          style={{ height: barHeight }}
+        >
+           <div className="font-bold tracking-widest" style={{ fontSize: phoneFontSize }}>
+             +45 71 99 33 66
+           </div>
+        </div>
       </div>
-    </div>
-  );
+    );
+  };
 
   return (
     <div className="min-h-screen bg-background p-8 font-sans">
