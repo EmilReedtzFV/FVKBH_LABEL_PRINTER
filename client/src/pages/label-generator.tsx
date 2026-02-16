@@ -70,6 +70,7 @@ function EquipmentLabelContent({ data, isPreview = false }: { data: EquipmentFor
 
   const isPortrait = height > width * 1.2;
   const isSquareish = !isPortrait && (height > width * 0.8);
+  const isNarrow = width < 40;
 
   return (
     <div
@@ -82,24 +83,28 @@ function EquipmentLabelContent({ data, isPreview = false }: { data: EquipmentFor
         border: isPreview ? '1px solid #e5e7eb' : 'none'
       }}
     >
-      {/* Top Bar - Logo + Phone */}
+      {/* Top Bar - Logo, and name+phone if wide enough */}
       <div
         className="bg-black text-white flex items-center justify-between px-3 w-full flex-shrink-0"
         style={{ height: barHeight }}
       >
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 overflow-hidden w-full">
           <img
             src="/logo.png"
             alt="Logo"
-            className="object-contain filter invert brightness-0 saturate-100 invert-[1]"
+            className="object-contain filter invert brightness-0 saturate-100 invert-[1] flex-shrink-0"
             style={{ height: logoHeight }}
           />
-          <span className="font-bold uppercase whitespace-nowrap" style={{ fontSize: phoneFontSize }}>
-            Filmværksted København
-          </span>
-          <span className="font-bold tracking-widest whitespace-nowrap" style={{ fontSize: phoneFontSize }}>
-            +45 71 99 33 66
-          </span>
+          {!isNarrow && (
+            <>
+              <span className="font-bold uppercase whitespace-nowrap truncate" style={{ fontSize: phoneFontSize }}>
+                Filmværksted København
+              </span>
+              <span className="font-bold tracking-widest whitespace-nowrap flex-shrink-0" style={{ fontSize: phoneFontSize }}>
+                +45 71 99 33 66
+              </span>
+            </>
+          )}
         </div>
       </div>
 
@@ -139,6 +144,21 @@ function EquipmentLabelContent({ data, isPreview = false }: { data: EquipmentFor
           </div>
         </div>
       </div>
+
+      {/* Bottom Bar - shown on narrow labels where text doesn't fit in top */}
+      {isNarrow && (
+        <div
+          className="bg-black text-white flex flex-col items-center justify-center px-2 w-full flex-shrink-0"
+          style={{ height: barHeight }}
+        >
+          <span className="font-bold uppercase whitespace-nowrap truncate" style={{ fontSize: phoneFontSize }}>
+            Filmværksted København
+          </span>
+          <span className="font-bold tracking-widest whitespace-nowrap" style={{ fontSize: phoneFontSize }}>
+            +45 71 99 33 66
+          </span>
+        </div>
+      )}
     </div>
   );
 }
