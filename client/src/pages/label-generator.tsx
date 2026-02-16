@@ -124,11 +124,13 @@ function EquipmentLabelContent({ data, isPreview = false }: { data: EquipmentFor
               {data.id}
             </div>
             {data.group && (
-              <div
-                className="bg-black text-white px-2 py-0.5 font-bold uppercase tracking-wider whitespace-nowrap rounded-sm mt-1"
-                style={{ fontSize: groupFontSize }}
-              >
-                {data.group}
+              <div className="mt-1" style={{ display: 'inline-block' }}>
+                <span
+                  className="bg-black text-white font-bold uppercase tracking-wider rounded"
+                  style={{ fontSize: groupFontSize, padding: '2px 8px', letterSpacing: '0.05em' }}
+                >
+                  {data.group}
+                </span>
               </div>
             )}
           </div>
