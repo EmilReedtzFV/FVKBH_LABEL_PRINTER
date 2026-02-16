@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import QRCode from "react-qr-code";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -16,15 +16,18 @@ const labelSchema = z.object({
   name: z.string().min(1, "Navn er påkrævet"),
   id: z.string().min(1, "ID nummer er påkrævet"),
   group: z.string().optional(),
-  size: z.enum(["small", "medium", "large"]),
+  width: z.number().min(20, "Minimum bredde er 20mm").max(100, "Maksimum bredde er 100mm"),
+  height: z.number().min(10, "Minimum højde er 10mm").max(300, "Maksimum højde er 300mm"),
+  preset: z.string().optional(),
 });
 
 type LabelFormValues = z.infer<typeof labelSchema>;
 
-const SIZES = {
-  small: { width: "50mm", height: "30mm", label: "Lille (50x30mm)" },
-  medium: { width: "70mm", height: "40mm", label: "Mellem (70x40mm)" },
-  large: { width: "90mm", height: "50mm", label: "Stor (90x50mm)" },
+const PRESETS = {
+  small: { width: 50, height: 30, label: "Lille (50x30mm)" },
+  medium: { width: 70, height: 40, label: "Mellem (70x40mm)" },
+  large: { width: 90, height: 50, label: "Stor (90x50mm)" },
+  custom: { width: 0, height: 0, label: "Brugerdefineret" },
 };
 
 export default function LabelGenerator() {
@@ -33,13 +36,28 @@ export default function LabelGenerator() {
     name: "Kamera 1",
     id: "CAM-001",
     group: "Kit 1",
-    size: "medium",
+    width: 70,
+    height: 40,
+    preset: "medium",
   });
 
   const form = useForm<LabelFormValues>({
     resolver: zodResolver(labelSchema),
     defaultValues: labelData,
   });
+
+  // Watch preset changes to update width/height
+  const watchPreset = form.watch("preset");
+
+  useEffect(() => {
+    if (watchPreset && watchPreset !== "custom") {
+        const preset = PRESETS[watchPreset as keyof typeof PRESETS];
+        if (preset) {
+            form.setValue("width", preset.width);
+            form.setValue("height", preset.height);
+        }
+    }
+  }, [watchPreset, form]);
 
   const onSubmit = (data: LabelFormValues) => {
     setLabelData(data);
@@ -58,32 +76,34 @@ export default function LabelGenerator() {
     window.print();
   };
 
-  const currentSize = SIZES[labelData.size];
-
   // Component for the actual label content to be reused
-  const LabelContent = ({ data, size, isPreview = false }: { data: LabelFormValues; size: typeof currentSize; isPreview?: boolean }) => {
-    // Calculate layout values based on size
-    const isSmall = data.size === 'small';
-    const isMedium = data.size === 'medium';
+  const LabelContent = ({ data, isPreview = false }: { data: LabelFormValues; isPreview?: boolean }) => {
+    // Dynamic size calculations based on actual dimensions
+    const width = data.width;
+    const height = data.height;
     
-    // Header/Footer height
-    const barHeight = isSmall ? '5mm' : isMedium ? '7mm' : '8mm';
+    // Scale factors relative to "medium" (70x40)
+    const scale = Math.min(width / 70, height / 40);
     
-    // Font sizes
-    const groupFontSize = isSmall ? '10px' : isMedium ? '12px' : '14px';
-    const titleFontSize = isSmall ? '10px' : isMedium ? '12px' : '14px';
-    const idFontSize = isSmall ? '14px' : isMedium ? '18px' : '20px';
-    const phoneFontSize = isSmall ? '8px' : isMedium ? '9px' : '10px';
+    // Header/Footer height - scaled but clamped
+    const barHeightMm = Math.max(5, Math.min(8, 7 * scale));
+    const barHeight = `${barHeightMm}mm`;
     
-    // Logo size
-    const logoHeight = isSmall ? '12px' : isMedium ? '16px' : '20px';
+    // Font sizes - scaled
+    const groupFontSize = `${Math.max(8, 12 * scale)}px`;
+    const titleFontSize = `${Math.max(8, 12 * scale)}px`;
+    const idFontSize = `${Math.max(12, 18 * scale)}px`;
+    const phoneFontSize = `${Math.max(6, 9 * scale)}px`;
+    
+    // Logo size - scaled
+    const logoHeight = `${Math.max(10, 16 * scale)}px`;
 
     return (
       <div
         className="bg-white text-black relative flex flex-col overflow-hidden border-0"
         style={{
-          width: size.width,
-          height: size.height,
+          width: `${width}mm`,
+          height: `${height}mm`,
           boxSizing: "border-box",
           pageBreakInside: "avoid",
           border: isPreview ? '1px solid #e5e7eb' : 'none'
@@ -91,7 +111,7 @@ export default function LabelGenerator() {
       >
         {/* Top Bar - Black */}
         <div 
-          className="bg-black text-white flex items-center justify-between px-3 w-full"
+          className="bg-black text-white flex items-center justify-between px-3 w-full flex-shrink-0"
           style={{ height: barHeight }}
         >
            <div className="flex items-center">
@@ -110,8 +130,8 @@ export default function LabelGenerator() {
         </div>
 
         {/* Middle Section - White with QR and Text */}
-        <div className="flex-1 flex items-center bg-white p-1">
-          <div className="flex w-full h-full items-center">
+        <div className="flex-1 flex items-center bg-white p-1 min-h-0">
+          <div className="flex w-full h-full items-center justify-center">
             {/* QR Code */}
             <div className="h-full aspect-square flex items-center justify-center p-1">
               <QRCode
@@ -122,14 +142,14 @@ export default function LabelGenerator() {
             </div>
             
             {/* Divider */}
-            <div className="h-[80%] w-[2px] bg-black mx-2 rounded-full"></div>
+            <div className="h-[80%] w-[2px] bg-black mx-2 rounded-full flex-shrink-0"></div>
 
             {/* Text Info */}
-            <div className="flex-1 flex flex-col justify-center h-full overflow-hidden">
-               <div className="font-bold uppercase leading-tight" style={{ fontSize: titleFontSize }}>
+            <div className="flex-1 flex flex-col justify-center h-full overflow-hidden min-w-0">
+               <div className="font-bold uppercase leading-tight truncate" style={{ fontSize: titleFontSize }}>
                  {data.name}
                </div>
-               <div className="font-mono font-bold tracking-widest mt-1" style={{ fontSize: idFontSize }}>
+               <div className="font-mono font-bold tracking-widest mt-1 truncate" style={{ fontSize: idFontSize }}>
                  {data.id}
                </div>
             </div>
@@ -138,7 +158,7 @@ export default function LabelGenerator() {
 
         {/* Bottom Bar - Black */}
         <div 
-          className="bg-black text-white flex items-center justify-center w-full"
+          className="bg-black text-white flex items-center justify-center w-full flex-shrink-0"
           style={{ height: barHeight }}
         >
            <div className="font-bold tracking-widest" style={{ fontSize: phoneFontSize }}>
@@ -227,28 +247,73 @@ export default function LabelGenerator() {
                     )}
                   />
 
-                  <FormField
-                    control={form.control}
-                    name="size"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Størrelse</FormLabel>
-                        <Select onValueChange={field.onChange} defaultValue={field.value}>
-                          <FormControl>
-                            <SelectTrigger>
-                              <SelectValue placeholder="Vælg størrelse" />
-                            </SelectTrigger>
-                          </FormControl>
-                          <SelectContent>
-                            <SelectItem value="small">Lille (50x30mm)</SelectItem>
-                            <SelectItem value="medium">Mellem (70x40mm)</SelectItem>
-                            <SelectItem value="large">Stor (90x50mm)</SelectItem>
-                          </SelectContent>
-                        </Select>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
+                  <div className="grid grid-cols-2 gap-4">
+                      <FormField
+                        control={form.control}
+                        name="preset"
+                        render={({ field }) => (
+                          <FormItem className="col-span-2">
+                            <FormLabel>Størrelse Preset</FormLabel>
+                            <Select onValueChange={field.onChange} defaultValue={field.value}>
+                              <FormControl>
+                                <SelectTrigger>
+                                  <SelectValue placeholder="Vælg størrelse" />
+                                </SelectTrigger>
+                              </FormControl>
+                              <SelectContent>
+                                <SelectItem value="small">Lille (50x30mm)</SelectItem>
+                                <SelectItem value="medium">Mellem (70x40mm)</SelectItem>
+                                <SelectItem value="large">Stor (90x50mm)</SelectItem>
+                                <SelectItem value="custom">Brugerdefineret</SelectItem>
+                              </SelectContent>
+                            </Select>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+
+                      <FormField
+                        control={form.control}
+                        name="width"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Bredde (mm)</FormLabel>
+                            <FormControl>
+                              <Input 
+                                type="number" 
+                                {...field} 
+                                onChange={e => {
+                                    field.onChange(Number(e.target.value));
+                                    form.setValue("preset", "custom");
+                                }}
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+
+                      <FormField
+                        control={form.control}
+                        name="height"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Højde (mm)</FormLabel>
+                            <FormControl>
+                              <Input 
+                                type="number" 
+                                {...field} 
+                                onChange={e => {
+                                    field.onChange(Number(e.target.value));
+                                    form.setValue("preset", "custom");
+                                }}
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                  </div>
 
                   <Button type="submit" className="w-full">
                     Opdater Visning
@@ -266,8 +331,8 @@ export default function LabelGenerator() {
                 Dette er hvordan labelen ser ud. Brug print-knappen for at udskrive.
               </CardDescription>
             </CardHeader>
-            <CardContent className="flex-1 flex items-center justify-center bg-muted/20 p-8 rounded-lg border-dashed border-2 m-6">
-              <LabelContent data={labelData} size={currentSize} isPreview={true} />
+            <CardContent className="flex-1 flex items-center justify-center bg-muted/20 p-8 rounded-lg border-dashed border-2 m-6 overflow-auto">
+              <LabelContent data={labelData} isPreview={true} />
             </CardContent>
           </Card>
         </div>
@@ -286,7 +351,7 @@ export default function LabelGenerator() {
             }
           `}
         </style>
-        <LabelContent data={labelData} size={currentSize} />
+        <LabelContent data={labelData} />
       </div>
     </div>
   );
