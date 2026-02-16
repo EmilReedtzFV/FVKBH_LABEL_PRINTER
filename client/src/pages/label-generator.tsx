@@ -66,7 +66,7 @@ function EquipmentLabelContent({ data, isPreview = false }: { data: EquipmentFor
 
   const logoAreaSize = Math.min(width * 0.55, height * 0.65);
   const circleStroke = Math.max(1.5, logoAreaSize * 0.06);
-  const qrPadding = logoAreaSize * 0.22;
+  const innerSquare = (logoAreaSize - circleStroke * 2) * 0.62;
 
   return (
     <div
@@ -93,19 +93,22 @@ function EquipmentLabelContent({ data, isPreview = false }: { data: EquipmentFor
               border: `${circleStroke}mm solid black`,
             }}
           />
-          {/* QR code centered inside the circle */}
+          {/* Square with QR code inside (matches logo's inner square) */}
           <div
             className="relative flex items-center justify-center"
             style={{
-              width: `${logoAreaSize - qrPadding}mm`,
-              height: `${logoAreaSize - qrPadding}mm`,
+              width: `${innerSquare}mm`,
+              height: `${innerSquare}mm`,
+              border: `${circleStroke * 0.8}mm solid black`,
             }}
           >
-            <QRCode
-              value={data.id}
-              style={{ height: "100%", width: "100%", maxWidth: "100%", objectFit: "contain" }}
-              viewBox="0 0 256 256"
-            />
+            <div className="flex items-center justify-center" style={{ width: '88%', height: '88%' }}>
+              <QRCode
+                value={data.id}
+                style={{ height: "100%", width: "100%", maxWidth: "100%", objectFit: "contain" }}
+                viewBox="0 0 256 256"
+              />
+            </div>
           </div>
         </div>
 
