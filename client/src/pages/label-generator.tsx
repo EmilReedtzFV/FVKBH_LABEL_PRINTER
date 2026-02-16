@@ -9,7 +9,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { RefreshCw, Printer, Tag, Cable } from "lucide-react";
+import { RefreshCw, Printer, Tag, Cable, ArrowRightLeft } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
 type LabelMode = "equipment" | "cable";
@@ -470,42 +470,60 @@ export default function LabelGenerator() {
                           </FormItem>
                         )}
                       />
-                      <FormField
-                        control={equipmentForm.control}
-                        name="width"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Bredde (mm)</FormLabel>
-                            <FormControl>
-                              <Input
-                                type="number"
-                                {...field}
-                                onChange={e => { field.onChange(Number(e.target.value)); equipmentForm.setValue("preset", "custom"); }}
-                                data-testid="input-equipment-width"
-                              />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                      <FormField
-                        control={equipmentForm.control}
-                        name="height"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Højde (mm)</FormLabel>
-                            <FormControl>
-                              <Input
-                                type="number"
-                                {...field}
-                                onChange={e => { field.onChange(Number(e.target.value)); equipmentForm.setValue("preset", "custom"); }}
-                                data-testid="input-equipment-height"
-                              />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
+                      <div className="flex items-end gap-2">
+                        <FormField
+                          control={equipmentForm.control}
+                          name="width"
+                          render={({ field }) => (
+                            <FormItem className="flex-1">
+                              <FormLabel>Bredde (mm)</FormLabel>
+                              <FormControl>
+                                <Input
+                                  type="number"
+                                  {...field}
+                                  onChange={e => { field.onChange(Number(e.target.value)); equipmentForm.setValue("preset", "custom"); }}
+                                  data-testid="input-equipment-width"
+                                />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="icon"
+                          className="flex-shrink-0 mb-0.5"
+                          data-testid="button-swap-equipment-dimensions"
+                          onClick={() => {
+                            const w = equipmentForm.getValues("width");
+                            const h = equipmentForm.getValues("height");
+                            equipmentForm.setValue("width", h);
+                            equipmentForm.setValue("height", w);
+                            equipmentForm.setValue("preset", "custom");
+                          }}
+                        >
+                          <ArrowRightLeft className="h-4 w-4" />
+                        </Button>
+                        <FormField
+                          control={equipmentForm.control}
+                          name="height"
+                          render={({ field }) => (
+                            <FormItem className="flex-1">
+                              <FormLabel>Højde (mm)</FormLabel>
+                              <FormControl>
+                                <Input
+                                  type="number"
+                                  {...field}
+                                  onChange={e => { field.onChange(Number(e.target.value)); equipmentForm.setValue("preset", "custom"); }}
+                                  data-testid="input-equipment-height"
+                                />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                      </div>
                     </div>
                     <Button type="submit" className="w-full" data-testid="button-update-equipment">Opdater Visning</Button>
                   </form>
@@ -603,42 +621,60 @@ export default function LabelGenerator() {
                           </FormItem>
                         )}
                       />
-                      <FormField
-                        control={cableForm.control}
-                        name="width"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Bredde (mm)</FormLabel>
-                            <FormControl>
-                              <Input
-                                type="number"
-                                {...field}
-                                onChange={e => { field.onChange(Number(e.target.value)); cableForm.setValue("preset", "custom"); }}
-                                data-testid="input-cable-width"
-                              />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                      <FormField
-                        control={cableForm.control}
-                        name="height"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Højde (mm)</FormLabel>
-                            <FormControl>
-                              <Input
-                                type="number"
-                                {...field}
-                                onChange={e => { field.onChange(Number(e.target.value)); cableForm.setValue("preset", "custom"); }}
-                                data-testid="input-cable-height"
-                              />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
+                      <div className="flex items-end gap-2">
+                        <FormField
+                          control={cableForm.control}
+                          name="width"
+                          render={({ field }) => (
+                            <FormItem className="flex-1">
+                              <FormLabel>Bredde (mm)</FormLabel>
+                              <FormControl>
+                                <Input
+                                  type="number"
+                                  {...field}
+                                  onChange={e => { field.onChange(Number(e.target.value)); cableForm.setValue("preset", "custom"); }}
+                                  data-testid="input-cable-width"
+                                />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="icon"
+                          className="flex-shrink-0 mb-0.5"
+                          data-testid="button-swap-cable-dimensions"
+                          onClick={() => {
+                            const w = cableForm.getValues("width");
+                            const h = cableForm.getValues("height");
+                            cableForm.setValue("width", h);
+                            cableForm.setValue("height", w);
+                            cableForm.setValue("preset", "custom");
+                          }}
+                        >
+                          <ArrowRightLeft className="h-4 w-4" />
+                        </Button>
+                        <FormField
+                          control={cableForm.control}
+                          name="height"
+                          render={({ field }) => (
+                            <FormItem className="flex-1">
+                              <FormLabel>Højde (mm)</FormLabel>
+                              <FormControl>
+                                <Input
+                                  type="number"
+                                  {...field}
+                                  onChange={e => { field.onChange(Number(e.target.value)); cableForm.setValue("preset", "custom"); }}
+                                  data-testid="input-cable-height"
+                                />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                      </div>
                     </div>
                     <Button type="submit" className="w-full" data-testid="button-update-cable">Opdater Visning</Button>
                   </form>
