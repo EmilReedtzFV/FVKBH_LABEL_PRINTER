@@ -72,9 +72,11 @@ function EquipmentLabelContent({ data, isPreview = false }: { data: EquipmentFor
   const isSquareish = !isPortrait && (height > width * 0.8);
   const isNarrow = width < 40;
 
+  const sidebarWidth = `${Math.max(8, width * 0.12)}mm`;
+
   return (
     <div
-      className="bg-white text-black relative flex flex-col overflow-hidden border-0"
+      className="bg-white text-black relative flex flex-row overflow-hidden border-0"
       style={{
         width: `${width}mm`,
         height: `${height}mm`,
@@ -83,82 +85,74 @@ function EquipmentLabelContent({ data, isPreview = false }: { data: EquipmentFor
         border: isPreview ? '1px solid #e5e7eb' : 'none'
       }}
     >
-      {/* Top Bar - Logo, and name+phone if wide enough */}
+      {/* Left sidebar with logo */}
       <div
-        className="bg-black text-white flex items-center justify-center px-3 w-full flex-shrink-0"
-        style={{ height: barHeight }}
+        className="bg-black text-white flex items-center justify-center flex-shrink-0"
+        style={{ width: sidebarWidth, height: '100%' }}
       >
-        <div className="flex items-center gap-2 overflow-hidden">
-          <img
-            src="/logo.png"
-            alt="Logo"
-            className="object-contain filter invert brightness-0 saturate-100 invert-[1] flex-shrink-0"
-            style={{ height: logoHeight }}
-          />
-          {!isNarrow && (
-            <>
-              <span className="font-bold uppercase whitespace-nowrap truncate" style={{ fontSize: phoneFontSize }}>
-                Filmværksted København
-              </span>
-              <span className="font-bold tracking-widest whitespace-nowrap flex-shrink-0" style={{ fontSize: phoneFontSize }}>
-                +45 71 99 33 66
-              </span>
-            </>
-          )}
-        </div>
+        <img
+          src="/logo.png"
+          alt="Logo"
+          className="object-contain filter invert brightness-0 saturate-100 invert-[1]"
+          style={{ width: '80%', maxHeight: '80%' }}
+        />
       </div>
 
-      <div className="flex-1 flex items-center bg-white p-1 min-h-0 relative">
-        <div className={`flex w-full h-full ${isPortrait || isSquareish ? 'flex-col justify-between py-2' : 'flex-row items-center justify-center'}`}>
-          <div className={`flex items-center justify-center p-1 ${isPortrait || isSquareish ? 'h-[55%] w-full' : 'h-full aspect-square'}`}>
-            <QRCode
-              value={data.id}
-              style={{ height: "100%", width: "100%", maxWidth: "100%", objectFit: "contain" }}
-              viewBox={`0 0 256 256`}
-            />
-          </div>
-
-          {isPortrait || isSquareish ? (
-            <div className="w-[80%] h-[2px] bg-black my-1 rounded-full flex-shrink-0"></div>
-          ) : (
-            <div className="h-[80%] w-[2px] bg-black mx-2 rounded-full flex-shrink-0"></div>
-          )}
-
-          <div className={`flex-1 flex flex-col justify-center overflow-hidden min-w-0 ${isPortrait || isSquareish ? 'w-full items-center text-center px-1' : 'h-full'}`}>
-            <div className="font-bold uppercase leading-tight truncate w-full" style={{ fontSize: titleFontSize }}>
-              {data.name}
-            </div>
-            <div className="font-mono font-bold tracking-widest mt-1 truncate w-full" style={{ fontSize: idFontSize }}>
-              {data.id}
-            </div>
-            {data.group && (
-              <div className="mt-1">
-                <span
-                  className="bg-black text-white font-bold uppercase tracking-wider rounded inline-block"
-                  style={{ fontSize: groupFontSize, padding: '1px 6px', letterSpacing: '0.03em' }}
-                >
-                  {data.group}
-                </span>
-              </div>
-            )}
-          </div>
-        </div>
-      </div>
-
-      {/* Bottom Bar - shown on narrow labels where text doesn't fit in top */}
-      {isNarrow && (
+      {/* Main content area */}
+      <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
+        {/* Top bar - Company name + phone */}
         <div
-          className="bg-black text-white flex flex-col items-center justify-center px-2 w-full flex-shrink-0"
+          className="bg-black text-white flex items-center justify-center px-2 w-full flex-shrink-0"
           style={{ height: barHeight }}
         >
-          <span className="font-bold uppercase whitespace-nowrap truncate" style={{ fontSize: phoneFontSize }}>
-            Filmværksted København
-          </span>
-          <span className="font-bold tracking-widest whitespace-nowrap" style={{ fontSize: phoneFontSize }}>
-            +45 71 99 33 66
-          </span>
+          <div className="flex items-center gap-2 overflow-hidden">
+            <span className="font-bold uppercase whitespace-nowrap truncate" style={{ fontSize: phoneFontSize }}>
+              Filmværksted København
+            </span>
+            <span className="font-bold tracking-widest whitespace-nowrap flex-shrink-0" style={{ fontSize: phoneFontSize }}>
+              +45 71 99 33 66
+            </span>
+          </div>
         </div>
-      )}
+
+        {/* Content area - QR + info */}
+        <div className="flex-1 flex items-center bg-white p-1 min-h-0 relative">
+          <div className={`flex w-full h-full ${isPortrait || isSquareish ? 'flex-col justify-between py-2' : 'flex-row items-center justify-center'}`}>
+            <div className={`flex items-center justify-center p-1 ${isPortrait || isSquareish ? 'h-[55%] w-full' : 'h-full aspect-square'}`}>
+              <QRCode
+                value={data.id}
+                style={{ height: "100%", width: "100%", maxWidth: "100%", objectFit: "contain" }}
+                viewBox={`0 0 256 256`}
+              />
+            </div>
+
+            {isPortrait || isSquareish ? (
+              <div className="w-[80%] h-[2px] bg-black my-1 rounded-full flex-shrink-0"></div>
+            ) : (
+              <div className="h-[80%] w-[2px] bg-black mx-2 rounded-full flex-shrink-0"></div>
+            )}
+
+            <div className={`flex-1 flex flex-col justify-center overflow-hidden min-w-0 ${isPortrait || isSquareish ? 'w-full items-center text-center px-1' : 'h-full'}`}>
+              <div className="font-bold uppercase leading-tight truncate w-full" style={{ fontSize: titleFontSize }}>
+                {data.name}
+              </div>
+              <div className="font-mono font-bold tracking-widest mt-1 truncate w-full" style={{ fontSize: idFontSize }}>
+                {data.id}
+              </div>
+              {data.group && (
+                <div className="mt-1">
+                  <span
+                    className="bg-black text-white font-bold uppercase tracking-wider rounded inline-block"
+                    style={{ fontSize: groupFontSize, padding: '1px 6px', letterSpacing: '0.03em' }}
+                  >
+                    {data.group}
+                  </span>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }
