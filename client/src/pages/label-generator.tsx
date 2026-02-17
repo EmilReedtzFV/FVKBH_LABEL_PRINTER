@@ -79,7 +79,7 @@ const CABLE_PRESETS: Record<string, { width: number; height: number; label: stri
 type LabelElement = 'name' | 'id' | 'group';
 
 // Design A: Top bar with company info, QR left, text right (horizontal)
-function EquipmentLabelDesignA({ data, isPreview = false, fontScale = 1, elementOrder = ['name', 'id', 'group'] }: { data: EquipmentFormValues; isPreview?: boolean; fontScale?: number; elementOrder?: LabelElement[] }) {
+function EquipmentLabelDesignA({ data, isPreview = false, fontScale = 1, elementOrder = ['name', 'id', 'group'], spacing = 50 }: { data: EquipmentFormValues; isPreview?: boolean; fontScale?: number; elementOrder?: LabelElement[]; spacing?: number }) {
   const { width, height } = data;
   const s = fontScale;
   const isSmall = height < 20;
@@ -125,7 +125,7 @@ function EquipmentLabelDesignA({ data, isPreview = false, fontScale = 1, element
               <div className="h-[70%] w-[2px] bg-white rounded-full flex-shrink-0"></div>
             </>
           )}
-          <div className="flex flex-col items-center justify-center min-w-0 w-full text-center" style={{ overflow: 'hidden', gap: isTiny ? '1px' : '3px' }}>
+          <div className="flex flex-col items-center justify-center min-w-0 w-full text-center" style={{ overflow: 'hidden', gap: isTiny ? '1px' : `${Math.max(1, spacing * 0.15)}px` }}>
             {elementOrder.map((el) => {
               if (el === 'name') return <div key="name" className="font-bold uppercase leading-none" data-label-name style={{ fontSize: nameFs, wordBreak: 'break-word', overflowWrap: 'break-word', lineHeight: 1.1 }}>{data.name}</div>;
               if (el === 'id' && data.id) return <div key="id" className="font-mono tracking-wider" data-label-id style={{ fontSize: idFs, wordBreak: 'break-all', overflowWrap: 'break-word', lineHeight: 1.1 }}>#{data.id}</div>;
@@ -321,8 +321,8 @@ function EquipmentLabelByDesign({ design, data, isPreview = false, fontScale = 1
   }
 }
 
-function EquipmentLabelContent({ data, isPreview = false, fontScale = 1, elementOrder = ['name', 'id', 'group'] }: { data: EquipmentFormValues; isPreview?: boolean; fontScale?: number; elementOrder?: LabelElement[] }) {
-  return <EquipmentLabelDesignA data={data} isPreview={isPreview} fontScale={fontScale} elementOrder={elementOrder} />;
+function EquipmentLabelContent({ data, isPreview = false, fontScale = 1, elementOrder = ['name', 'id', 'group'], spacing = 50 }: { data: EquipmentFormValues; isPreview?: boolean; fontScale?: number; elementOrder?: LabelElement[]; spacing?: number }) {
+  return <EquipmentLabelDesignA data={data} isPreview={isPreview} fontScale={fontScale} elementOrder={elementOrder} spacing={spacing} />;
 }
 
 // Cable Label Component - narrow strip that wraps around a cable
@@ -481,15 +481,7 @@ export default function LabelGenerator() {
   const previewLabelRef = useRef<HTMLDivElement>(null);
   const [fontScales, setFontScales] = useState<Record<number, number>>({});
   const [elementOrder, setElementOrder] = useState<LabelElement[]>(['name', 'id', 'group']);
-
-  const elementLabels: Record<LabelElement, string> = { name: 'Navn', id: 'ID Nummer', group: 'Gruppe / Kit' };
-  const moveElement = (idx: number, dir: -1 | 1) => {
-    const newOrder = [...elementOrder];
-    const target = idx + dir;
-    if (target < 0 || target >= newOrder.length) return;
-    [newOrder[idx], newOrder[target]] = [newOrder[target], newOrder[idx]];
-    setElementOrder(newOrder);
-  };
+  const [labelSpacing, setLabelSpacing] = useState(50);
 
   const getFontScale = (idx: number) => fontScales[idx] ?? 1;
 
@@ -1017,19 +1009,19 @@ export default function LabelGenerator() {
                       )}
                     />
                     <div className="space-y-2">
-                      <label className="text-sm font-medium">Rækkefølge på label</label>
-                      <div className="flex flex-col gap-1">
-                        {elementOrder.map((el, idx) => (
-                          <div key={el} className="flex items-center gap-2 bg-muted/50 rounded-md px-3 py-1.5 border">
-                            <span className="text-sm font-medium flex-1">{elementLabels[el]}</span>
-                            <Button type="button" variant="ghost" size="icon" className="h-6 w-6" disabled={idx === 0} onClick={() => moveElement(idx, -1)} data-testid={`button-move-up-${el}`}>
-                              <ChevronUp className="h-3.5 w-3.5" />
-                            </Button>
-                            <Button type="button" variant="ghost" size="icon" className="h-6 w-6" disabled={idx === elementOrder.length - 1} onClick={() => moveElement(idx, 1)} data-testid={`button-move-down-${el}`}>
-                              <ChevronDown className="h-3.5 w-3.5" />
-                            </Button>
-                          </div>
-                        ))}
+                      <label className="text-sm font-medium">Afstand mellem tekst</label>
+                      <div className="flex items-center gap-3">
+                        <span className="text-xs text-muted-foreground">Tæt</span>
+                        <input
+                          type="range"
+                          min={0}
+                          max={100}
+                          value={labelSpacing}
+                          onChange={(e) => setLabelSpacing(Number(e.target.value))}
+                          className="flex-1 accent-primary"
+                          data-testid="slider-label-spacing"
+                        />
+                        <span className="text-xs text-muted-foreground">Spredt</span>
                       </div>
                     </div>
                     <div className="grid grid-cols-2 gap-4">
@@ -1326,6 +1318,7 @@ export default function LabelGenerator() {
                         isPreview={true}
                         fontScale={getFontScale(idx)}
                         elementOrder={elementOrder}
+                        spacing={labelSpacing}
                       />
                     ) : (
                       <CableLabelContent
@@ -1337,7 +1330,7 @@ export default function LabelGenerator() {
                     )
                   ))
                 ) : mode === "equipment" ? (
-                  <EquipmentLabelContent data={labelData} isPreview={true} fontScale={getFontScale(0)} elementOrder={elementOrder} />
+                  <EquipmentLabelContent data={labelData} isPreview={true} fontScale={getFontScale(0)} elementOrder={elementOrder} spacing={labelSpacing} />
                 ) : (
                   <CableLabelContent data={cableData} isPreview={true} fontScale={getFontScale(0)} />
                 )}
@@ -1384,6 +1377,7 @@ export default function LabelGenerator() {
                     data={{ ...labelData, name: item.name, id: item.id, group: item.group }}
                     fontScale={getFontScale(globalIdx)}
                     elementOrder={elementOrder}
+                    spacing={labelSpacing}
                   />
                 ) : (
                   <CableLabelContent
