@@ -53,6 +53,7 @@ type BoxFormValues = z.infer<typeof boxSchema>;
 
 interface BoxItem {
   name: string;
+  id?: string;
 }
 
 const ASPECT_RATIOS: Record<string, { w: number; h: number; label: string }> = {
@@ -219,11 +220,11 @@ function CableLabelContent({ data, isPreview = false }: { data: CableFormValues;
 function BoxLabelContent({ data, items, isPreview = false }: { data: BoxFormValues; items: BoxItem[]; isPreview?: boolean }) {
   const { width, height } = data;
   const itemCount = Math.max(items.length, 1);
-  const logoSection = height * 0.15;
+  const logoSection = height * 0.13;
   const kitSection = height * 0.12;
   const remainingH = height - logoSection - kitSection - 6;
-  const itemRowH = Math.min(remainingH / itemCount, 8);
-  const itemFs = `${Math.max(7, Math.min(itemRowH * 0.55, width * 0.08))}px`;
+  const itemRowH = Math.min(remainingH / itemCount, 10);
+  const itemFs = `${Math.max(9, Math.min(itemRowH * 0.6, width * 0.1))}px`;
   const kitFs = `${Math.max(16, width * 0.25)}px`;
   const logoW = `${width * 0.7}mm`;
 
@@ -240,6 +241,7 @@ function BoxLabelContent({ data, items, isPreview = false }: { data: BoxFormValu
           {items.map((item, idx) => (
             <div key={idx} className="flex items-center px-2 bg-white/10 rounded" style={{ fontSize: itemFs, height: `${itemRowH}mm` }}>
               <span className="font-medium">{item.name}</span>
+              {item.id && <span className="ml-auto text-gray-400 font-mono flex-shrink-0" style={{ fontSize: `calc(${itemFs} * 0.85)` }}>#{item.id}</span>}
             </div>
           ))}
         </div>
@@ -377,7 +379,7 @@ export default function LabelGenerator() {
         return;
       }
       if (mode === "box") {
-        setBoxItems(items.map(i => ({ name: i.name })));
+        setBoxItems(items.map(i => ({ name: i.name, id: i.id || undefined })));
         if (items[0]?.group) {
           const kitName = items[0].group;
           boxForm.setValue("kitName", kitName);
