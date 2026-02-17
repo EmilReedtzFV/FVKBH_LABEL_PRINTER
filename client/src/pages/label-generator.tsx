@@ -291,6 +291,7 @@ export default function LabelGenerator() {
   });
   const [boxItems, setBoxItems] = useState<BoxItem[]>([{ name: "Eksempel genstand" }]);
   const [newBoxItemName, setNewBoxItemName] = useState("");
+  const [boxCopies, setBoxCopies] = useState(1);
 
   const equipmentForm = useForm<EquipmentFormValues>({
     resolver: zodResolver(equipmentSchema),
@@ -596,6 +597,14 @@ export default function LabelGenerator() {
                           </FormItem>
                         )}
                       />
+                    </div>
+                    <div>
+                      <label className="text-sm font-medium leading-none">Antal kopier</label>
+                      <div className="mt-2 flex items-center gap-2">
+                        <Button type="button" variant="outline" size="icon" onClick={() => setBoxCopies(prev => Math.max(1, prev - 1))} data-testid="button-box-copies-minus">-</Button>
+                        <Input type="number" min={1} value={boxCopies} onChange={e => setBoxCopies(Math.max(1, Number(e.target.value)))} className="w-20 text-center" data-testid="input-box-copies" />
+                        <Button type="button" variant="outline" size="icon" onClick={() => setBoxCopies(prev => prev + 1)} data-testid="button-box-copies-plus">+</Button>
+                      </div>
                     </div>
                     <Button type="submit" className="w-full" data-testid="button-update-box">Opdater Visning</Button>
                   </form>
@@ -958,7 +967,9 @@ export default function LabelGenerator() {
           `}
         </style>
         {mode === "box" ? (
-          <BoxLabelContent data={boxData} items={boxItems} />
+          Array.from({ length: boxCopies }).map((_, i) => (
+            <BoxLabelContent key={i} data={boxData} items={boxItems} />
+          ))
         ) : batchItems.length > 0 ? (
           batchItems.map((item, idx) => (
             mode === "equipment" ? (
