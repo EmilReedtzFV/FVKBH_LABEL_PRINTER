@@ -667,6 +667,30 @@ export default function LabelGenerator() {
                       </div>
                     </div>
                     <div>
+                      <label className="text-sm font-medium leading-none">Label Type</label>
+                      <div className="mt-2 grid grid-cols-3 gap-2">
+                        {[
+                          { label: "Peli Air 1555", w: 100 },
+                          { label: "CRDBAG Half", w: 100 },
+                          { label: "CRDBAG Full", w: 100 },
+                        ].map(preset => (
+                          <Button
+                            key={preset.label}
+                            type="button"
+                            variant={boxData.width === preset.w ? "outline" : "outline"}
+                            className="text-xs"
+                            onClick={() => {
+                              boxForm.setValue("width", preset.w);
+                              setBoxData(prev => ({ ...prev, width: preset.w }));
+                            }}
+                            data-testid={`button-box-preset-${preset.label.toLowerCase().replace(/\s/g, '-')}`}
+                          >
+                            {preset.label}<br />{preset.w}mm bred
+                          </Button>
+                        ))}
+                      </div>
+                    </div>
+                    <div>
                       <label className="text-sm font-medium leading-none">Bredde (mm)</label>
                       <div className="mt-2">
                         <Input
