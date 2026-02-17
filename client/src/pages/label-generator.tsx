@@ -140,8 +140,179 @@ function EquipmentLabelDesignA({ data, isPreview = false, fontScale = 1 }: { dat
   );
 }
 
-function EquipmentLabelContent({ data, isPreview = false, fontScale = 1 }: { data: EquipmentFormValues; isPreview?: boolean; fontScale?: number }) {
-  return <EquipmentLabelDesignA data={data} isPreview={isPreview} fontScale={fontScale} />;
+// Design B: Name large on top, ID + Group side by side below
+function EquipmentLabelDesignB({ data, isPreview = false, fontScale = 1 }: { data: EquipmentFormValues; isPreview?: boolean; fontScale?: number }) {
+  const { width, height } = data;
+  const s = fontScale;
+  const isSmall = height < 20;
+  const isNarrow = width < 20;
+  const isTiny = isSmall || isNarrow;
+  const showQr = data.id && !isTiny;
+
+  const contentH = isSmall ? height * 0.78 : height * 0.82;
+  const namePx = (isSmall ? Math.max(8, Math.min(width * 0.22, contentH * 0.45)) : Math.max(8, Math.min(width, height) * 0.24)) * s;
+  const idPx = (isSmall ? Math.max(6, Math.min(width * 0.16, contentH * 0.35)) : Math.max(8, Math.min(width, height) * 0.17)) * s;
+  const groupPx = (isSmall ? Math.max(5, Math.min(width * 0.1, contentH * 0.22)) : Math.max(6, Math.min(width, height) * 0.11)) * s;
+  const infoFs = `${Math.max(4, Math.min(width * 0.08, height * 0.14))}px`;
+  const barH = isSmall ? `${Math.max(height * 0.2, 2.5)}mm` : `${Math.max(height * 0.18, 5)}mm`;
+  const isLarge = width >= 40 && height >= 40;
+  const qrSize = Math.min(width * 0.25, height * 0.4);
+  const logoH = `${Math.max(5, height * 0.12)}px`;
+  const pad = isTiny ? '1mm 1mm' : isLarge ? `${height * 0.06}mm ${width * 0.05}mm` : '0.5rem';
+
+  return (
+    <div data-label-root className="bg-black text-white relative flex flex-col border-0" style={{ width: `${width}mm`, height: `${height}mm`, boxSizing: "border-box", pageBreakInside: "avoid", border: isPreview ? '1px solid #e5e7eb' : 'none', overflow: 'hidden' }}>
+      <div className="bg-white text-black flex items-center justify-center px-0.5 w-full flex-shrink-0 gap-0.5" style={{ height: barH, minHeight: 0 }}>
+        <img src="/logo.png" alt="Logo" className="object-contain flex-shrink-0" style={{ height: logoH, maxHeight: '90%' }} />
+        <span className="font-bold uppercase flex-shrink truncate" style={{ fontSize: infoFs, lineHeight: 1.1 }}>Filmværksted København</span>
+        <span className="font-bold tracking-wider flex-shrink-0" style={{ fontSize: infoFs, lineHeight: 1.1 }}>+45 71 99 33 66</span>
+      </div>
+      <div data-label-content className="flex-1 flex flex-col justify-center min-h-0" style={{ padding: pad }}>
+        <div className="font-bold uppercase leading-none text-center" data-label-name style={{ fontSize: `${namePx}px`, wordBreak: 'break-word', overflowWrap: 'break-word', lineHeight: 1.1, marginBottom: isTiny ? '2px' : '4px' }}>{data.name}</div>
+        <div className="flex flex-row items-center justify-center w-full" style={{ gap: isTiny ? '3px' : '8px' }}>
+          {showQr && (
+            <div className="flex items-center justify-center flex-shrink-0 bg-white p-0.5 rounded" style={{ width: `${qrSize}mm`, height: `${qrSize}mm` }}>
+              <QRCode value={data.id} style={{ height: "100%", width: "100%", maxWidth: "100%", objectFit: "contain" }} viewBox="0 0 256 256" />
+            </div>
+          )}
+          <div className="flex flex-col items-center justify-center text-center min-w-0">
+            {data.id && (
+              <div className="font-mono tracking-wider" data-label-id style={{ fontSize: `${idPx}px`, wordBreak: 'break-all', lineHeight: 1.1 }}>#{data.id}</div>
+            )}
+            {data.group && (
+              <div style={{ marginTop: isTiny ? '1px' : '3px' }}>
+                <span className="bg-white text-black font-bold uppercase tracking-wider rounded inline-block" data-label-group style={{ fontSize: `${groupPx}px`, padding: isTiny ? '0px 2px' : '1px 6px', lineHeight: 1.15 }}>{data.group}</span>
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// Design C: QR left, Name+ID stacked right, Group as bottom bar
+function EquipmentLabelDesignC({ data, isPreview = false, fontScale = 1 }: { data: EquipmentFormValues; isPreview?: boolean; fontScale?: number }) {
+  const { width, height } = data;
+  const s = fontScale;
+  const isSmall = height < 20;
+  const isNarrow = width < 20;
+  const isTiny = isSmall || isNarrow;
+  const showQr = data.id && !isTiny;
+
+  const contentH = isSmall ? height * 0.78 : height * 0.82;
+  const namePx = (isSmall ? Math.max(8, Math.min(width * 0.2, contentH * 0.4)) : Math.max(8, Math.min(width, height) * 0.2)) * s;
+  const idPx = (isSmall ? Math.max(6, Math.min(width * 0.16, contentH * 0.35)) : Math.max(8, Math.min(width, height) * 0.18)) * s;
+  const groupPx = (isSmall ? Math.max(5, Math.min(width * 0.1, contentH * 0.22)) : Math.max(6, Math.min(width, height) * 0.11)) * s;
+  const infoFs = `${Math.max(4, Math.min(width * 0.08, height * 0.14))}px`;
+  const barH = isSmall ? `${Math.max(height * 0.2, 2.5)}mm` : `${Math.max(height * 0.16, 4.5)}mm`;
+  const isLarge = width >= 40 && height >= 40;
+  const qrSize = Math.min(width * 0.3, height * 0.45);
+  const logoH = `${Math.max(5, height * 0.12)}px`;
+  const pad = isTiny ? '1mm 1mm' : isLarge ? `${height * 0.06}mm ${width * 0.05}mm` : '0.5rem';
+  const contentGap = isTiny ? '2px' : isLarge ? `${width * 0.04}mm` : '0.75rem';
+
+  return (
+    <div data-label-root className="bg-black text-white relative flex flex-col border-0" style={{ width: `${width}mm`, height: `${height}mm`, boxSizing: "border-box", pageBreakInside: "avoid", border: isPreview ? '1px solid #e5e7eb' : 'none', overflow: 'hidden' }}>
+      <div className="bg-white text-black flex items-center justify-center px-0.5 w-full flex-shrink-0 gap-0.5" style={{ height: barH, minHeight: 0 }}>
+        <img src="/logo.png" alt="Logo" className="object-contain flex-shrink-0" style={{ height: logoH, maxHeight: '90%' }} />
+        <span className="font-bold uppercase flex-shrink truncate" style={{ fontSize: infoFs, lineHeight: 1.1 }}>Filmværksted København</span>
+        <span className="font-bold tracking-wider flex-shrink-0" style={{ fontSize: infoFs, lineHeight: 1.1 }}>+45 71 99 33 66</span>
+      </div>
+      <div data-label-content className="flex-1 flex items-center min-h-0" style={{ padding: pad }}>
+        <div className="flex flex-row items-center h-full max-w-full w-full" style={{ gap: contentGap }}>
+          {showQr && (
+            <>
+              <div className="flex items-center justify-center flex-shrink-0 bg-white p-0.5 rounded" style={{ width: `${qrSize}mm`, height: `${qrSize}mm` }}>
+                <QRCode value={data.id} style={{ height: "100%", width: "100%", maxWidth: "100%", objectFit: "contain" }} viewBox="0 0 256 256" />
+              </div>
+              <div className="h-[70%] w-[2px] bg-white rounded-full flex-shrink-0"></div>
+            </>
+          )}
+          <div className="flex flex-col justify-center items-center min-w-0 w-full text-center flex-1" style={{ overflow: 'hidden' }}>
+            <div className="font-bold uppercase leading-none" data-label-name style={{ fontSize: `${namePx}px`, wordBreak: 'break-word', overflowWrap: 'break-word', lineHeight: 1.1 }}>{data.name}</div>
+            {data.id && (
+              <div className="font-mono tracking-wider" data-label-id style={{ fontSize: `${idPx}px`, wordBreak: 'break-all', lineHeight: 1.1, marginTop: isTiny ? '2px' : '4px' }}>#{data.id}</div>
+            )}
+          </div>
+        </div>
+      </div>
+      {data.group && (
+        <div className="bg-white text-black flex items-center justify-center w-full flex-shrink-0" style={{ height: barH, minHeight: 0 }}>
+          <span className="font-bold uppercase tracking-wider" data-label-group style={{ fontSize: `${groupPx}px`, lineHeight: 1.15 }}>{data.group}</span>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// Design D: Clean centered layout with all text stacked vertically, QR at bottom
+function EquipmentLabelDesignD({ data, isPreview = false, fontScale = 1 }: { data: EquipmentFormValues; isPreview?: boolean; fontScale?: number }) {
+  const { width, height } = data;
+  const s = fontScale;
+  const isSmall = height < 20;
+  const isNarrow = width < 20;
+  const isTiny = isSmall || isNarrow;
+  const showQr = data.id && !isTiny;
+
+  const contentH = isSmall ? height * 0.78 : height * 0.82;
+  const namePx = (isSmall ? Math.max(8, Math.min(width * 0.22, contentH * 0.45)) : Math.max(8, Math.min(width, height) * 0.22)) * s;
+  const idPx = (isSmall ? Math.max(6, Math.min(width * 0.16, contentH * 0.35)) : Math.max(8, Math.min(width, height) * 0.19)) * s;
+  const groupPx = (isSmall ? Math.max(5, Math.min(width * 0.1, contentH * 0.22)) : Math.max(6, Math.min(width, height) * 0.12)) * s;
+  const infoFs = `${Math.max(4, Math.min(width * 0.08, height * 0.14))}px`;
+  const barH = isSmall ? `${Math.max(height * 0.2, 2.5)}mm` : `${Math.max(height * 0.16, 4.5)}mm`;
+  const isLarge = width >= 40 && height >= 40;
+  const qrSize = Math.min(width * 0.22, height * 0.3);
+  const logoH = `${Math.max(5, height * 0.12)}px`;
+  const pad = isTiny ? '1mm 1mm' : isLarge ? `${height * 0.05}mm ${width * 0.05}mm` : '0.4rem';
+
+  return (
+    <div data-label-root className="bg-black text-white relative flex flex-col border-0" style={{ width: `${width}mm`, height: `${height}mm`, boxSizing: "border-box", pageBreakInside: "avoid", border: isPreview ? '1px solid #e5e7eb' : 'none', overflow: 'hidden' }}>
+      <div className="bg-white text-black flex items-center justify-center px-0.5 w-full flex-shrink-0 gap-0.5" style={{ height: barH, minHeight: 0 }}>
+        <img src="/logo.png" alt="Logo" className="object-contain flex-shrink-0" style={{ height: logoH, maxHeight: '90%' }} />
+        <span className="font-bold uppercase flex-shrink truncate" style={{ fontSize: infoFs, lineHeight: 1.1 }}>Filmværksted København</span>
+        <span className="font-bold tracking-wider flex-shrink-0" style={{ fontSize: infoFs, lineHeight: 1.1 }}>+45 71 99 33 66</span>
+      </div>
+      <div data-label-content className="flex-1 flex flex-col items-center justify-center min-h-0" style={{ padding: pad, gap: isTiny ? '2px' : '4px' }}>
+        <div className="font-bold uppercase leading-none text-center" data-label-name style={{ fontSize: `${namePx}px`, wordBreak: 'break-word', overflowWrap: 'break-word', lineHeight: 1.1 }}>{data.name}</div>
+        {data.id && (
+          <div className="font-mono tracking-wider text-center" data-label-id style={{ fontSize: `${idPx}px`, wordBreak: 'break-all', lineHeight: 1.1 }}>#{data.id}</div>
+        )}
+        {data.group && (
+          <div>
+            <span className="bg-white text-black font-bold uppercase tracking-wider rounded inline-block" data-label-group style={{ fontSize: `${groupPx}px`, padding: isTiny ? '0px 2px' : '2px 8px', lineHeight: 1.15 }}>{data.group}</span>
+          </div>
+        )}
+        {showQr && (
+          <div className="flex items-center justify-center flex-shrink-0 bg-white p-0.5 rounded" style={{ width: `${qrSize}mm`, height: `${qrSize}mm` }}>
+            <QRCode value={data.id} style={{ height: "100%", width: "100%", maxWidth: "100%", objectFit: "contain" }} viewBox="0 0 256 256" />
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+const equipmentDesigns = ['A', 'B', 'C', 'D'] as const;
+type EquipmentDesign = typeof equipmentDesigns[number];
+const designLabels: Record<EquipmentDesign, string> = {
+  A: 'QR venstre, tekst højre',
+  B: 'Navn stor øverst, QR+ID nedenunder',
+  C: 'QR venstre, gruppe som bundbar',
+  D: 'Alt centreret, QR i bunden',
+};
+
+function EquipmentLabelByDesign({ design, data, isPreview = false, fontScale = 1 }: { design: EquipmentDesign; data: EquipmentFormValues; isPreview?: boolean; fontScale?: number }) {
+  switch (design) {
+    case 'A': return <EquipmentLabelDesignA data={data} isPreview={isPreview} fontScale={fontScale} />;
+    case 'B': return <EquipmentLabelDesignB data={data} isPreview={isPreview} fontScale={fontScale} />;
+    case 'C': return <EquipmentLabelDesignC data={data} isPreview={isPreview} fontScale={fontScale} />;
+    case 'D': return <EquipmentLabelDesignD data={data} isPreview={isPreview} fontScale={fontScale} />;
+  }
+}
+
+function EquipmentLabelContent({ data, isPreview = false, fontScale = 1, design = 'A' }: { data: EquipmentFormValues; isPreview?: boolean; fontScale?: number; design?: EquipmentDesign }) {
+  return <EquipmentLabelByDesign design={design} data={data} isPreview={isPreview} fontScale={fontScale} />;
 }
 
 // Cable Label Component - narrow strip that wraps around a cable
@@ -299,6 +470,8 @@ export default function LabelGenerator() {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const previewLabelRef = useRef<HTMLDivElement>(null);
   const [fontScales, setFontScales] = useState<Record<number, number>>({});
+  const [equipDesign, setEquipDesign] = useState<EquipmentDesign>('A');
+  const [showDesignPicker, setShowDesignPicker] = useState(false);
 
   const getFontScale = (idx: number) => fontScales[idx] ?? 1;
 
@@ -1094,46 +1267,80 @@ export default function LabelGenerator() {
               </CardDescription>
             </CardHeader>
             <CardContent className="flex-1 flex flex-col items-center justify-center bg-muted/20 p-8 rounded-lg border-dashed border-2 m-6 overflow-auto gap-4">
-              {mode !== "box" && (
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  className="gap-2 self-end"
-                  onClick={optimizeLabel}
-                  data-testid="button-optimize-label"
-                >
-                  <Wand2 className="h-4 w-4" />
-                  Optimer Tekst
-                </Button>
-              )}
-              <div ref={previewLabelRef}>
-                {mode === "box" ? (
-                  <BoxLabelContent data={boxData} items={boxItems} isPreview={true} />
-                ) : batchItems.length > 0 ? (
-                  batchItems.map((item, idx) => (
-                    mode === "equipment" ? (
-                      <EquipmentLabelContent
-                        key={idx}
-                        data={{ ...labelData, name: item.name, id: item.id, group: item.group }}
-                        isPreview={true}
-                        fontScale={getFontScale(idx)}
-                      />
-                    ) : (
-                      <CableLabelContent
-                        key={idx}
-                        data={{ ...cableData, name: item.name, id: item.id, group: item.group }}
-                        isPreview={true}
-                        fontScale={getFontScale(idx)}
-                      />
-                    )
-                  ))
-                ) : mode === "equipment" ? (
-                  <EquipmentLabelContent data={labelData} isPreview={true} fontScale={getFontScale(0)} />
-                ) : (
-                  <CableLabelContent data={cableData} isPreview={true} fontScale={getFontScale(0)} />
+              <div className="flex gap-2 self-end">
+                {mode === "equipment" && (
+                  <Button
+                    type="button"
+                    variant={showDesignPicker ? "default" : "outline"}
+                    size="sm"
+                    className="gap-2"
+                    onClick={() => setShowDesignPicker(!showDesignPicker)}
+                    data-testid="button-toggle-designs"
+                  >
+                    Vælg Design
+                  </Button>
+                )}
+                {mode !== "box" && (
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    className="gap-2"
+                    onClick={optimizeLabel}
+                    data-testid="button-optimize-label"
+                  >
+                    <Wand2 className="h-4 w-4" />
+                    Optimer Tekst
+                  </Button>
                 )}
               </div>
+              {showDesignPicker && mode === "equipment" ? (
+                <div className="grid grid-cols-2 gap-6 w-full">
+                  {equipmentDesigns.map((d) => (
+                    <div
+                      key={d}
+                      className={`flex flex-col items-center gap-2 p-3 rounded-lg border-2 cursor-pointer transition-all ${equipDesign === d ? 'border-primary bg-primary/5 shadow-md' : 'border-muted hover:border-muted-foreground/30'}`}
+                      onClick={() => { setEquipDesign(d); setShowDesignPicker(false); }}
+                      data-testid={`button-design-${d}`}
+                    >
+                      <span className="text-sm font-semibold">Design {d}</span>
+                      <span className="text-xs text-muted-foreground mb-1">{designLabels[d]}</span>
+                      <div className="transform scale-75 origin-top">
+                        <EquipmentLabelByDesign design={d} data={labelData} isPreview={true} fontScale={1} />
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div ref={previewLabelRef}>
+                  {mode === "box" ? (
+                    <BoxLabelContent data={boxData} items={boxItems} isPreview={true} />
+                  ) : batchItems.length > 0 ? (
+                    batchItems.map((item, idx) => (
+                      mode === "equipment" ? (
+                        <EquipmentLabelContent
+                          key={idx}
+                          data={{ ...labelData, name: item.name, id: item.id, group: item.group }}
+                          isPreview={true}
+                          fontScale={getFontScale(idx)}
+                          design={equipDesign}
+                        />
+                      ) : (
+                        <CableLabelContent
+                          key={idx}
+                          data={{ ...cableData, name: item.name, id: item.id, group: item.group }}
+                          isPreview={true}
+                          fontScale={getFontScale(idx)}
+                        />
+                      )
+                    ))
+                  ) : mode === "equipment" ? (
+                    <EquipmentLabelContent data={labelData} isPreview={true} fontScale={getFontScale(0)} design={equipDesign} />
+                  ) : (
+                    <CableLabelContent data={cableData} isPreview={true} fontScale={getFontScale(0)} />
+                  )}
+                </div>
+              )}
             </CardContent>
           </Card>
         </div>
@@ -1175,6 +1382,7 @@ export default function LabelGenerator() {
                     key={`${rowIdx}-${colIdx}`}
                     data={{ ...labelData, name: item.name, id: item.id, group: item.group }}
                     fontScale={getFontScale(globalIdx)}
+                    design={equipDesign}
                   />
                 ) : (
                   <CableLabelContent
