@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import QRCode from "react-qr-code";
 import Barcode from "react-barcode";
 import { useForm } from "react-hook-form";
@@ -9,10 +9,19 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { RefreshCw, Printer, Tag, Cable, ArrowRightLeft } from "lucide-react";
+import { RefreshCw, Printer, Tag, Cable, ArrowRightLeft, Upload, Trash2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import * as pdfjsLib from "pdfjs-dist";
+
+pdfjsLib.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjsLib.version}/pdf.worker.min.mjs`;
 
 type LabelMode = "equipment" | "cable";
+
+interface ParsedItem {
+  id: string;
+  name: string;
+  group: string;
+}
 
 // Schema for the equipment label form
 const equipmentSchema = z.object({
@@ -187,9 +196,47 @@ function CableLabelContent({ data, isPreview = false }: { data: CableFormValues;
   );
 }
 
+async function parsePdfFile(file: File): Promise<ParsedItem[]> {
+  const arrayBuffer = await file.arrayBuffer();
+  const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+  const items: ParsedItem[] = [];
+
+  for (let i = 1; i <= pdf.numPages; i++) {
+    const page = await pdf.getPage(i);
+    const textContent = await page.getTextContent();
+    const lines = textContent.items
+      .filter((item: any) => item.str && item.str.trim() !== "")
+      .map((item: any) => item.str.trim());
+
+    let currentId = "";
+    let currentGroup = "";
+
+    for (let j = 0; j < lines.length; j++) {
+      const line = lines[j];
+
+      if (/^\d{3,}$/.test(line) || /^[A-Z]{2,}-\d+$/i.test(line)) {
+        currentId = line;
+      } else if (/^(KIT|SET|GRP|GRUPPE)\s/i.test(line)) {
+        currentGroup = line;
+      } else if (currentId && line.length > 2 && !/^\d+$/.test(line)) {
+        items.push({
+          id: currentId,
+          name: line,
+          group: currentGroup,
+        });
+        currentId = "";
+      }
+    }
+  }
+
+  return items;
+}
+
 export default function LabelGenerator() {
   const { toast } = useToast();
   const [mode, setMode] = useState<LabelMode>("equipment");
+  const [batchItems, setBatchItems] = useState<ParsedItem[]>([]);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const [labelData, setLabelData] = useState<EquipmentFormValues>({
     name: "Kamera 1",
@@ -268,6 +315,22 @@ export default function LabelGenerator() {
     window.print();
   };
 
+  const handlePdfUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    try {
+      const items = await parsePdfFile(file);
+      if (items.length === 0) {
+        toast({ title: "Ingen data fundet", description: "PDF'en indeholdt ingen genkendelige labels.", variant: "destructive" });
+        return;
+      }
+      setBatchItems(items);
+      toast({ title: `${items.length} labels indlæst`, description: "Labels fra PDF er klar til forhåndsvisning og print." });
+    } catch {
+      toast({ title: "Fejl ved indlæsning", description: "Kunne ikke læse PDF-filen. Prøv en anden fil.", variant: "destructive" });
+    }
+    if (fileInputRef.current) fileInputRef.current.value = "";
+  };
 
   return (
     <div className="min-h-screen bg-background p-8 font-sans">
@@ -279,10 +342,17 @@ export default function LabelGenerator() {
               Generer labels til udstyr og kabler med QR-koder. Klar til Zebra ZD621t.
             </p>
           </div>
-          <Button onClick={handlePrint} size="lg" className="gap-2" data-testid="button-print">
-            <Printer className="h-5 w-5" />
-            Print Label
-          </Button>
+          <div className="flex gap-2">
+            <input type="file" accept=".pdf" ref={fileInputRef} onChange={handlePdfUpload} className="hidden" />
+            <Button onClick={() => fileInputRef.current?.click()} size="lg" variant="outline" className="gap-2" data-testid="button-upload-pdf">
+              <Upload className="h-5 w-5" />
+              Importér PDF
+            </Button>
+            <Button onClick={handlePrint} size="lg" className="gap-2" data-testid="button-print">
+              <Printer className="h-5 w-5" />
+              {batchItems.length > 0 ? `Print ${batchItems.length} Labels` : "Print Label"}
+            </Button>
+          </div>
         </div>
 
         {/* Mode Toggle */}
@@ -306,6 +376,35 @@ export default function LabelGenerator() {
             Kabel Label
           </Button>
         </div>
+
+        {batchItems.length > 0 && (
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between">
+              <div>
+                <CardTitle>Importerede Labels ({batchItems.length})</CardTitle>
+                <CardDescription>Labels indlæst fra PDF-fil</CardDescription>
+              </div>
+              <Button variant="destructive" size="sm" className="gap-2" onClick={() => setBatchItems([])} data-testid="button-clear-batch">
+                <Trash2 className="h-4 w-4" />
+                Ryd alle
+              </Button>
+            </CardHeader>
+            <CardContent>
+              <div className="grid gap-2 max-h-60 overflow-y-auto">
+                {batchItems.map((item, idx) => (
+                  <div key={idx} className="flex items-center gap-3 p-2 bg-muted/50 rounded text-sm" data-testid={`batch-item-${idx}`}>
+                    <span className="font-mono text-muted-foreground">#{item.id}</span>
+                    <span className="font-bold flex-1">{item.name}</span>
+                    {item.group && <span className="text-xs bg-primary/10 px-2 py-0.5 rounded">{item.group}</span>}
+                    <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => setBatchItems(prev => prev.filter((_, i) => i !== idx))} data-testid={`button-remove-batch-${idx}`}>
+                      <Trash2 className="h-3 w-3" />
+                    </Button>
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        )}
 
         <div className="grid gap-8 md:grid-cols-2">
           {/* Controls */}
@@ -632,8 +731,16 @@ export default function LabelGenerator() {
                   : "Kabel-labelen vikles rundt om kablet. Brug print-knappen for at udskrive."}
               </CardDescription>
             </CardHeader>
-            <CardContent className="flex-1 flex flex-col items-center justify-center bg-muted/20 p-8 rounded-lg border-dashed border-2 m-6 overflow-auto gap-8">
-              {mode === "equipment" ? (
+            <CardContent className="flex-1 flex flex-col items-center justify-center bg-muted/20 p-8 rounded-lg border-dashed border-2 m-6 overflow-auto gap-4">
+              {batchItems.length > 0 ? (
+                batchItems.map((item, idx) => (
+                  <EquipmentLabelContent
+                    key={idx}
+                    data={{ ...labelData, name: item.name, id: item.id, group: item.group }}
+                    isPreview={true}
+                  />
+                ))
+              ) : mode === "equipment" ? (
                 <EquipmentLabelContent data={labelData} isPreview={true} />
               ) : (
                 <CableLabelContent data={cableData} isPreview={true} />
@@ -656,7 +763,14 @@ export default function LabelGenerator() {
             }
           `}
         </style>
-        {mode === "equipment" ? (
+        {batchItems.length > 0 ? (
+          batchItems.map((item, idx) => (
+            <EquipmentLabelContent
+              key={idx}
+              data={{ ...labelData, name: item.name, id: item.id, group: item.group }}
+            />
+          ))
+        ) : mode === "equipment" ? (
           <EquipmentLabelContent data={labelData} />
         ) : (
           <CableLabelContent data={cableData} />
