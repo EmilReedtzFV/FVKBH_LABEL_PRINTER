@@ -148,7 +148,8 @@ function CableLabelContent({ data, isPreview = false, fontScale = 1 }: { data: C
   const s = fontScale;
 
   const fontSize = `${Math.max(6, height * 0.55) * s}px`;
-  const smallFontSize = `${Math.max(5, height * 0.35) * s}px`;
+  const smallFontSize = `${Math.max(5, height * 0.35)}px`;
+  const groupFontSize = `${Math.max(5, height * 0.35) * s}px`;
   const logoH = `${Math.max(10, height * 1.8)}px`;
   const hasCode = data.codeType !== "none";
   const codeSize = height * 0.85;
@@ -217,7 +218,7 @@ function CableLabelContent({ data, isPreview = false, fontScale = 1 }: { data: C
           {data.group && (
             <span
               className="bg-black text-white px-1 rounded-sm font-bold uppercase truncate whitespace-nowrap flex-shrink-0"
-              style={{ fontSize: smallFontSize }}
+              style={{ fontSize: groupFontSize }}
             >
               {data.group}
             </span>
