@@ -151,8 +151,7 @@ function CableLabelContent({ data, isPreview = false }: { data: CableFormValues;
         </span>
       </div>
 
-      {/* QR or Barcode section */}
-      {hasCode && (
+      {hasCode && data.id && (
         <div className="flex items-center justify-center flex-shrink-0 bg-white px-1"
           style={{ height: '100%' }}
         >
@@ -189,11 +188,13 @@ function CableLabelContent({ data, isPreview = false }: { data: CableFormValues;
             </span>
           )}
         </div>
-        <div className="flex items-center gap-2 flex-shrink-0 ml-2">
-          <span className="font-mono font-bold whitespace-nowrap" style={{ fontSize }}>
-            {data.id}
-          </span>
-        </div>
+        {data.id && (
+          <div className="flex items-center gap-2 flex-shrink-0 ml-2">
+            <span className="font-mono font-bold whitespace-nowrap" style={{ fontSize }}>
+              {data.id}
+            </span>
+          </div>
+        )}
       </div>
     </div>
   );
@@ -713,11 +714,19 @@ export default function LabelGenerator() {
             <CardContent className="flex-1 flex flex-col items-center justify-center bg-muted/20 p-8 rounded-lg border-dashed border-2 m-6 overflow-auto gap-4">
               {batchItems.length > 0 ? (
                 batchItems.map((item, idx) => (
-                  <EquipmentLabelContent
-                    key={idx}
-                    data={{ ...labelData, name: item.name, id: item.id, group: item.group }}
-                    isPreview={true}
-                  />
+                  mode === "equipment" ? (
+                    <EquipmentLabelContent
+                      key={idx}
+                      data={{ ...labelData, name: item.name, id: item.id, group: item.group }}
+                      isPreview={true}
+                    />
+                  ) : (
+                    <CableLabelContent
+                      key={idx}
+                      data={{ ...cableData, name: item.name, id: item.id, group: item.group }}
+                      isPreview={true}
+                    />
+                  )
                 ))
               ) : mode === "equipment" ? (
                 <EquipmentLabelContent data={labelData} isPreview={true} />
@@ -744,10 +753,17 @@ export default function LabelGenerator() {
         </style>
         {batchItems.length > 0 ? (
           batchItems.map((item, idx) => (
-            <EquipmentLabelContent
-              key={idx}
-              data={{ ...labelData, name: item.name, id: item.id, group: item.group }}
-            />
+            mode === "equipment" ? (
+              <EquipmentLabelContent
+                key={idx}
+                data={{ ...labelData, name: item.name, id: item.id, group: item.group }}
+              />
+            ) : (
+              <CableLabelContent
+                key={idx}
+                data={{ ...cableData, name: item.name, id: item.id, group: item.group }}
+              />
+            )
           ))
         ) : mode === "equipment" ? (
           <EquipmentLabelContent data={labelData} />
