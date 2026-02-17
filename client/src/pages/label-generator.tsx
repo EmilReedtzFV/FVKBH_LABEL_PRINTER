@@ -99,9 +99,11 @@ function EquipmentLabelDesignA({ data, isPreview = false, fontScale = 1 }: { dat
   const idFs = `${idPx}px`;
   const infoFs = `${Math.max(4, Math.min(width * 0.08, height * 0.14))}px`;
   const barH = isSmall ? `${Math.max(height * 0.2, 2.5)}mm` : `${Math.max(height * 0.18, 5)}mm`;
-  const qrSize = Math.min(width * 0.35, height * 0.6);
+  const isLarge = width >= 40 && height >= 40;
+  const qrSize = Math.min(width * 0.3, height * 0.5);
   const logoH = `${Math.max(5, height * 0.12)}px`;
-  const pad = isTiny ? '0.5mm 1mm' : '0.5rem';
+  const pad = isTiny ? '1mm 1mm' : isLarge ? `${height * 0.08}mm ${width * 0.06}mm` : '0.5rem';
+  const contentGap = isTiny ? '2px' : isLarge ? `${width * 0.04}mm` : '0.75rem';
 
   return (
     <div data-label-root className="bg-black text-white relative flex flex-col border-0" style={{ width: `${width}mm`, height: `${height}mm`, boxSizing: "border-box", pageBreakInside: "avoid", border: isPreview ? '1px solid #e5e7eb' : 'none', overflow: 'hidden' }}>
@@ -110,8 +112,8 @@ function EquipmentLabelDesignA({ data, isPreview = false, fontScale = 1 }: { dat
         <span className="font-bold uppercase flex-shrink truncate" style={{ fontSize: infoFs, lineHeight: 1.1 }}>Filmværksted København</span>
         <span className="font-bold tracking-wider flex-shrink-0" style={{ fontSize: infoFs, lineHeight: 1.1 }}>+45 71 99 33 66</span>
       </div>
-      <div data-label-content className="flex-1 flex items-center justify-center min-h-0" style={{ padding: isTiny ? '1mm 1mm' : '0.5rem', paddingTop: isTiny ? '1.5mm' : '0.5rem' }}>
-        <div className="flex flex-row items-center h-full max-w-full" style={{ gap: isTiny ? '2px' : '0.75rem' }}>
+      <div data-label-content className="flex-1 flex items-center justify-center min-h-0" style={{ padding: pad, paddingTop: isTiny ? '1.5mm' : undefined }}>
+        <div className="flex flex-row items-center h-full max-w-full" style={{ gap: contentGap }}>
           {showQr && (
             <>
               <div className="flex items-center justify-center flex-shrink-0 bg-white p-0.5 rounded" style={{ width: `${qrSize}mm`, height: `${qrSize}mm` }}>
