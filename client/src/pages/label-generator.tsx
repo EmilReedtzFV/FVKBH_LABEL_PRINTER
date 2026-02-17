@@ -544,6 +544,31 @@ export default function LabelGenerator() {
                         )}
                       </div>
                     </div>
+                    <div>
+                      <label className="text-sm font-medium leading-none">Label Type</label>
+                      <div className="mt-2 grid grid-cols-3 gap-2">
+                        {[
+                          { label: "Kasse", w: 100, h: 200 },
+                          { label: "CRDBAG Half", w: 100, h: 100 },
+                          { label: "CRDBAG Full", w: 100, h: 150 },
+                        ].map(preset => (
+                          <Button
+                            key={preset.label}
+                            type="button"
+                            variant={boxData.width === preset.w && boxData.height === preset.h ? "default" : "outline"}
+                            className="text-xs"
+                            onClick={() => {
+                              boxForm.setValue("width", preset.w);
+                              boxForm.setValue("height", preset.h);
+                              setBoxData(prev => ({ ...prev, width: preset.w, height: preset.h }));
+                            }}
+                            data-testid={`button-box-preset-${preset.label.toLowerCase().replace(/\s/g, '-')}`}
+                          >
+                            {preset.label}<br />{preset.w}x{preset.h}mm
+                          </Button>
+                        ))}
+                      </div>
+                    </div>
                     <div className="grid grid-cols-2 gap-4">
                       <FormField
                         control={boxForm.control}
