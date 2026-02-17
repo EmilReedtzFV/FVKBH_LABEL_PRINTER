@@ -122,13 +122,13 @@ function EquipmentLabelDesignA({ data, isPreview = false, fontScale = 1, element
               <div className="flex items-center justify-center flex-shrink-0 bg-white p-0.5 rounded" style={{ width: `${qrSize}mm`, height: `${qrSize}mm` }}>
                 <QRCode value={data.id} style={{ height: "100%", width: "100%", maxWidth: "100%", objectFit: "contain" }} viewBox="0 0 256 256" />
               </div>
-              <div className="h-[70%] w-[2px] bg-white rounded-full flex-shrink-0"></div>
+              <div className="w-[2px] bg-white rounded-full flex-shrink-0" style={{ height: `${qrSize}mm` }}></div>
             </>
           )}
           <div className="flex flex-col items-center justify-center min-w-0 w-full text-center" style={{ overflow: 'hidden', gap: isTiny ? '1px' : `${Math.max(1, spacing * 0.15)}px` }}>
             {elementOrder.map((el) => {
               if (el === 'name') return <div key="name" className="font-bold uppercase leading-none" data-label-name style={{ fontSize: nameFs, wordBreak: 'break-word', overflowWrap: 'break-word', lineHeight: 1.1 }}>{data.name}</div>;
-              if (el === 'id' && data.id) return <div key="id" className="font-mono tracking-wider" data-label-id style={{ fontSize: idFs, wordBreak: 'break-all', overflowWrap: 'break-word', lineHeight: 1.1 }}>#{data.id}</div>;
+              if (el === 'id' && data.id) return <div key="id" className="font-mono tracking-wider font-bold" data-label-id style={{ fontSize: idFs, wordBreak: 'break-all', overflowWrap: 'break-word', lineHeight: 1.1, marginBottom: isTiny ? '0px' : '-1px' }}>#{data.id}</div>;
               if (el === 'group' && data.group) return <div key="group"><span className="bg-white text-black font-bold uppercase tracking-wider rounded inline-block" data-label-group style={{ fontSize: groupFs, padding: isTiny ? '0px 2px' : '2px 8px', lineHeight: 1.15 }}>{data.group}</span></div>;
               return null;
             })}
