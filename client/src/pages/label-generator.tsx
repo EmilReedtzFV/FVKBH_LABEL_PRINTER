@@ -121,7 +121,7 @@ function EquipmentLabelDesignA({ data, isPreview = false, fontScale = 1 }: { dat
             </>
           )}
           <div className="flex flex-col justify-center items-center min-w-0 w-full text-center" style={{ overflow: 'visible' }}>
-            <div className="font-bold uppercase leading-none" style={{ fontSize: nameFs, wordBreak: 'break-word', overflowWrap: 'break-word', lineHeight: 1.05 }}>{data.name}</div>
+            <div className="font-bold uppercase leading-none" data-label-name style={{ fontSize: nameFs, wordBreak: 'break-word', overflowWrap: 'break-word', lineHeight: 1.05 }}>{data.name}</div>
             {data.id && (
               <div className="font-mono tracking-wider" style={{ fontSize: idFs, wordBreak: 'break-all', overflowWrap: 'break-word', lineHeight: 1.05, marginTop: isTiny ? '1px' : '2px' }}>#{data.id}</div>
             )}
@@ -210,23 +210,23 @@ function CableLabelContent({ data, isPreview = false, fontScale = 1 }: { data: C
       )}
 
       {/* Main content - horizontal strip */}
-      <div data-label-content className="flex-1 flex items-center justify-between px-2 min-w-0 overflow-hidden">
-        <div className="flex items-center gap-2 min-w-0 overflow-hidden flex-1">
-          <span className="font-bold uppercase truncate whitespace-nowrap" style={{ fontSize }}>
+      <div data-label-content className="flex-1 flex items-center justify-between px-1 min-w-0" style={{ overflow: 'hidden' }}>
+        <div className="flex items-center gap-1 min-w-0 flex-1" style={{ overflow: 'hidden' }}>
+          <span className="font-bold uppercase" style={{ fontSize, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', minWidth: 0, flexShrink: 1 }} data-label-name>
             {data.name}
           </span>
           {data.group && (
             <span
-              className="bg-black text-white px-1 rounded-sm font-bold uppercase truncate whitespace-nowrap flex-shrink-0"
-              style={{ fontSize: groupFontSize }}
+              className="bg-black text-white px-1 rounded-sm font-bold uppercase flex-shrink-0"
+              style={{ fontSize: groupFontSize, whiteSpace: 'nowrap' }}
             >
               {data.group}
             </span>
           )}
         </div>
         {data.id && (
-          <div className="flex items-center gap-2 flex-shrink-0 ml-2">
-            <span className="font-mono font-bold whitespace-nowrap" style={{ fontSize }}>
+          <div className="flex items-center flex-shrink-0 ml-1">
+            <span className="font-mono font-bold" style={{ fontSize, whiteSpace: 'nowrap' }}>
               {data.id}
             </span>
           </div>
@@ -298,8 +298,11 @@ export default function LabelGenerator() {
     if (!labelEl) return false;
     const contentEl = labelEl.querySelector('[data-label-content]') as HTMLElement;
     if (!contentEl) return false;
-    return contentEl.scrollHeight > contentEl.clientHeight + 1 ||
-           contentEl.scrollWidth > contentEl.clientWidth + 1;
+    if (contentEl.scrollHeight > contentEl.clientHeight + 1 ||
+        contentEl.scrollWidth > contentEl.clientWidth + 1) return true;
+    const nameEl = labelEl.querySelector('[data-label-name]') as HTMLElement;
+    if (nameEl && nameEl.scrollWidth > nameEl.clientWidth + 1) return true;
+    return false;
   }, []);
 
   const optimizeLabel = useCallback(() => {
