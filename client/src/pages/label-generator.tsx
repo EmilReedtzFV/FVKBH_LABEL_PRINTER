@@ -548,7 +548,7 @@ export default function LabelGenerator() {
                       <label className="text-sm font-medium leading-none">Label Type</label>
                       <div className="mt-2 grid grid-cols-3 gap-2">
                         {[
-                          { label: "Kasse", w: 100, h: 200 },
+                          { label: "Peli Air 1555", w: 100, h: 200 },
                           { label: "CRDBAG Half", w: 100, h: 100 },
                           { label: "CRDBAG Full", w: 100, h: 150 },
                         ].map(preset => (
