@@ -511,7 +511,7 @@ export default function LabelGenerator() {
                       )}
                     />
                     <div>
-                      <FormLabel>Genstande i kassen</FormLabel>
+                      <label className="text-sm font-medium leading-none">Genstande i kassen</label>
                       <div className="mt-2 space-y-2">
                         <div className="flex gap-2">
                           <Input
