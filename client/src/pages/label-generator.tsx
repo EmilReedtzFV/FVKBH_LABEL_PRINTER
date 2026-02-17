@@ -90,8 +90,8 @@ function EquipmentLabelDesignA({ data, isPreview = false, fontScale = 1 }: { dat
     ? Math.max(8, Math.min(width * 0.22, contentH * 0.45))
     : Math.max(8, Math.min(width, height) * 0.22)) * s;
   const idPx = (isSmall
-    ? Math.max(6, Math.min(width * 0.14, contentH * 0.3))
-    : Math.max(7, Math.min(width, height) * 0.15)) * s;
+    ? Math.max(6, Math.min(width * 0.16, contentH * 0.35))
+    : Math.max(8, Math.min(width, height) * 0.19)) * s;
   const groupPx = (isSmall
     ? Math.max(5, Math.min(width * 0.1, contentH * 0.22))
     : Math.max(6, Math.min(width, height) * 0.12)) * s;
