@@ -617,7 +617,16 @@ export default function LabelGenerator() {
                         <FormItem>
                           <FormLabel>Kit / Kasse Navn</FormLabel>
                           <FormControl>
-                            <Input placeholder="F.eks. Lys Kit 1" {...field} data-testid="input-box-kit" />
+                            <Input
+                              placeholder="F.eks. Lys Kit 1"
+                              {...field}
+                              value={field.value ?? ""}
+                              onChange={e => {
+                                field.onChange(e);
+                                setBoxData(prev => ({ ...prev, kitName: e.target.value }));
+                              }}
+                              data-testid="input-box-kit"
+                            />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
