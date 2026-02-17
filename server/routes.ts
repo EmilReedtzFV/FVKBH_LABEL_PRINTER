@@ -34,10 +34,10 @@ export async function registerRoutes(
         } else if (line.length > 2 && !skipPattern.test(line) && !/^\d+$/.test(line)) {
           let name = line;
           let group = currentGroup;
-          const tabMatch = line.match(/^(.+?)\t+(KIT|SET|GRP|GRUPPE)\s*(.*)$/i);
+          const tabMatch = line.match(/^(.+?)\t+(.+)$/);
           if (tabMatch) {
             name = tabMatch[1].trim();
-            group = `${tabMatch[2]} ${tabMatch[3]}`.trim();
+            group = tabMatch[2].trim();
           }
           items.push({ id: currentId, name, group });
           currentId = "";

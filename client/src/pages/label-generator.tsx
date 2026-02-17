@@ -9,10 +9,10 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { RefreshCw, Printer, Tag, Cable, ArrowRightLeft, Upload, Trash2 } from "lucide-react";
+import { RefreshCw, Printer, Tag, Cable, ArrowRightLeft, Upload, Trash2, Box, Plus } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
-type LabelMode = "equipment" | "cable";
+type LabelMode = "equipment" | "cable" | "box";
 
 interface ParsedItem {
   id: string;
@@ -41,8 +41,19 @@ const cableSchema = z.object({
   preset: z.string().optional(),
 });
 
+const boxSchema = z.object({
+  kitName: z.string().min(1, "Kit navn er påkrævet"),
+  width: z.number().min(50, "Minimum bredde er 50mm").max(200, "Maksimum bredde er 200mm"),
+  height: z.number().min(50, "Minimum højde er 50mm").max(300, "Maksimum højde er 300mm"),
+});
+
 type EquipmentFormValues = z.infer<typeof equipmentSchema>;
 type CableFormValues = z.infer<typeof cableSchema>;
+type BoxFormValues = z.infer<typeof boxSchema>;
+
+interface BoxItem {
+  name: string;
+}
 
 const ASPECT_RATIOS: Record<string, { w: number; h: number; label: string }> = {
   "4:3": { w: 4, h: 3, label: "4:3" },
@@ -200,6 +211,40 @@ function CableLabelContent({ data, isPreview = false }: { data: CableFormValues;
   );
 }
 
+function BoxLabelContent({ data, items, isPreview = false }: { data: BoxFormValues; items: BoxItem[]; isPreview?: boolean }) {
+  const { width, height } = data;
+  const headerH = `${Math.max(height * 0.1, 8)}mm`;
+  const logoH = `${Math.max(14, height * 0.07)}px`;
+  const infoFs = `${Math.max(8, width * 0.045)}px`;
+  const kitFs = `${Math.max(12, Math.min(width, height) * 0.1)}px`;
+  const itemFs = `${Math.max(9, Math.min(width, height) * 0.055)}px`;
+
+  return (
+    <div className="bg-black text-white relative flex flex-col overflow-hidden border-0" style={{ width: `${width}mm`, height: `${height}mm`, boxSizing: "border-box", pageBreakInside: "avoid", border: isPreview ? '1px solid #e5e7eb' : 'none' }}>
+      <div className="bg-white text-black flex items-center justify-center px-2 w-full flex-shrink-0 gap-2" style={{ height: headerH }}>
+        <img src="/logo.png" alt="Logo" className="object-contain flex-shrink-0" style={{ height: logoH }} />
+        <span className="font-bold uppercase whitespace-nowrap flex-shrink-0" style={{ fontSize: infoFs }}>Filmværksted København</span>
+        <span className="font-bold tracking-wider whitespace-nowrap flex-shrink-0" style={{ fontSize: infoFs }}>+45 71 99 33 66</span>
+      </div>
+      <div className="flex-1 flex flex-col min-h-0 p-3 overflow-hidden">
+        <div className="text-center mb-2 pb-2 border-b border-white/30">
+          <div className="font-bold uppercase tracking-wider" style={{ fontSize: kitFs }}>{data.kitName}</div>
+        </div>
+        <div className="flex-1 overflow-hidden">
+          <div className="grid gap-1" style={{ gridTemplateColumns: items.length > 8 ? 'repeat(2, 1fr)' : '1fr' }}>
+            {items.map((item, idx) => (
+              <div key={idx} className="flex items-center gap-2 px-2 py-0.5 bg-white/10 rounded" style={{ fontSize: itemFs }}>
+                <span className="text-gray-400 font-mono" style={{ fontSize: `calc(${itemFs} * 0.8)` }}>{idx + 1}.</span>
+                <span className="font-medium truncate">{item.name}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 async function parsePdfFile(file: File): Promise<ParsedItem[]> {
   const formData = new FormData();
   formData.append("pdf", file);
@@ -234,6 +279,14 @@ export default function LabelGenerator() {
     preset: "medium",
   });
 
+  const [boxData, setBoxData] = useState<BoxFormValues>({
+    kitName: "Lys Kit 1",
+    width: 200,
+    height: 100,
+  });
+  const [boxItems, setBoxItems] = useState<BoxItem[]>([{ name: "Eksempel genstand" }]);
+  const [newBoxItemName, setNewBoxItemName] = useState("");
+
   const equipmentForm = useForm<EquipmentFormValues>({
     resolver: zodResolver(equipmentSchema),
     defaultValues: labelData,
@@ -242,6 +295,11 @@ export default function LabelGenerator() {
   const cableForm = useForm<CableFormValues>({
     resolver: zodResolver(cableSchema),
     defaultValues: cableData,
+  });
+
+  const boxForm = useForm<BoxFormValues>({
+    resolver: zodResolver(boxSchema),
+    defaultValues: boxData,
   });
 
   const watchEquipmentPreset = equipmentForm.watch("preset");
@@ -278,6 +336,18 @@ export default function LabelGenerator() {
     toast({ title: "Kabel label opdateret", description: "Visningen er blevet opdateret." });
   };
 
+  const onBoxSubmit = (data: BoxFormValues) => {
+    setBoxData(data);
+    toast({ title: "Kasse label opdateret", description: "Visningen er blevet opdateret." });
+  };
+
+  const addBoxItem = () => {
+    if (newBoxItemName.trim()) {
+      setBoxItems(prev => [...prev, { name: newBoxItemName.trim() }]);
+      setNewBoxItemName("");
+    }
+  };
+
   const generateRandomId = () => {
     const prefix = mode === "cable" ? "CBL" : "EQ";
     const randomId = `${prefix}-${Math.floor(1000 + Math.random() * 9000)}`;
@@ -303,8 +373,18 @@ export default function LabelGenerator() {
         toast({ title: "Ingen data fundet", description: "PDF'en indeholdt ingen genkendelige labels.", variant: "destructive" });
         return;
       }
-      setBatchItems(items);
-      toast({ title: `${items.length} labels indlæst`, description: "Labels fra PDF er klar til forhåndsvisning og print." });
+      if (mode === "box") {
+        setBoxItems(items.map(i => ({ name: i.name })));
+        if (items[0]?.group) {
+          const kitName = items[0].group;
+          boxForm.setValue("kitName", kitName);
+          setBoxData(prev => ({ ...prev, kitName }));
+        }
+        toast({ title: `${items.length} genstande indlæst`, description: "Genstande fra PDF er klar til kasse-labelen." });
+      } else {
+        setBatchItems(items);
+        toast({ title: `${items.length} labels indlæst`, description: "Labels fra PDF er klar til forhåndsvisning og print." });
+      }
     } catch (err) {
       console.error("PDF upload error:", err);
       toast({ title: "Fejl ved indlæsning", description: "Kunne ikke læse PDF-filen. Prøv en anden fil.", variant: "destructive" });
@@ -319,7 +399,7 @@ export default function LabelGenerator() {
           <div>
             <h1 className="text-4xl font-bold tracking-tight text-foreground" data-testid="text-title">Label Generator</h1>
             <p className="text-muted-foreground mt-2">
-              Generer labels til udstyr og kabler med QR-koder. Klar til Zebra ZD621t.
+              Generer labels til udstyr, kabler og kasser. Klar til Zebra ZD621t.
             </p>
           </div>
           <div className="flex gap-2">
@@ -354,6 +434,15 @@ export default function LabelGenerator() {
           >
             <Cable className="h-4 w-4" />
             Kabel Label
+          </Button>
+          <Button
+            variant={mode === "box" ? "default" : "outline"}
+            onClick={() => setMode("box")}
+            className="gap-2"
+            data-testid="button-mode-box"
+          >
+            <Box className="h-4 w-4" />
+            Kasse Label
           </Button>
         </div>
 
@@ -390,15 +479,98 @@ export default function LabelGenerator() {
           {/* Controls */}
           <Card>
             <CardHeader>
-              <CardTitle>{mode === "equipment" ? "Udstyr Konfiguration" : "Kabel Konfiguration"}</CardTitle>
+              <CardTitle>{mode === "equipment" ? "Udstyr Konfiguration" : mode === "cable" ? "Kabel Konfiguration" : "Kasse Konfiguration"}</CardTitle>
               <CardDescription>
                 {mode === "equipment"
                   ? "Indtast oplysninger til udstyr-labelen."
-                  : "Indtast oplysninger til kabel-labelen. Denne vikles rundt om kablet."}
+                  : mode === "cable"
+                  ? "Indtast oplysninger til kabel-labelen. Denne vikles rundt om kablet."
+                  : "Indtast kit-navn og tilføj genstande til kasse-labelen."}
               </CardDescription>
             </CardHeader>
             <CardContent>
-              {mode === "equipment" ? (
+              {mode === "box" ? (
+                <Form {...boxForm}>
+                  <form onSubmit={boxForm.handleSubmit(onBoxSubmit)} className="space-y-6">
+                    <FormField
+                      control={boxForm.control}
+                      name="kitName"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Kit / Kasse Navn</FormLabel>
+                          <FormControl>
+                            <Input placeholder="F.eks. Lys Kit 1" {...field} data-testid="input-box-kit" />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <div>
+                      <FormLabel>Genstande i kassen</FormLabel>
+                      <div className="mt-2 space-y-2">
+                        <div className="flex gap-2">
+                          <Input
+                            placeholder="Tilføj genstand..."
+                            value={newBoxItemName}
+                            onChange={e => setNewBoxItemName(e.target.value)}
+                            onKeyDown={e => { if (e.key === "Enter") { e.preventDefault(); addBoxItem(); } }}
+                            data-testid="input-box-new-item"
+                          />
+                          <Button type="button" variant="outline" onClick={addBoxItem} data-testid="button-add-box-item">
+                            <Plus className="h-4 w-4" />
+                          </Button>
+                        </div>
+                        <div className="grid gap-1 max-h-48 overflow-y-auto">
+                          {boxItems.map((item, idx) => (
+                            <div key={idx} className="flex items-center gap-2 p-2 bg-muted/50 rounded text-sm" data-testid={`box-item-${idx}`}>
+                              <span className="text-muted-foreground font-mono text-xs">{idx + 1}.</span>
+                              <span className="flex-1 font-medium">{item.name}</span>
+                              <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => setBoxItems(prev => prev.filter((_, i) => i !== idx))} data-testid={`button-remove-box-item-${idx}`}>
+                                <Trash2 className="h-3 w-3" />
+                              </Button>
+                            </div>
+                          ))}
+                        </div>
+                        {boxItems.length > 0 && (
+                          <Button type="button" variant="destructive" size="sm" className="gap-2" onClick={() => setBoxItems([])} data-testid="button-clear-box-items">
+                            <Trash2 className="h-3 w-3" />
+                            Ryd alle genstande
+                          </Button>
+                        )}
+                      </div>
+                    </div>
+                    <div className="grid grid-cols-2 gap-4">
+                      <FormField
+                        control={boxForm.control}
+                        name="width"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Bredde (mm)</FormLabel>
+                            <FormControl>
+                              <Input type="number" {...field} onChange={e => field.onChange(Number(e.target.value))} data-testid="input-box-width" />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      <FormField
+                        control={boxForm.control}
+                        name="height"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Højde (mm)</FormLabel>
+                            <FormControl>
+                              <Input type="number" {...field} onChange={e => field.onChange(Number(e.target.value))} data-testid="input-box-height" />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    </div>
+                    <Button type="submit" className="w-full" data-testid="button-update-box">Opdater Visning</Button>
+                  </form>
+                </Form>
+              ) : mode === "equipment" ? (
                 <Form {...equipmentForm}>
                   <form onSubmit={equipmentForm.handleSubmit(onEquipmentSubmit)} className="space-y-6">
                     <FormField
@@ -708,11 +880,15 @@ export default function LabelGenerator() {
               <CardDescription>
                 {mode === "equipment"
                   ? "Dette er hvordan labelen ser ud. Brug print-knappen for at udskrive."
-                  : "Kabel-labelen vikles rundt om kablet. Brug print-knappen for at udskrive."}
+                  : mode === "cable"
+                  ? "Kabel-labelen vikles rundt om kablet. Brug print-knappen for at udskrive."
+                  : "Kasse-labelen viser alle genstande i kassen. Brug print-knappen for at udskrive."}
               </CardDescription>
             </CardHeader>
             <CardContent className="flex-1 flex flex-col items-center justify-center bg-muted/20 p-8 rounded-lg border-dashed border-2 m-6 overflow-auto gap-4">
-              {batchItems.length > 0 ? (
+              {mode === "box" ? (
+                <BoxLabelContent data={boxData} items={boxItems} isPreview={true} />
+              ) : batchItems.length > 0 ? (
                 batchItems.map((item, idx) => (
                   mode === "equipment" ? (
                     <EquipmentLabelContent
@@ -751,7 +927,9 @@ export default function LabelGenerator() {
             }
           `}
         </style>
-        {batchItems.length > 0 ? (
+        {mode === "box" ? (
+          <BoxLabelContent data={boxData} items={boxItems} />
+        ) : batchItems.length > 0 ? (
           batchItems.map((item, idx) => (
             mode === "equipment" ? (
               <EquipmentLabelContent
