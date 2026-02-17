@@ -220,10 +220,9 @@ function CableLabelContent({ data, isPreview = false }: { data: CableFormValues;
 function BoxLabelContent({ data, items, isPreview = false }: { data: BoxFormValues; items: BoxItem[]; isPreview?: boolean }) {
   const { width, height } = data;
   const itemCount = Math.max(items.length, 1);
-  const logoSection = height * 0.08;
+  const logoSection = height * 0.12;
   const kitSection = height * 0.12;
-  const phoneSection = height * 0.05;
-  const remainingH = height - logoSection - kitSection - phoneSection - 6;
+  const remainingH = height - logoSection - kitSection - 6;
   const itemRowH = Math.min(remainingH / itemCount, 10);
   const itemFs = `${Math.max(9, Math.min(itemRowH * 0.6, width * 0.1))}px`;
   const kitFs = `${Math.max(16, width * 0.25)}px`;
@@ -232,8 +231,9 @@ function BoxLabelContent({ data, items, isPreview = false }: { data: BoxFormValu
 
   return (
     <div className="bg-black text-white relative flex flex-col overflow-hidden border-0" style={{ width: `${width}mm`, height: `${height}mm`, boxSizing: "border-box", pageBreakInside: "avoid", border: isPreview ? '1px solid #e5e7eb' : 'none' }}>
-      <div className="flex items-center justify-center flex-shrink-0" style={{ height: `${logoSection}mm`, padding: '1.5mm 2mm' }}>
-        <img src="/logo-black.png" alt="Filmværksted København" className="object-contain" style={{ maxWidth: logoW, maxHeight: '100%', filter: 'invert(1)' }} />
+      <div className="flex flex-col items-center justify-center flex-shrink-0" style={{ height: `${logoSection}mm`, padding: '1.5mm 2mm' }}>
+        <img src="/logo-black.png" alt="Filmværksted København" className="object-contain" style={{ maxWidth: logoW, maxHeight: '70%', filter: 'invert(1)' }} />
+        <span className="font-bold tracking-wider" style={{ fontSize: phoneFs }}>+45 71 99 33 66</span>
       </div>
       <div className="bg-white text-black text-center flex-shrink-0 px-3" style={{ height: `${kitSection}mm`, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
         <div className="font-bold uppercase tracking-wider leading-tight" style={{ fontSize: kitFs }}>{data.kitName}</div>
@@ -247,9 +247,6 @@ function BoxLabelContent({ data, items, isPreview = false }: { data: BoxFormValu
             </div>
           ))}
         </div>
-      </div>
-      <div className="flex-shrink-0 text-center" style={{ height: `${phoneSection}mm`, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-        <span className="font-bold tracking-wider" style={{ fontSize: phoneFs }}>+45 71 99 33 66</span>
       </div>
     </div>
   );
