@@ -239,37 +239,35 @@ function CableLabelContent({ data, isPreview = false, fontScale = 1 }: { data: C
   );
 }
 
-function calcBoxAutoHeight(width: number, itemCount: number): number {
-  const logoSection = 14;
-  const kitSection = 14;
-  const padding = 6;
-  const itemRowH = Math.max(5, Math.min(8, width * 0.07));
-  return Math.max(50, Math.ceil(logoSection + kitSection + padding + itemCount * itemRowH));
+const BOX_LOGO_H = 14;
+const BOX_KIT_H = 14;
+const BOX_PADDING = 8;
+const BOX_ITEM_ROW_H = 7;
+
+function calcBoxAutoHeight(_width: number, itemCount: number): number {
+  return Math.max(50, Math.ceil(BOX_LOGO_H + BOX_KIT_H + BOX_PADDING + itemCount * BOX_ITEM_ROW_H));
 }
 
 function BoxLabelContent({ data, items, isPreview = false }: { data: BoxFormValues; items: BoxItem[]; isPreview?: boolean }) {
   const { width } = data;
   const itemCount = Math.max(items.length, 1);
   const height = data.autoHeight ? calcBoxAutoHeight(width, itemCount) : data.height;
-  const logoSection = Math.max(12, height * 0.07);
-  const kitSection = Math.max(12, height * 0.07);
-  const remainingH = height - logoSection - kitSection - 6;
-  const itemRowH = Math.min(remainingH / itemCount, 10);
-  const itemFs = `${Math.max(9, Math.min(itemRowH * 0.6, width * 0.1))}px`;
+  const itemRowH = data.autoHeight ? BOX_ITEM_ROW_H : Math.min((height - BOX_LOGO_H - BOX_KIT_H - BOX_PADDING) / itemCount, 10);
+  const itemFs = `${Math.max(9, Math.min(itemRowH * 0.85, width * 0.1))}px`;
   const kitFs = `${Math.max(16, width * 0.25)}px`;
   const phoneFs = `${Math.max(8, width * 0.09)}px`;
   const logoW = `${width * 0.55}mm`;
 
   return (
-    <div className="bg-black text-white relative flex flex-col overflow-hidden border-0" style={{ width: `${width}mm`, height: `${height}mm`, boxSizing: "border-box", pageBreakInside: "avoid", border: isPreview ? '1px solid #e5e7eb' : 'none' }}>
-      <div className="flex items-center justify-center gap-2 flex-shrink-0" style={{ height: `${logoSection}mm`, padding: '1.5mm 2mm' }}>
+    <div className="bg-black text-white relative flex flex-col border-0" style={{ width: `${width}mm`, height: `${height}mm`, boxSizing: "border-box", pageBreakInside: "avoid", border: isPreview ? '1px solid #e5e7eb' : 'none', overflow: data.autoHeight ? 'visible' : 'hidden' }}>
+      <div className="flex items-center justify-center gap-2 flex-shrink-0" style={{ height: `${BOX_LOGO_H}mm`, padding: '1.5mm 2mm' }}>
         <img src="/logo-black.png" alt="Filmværksted København" className="object-contain" style={{ maxWidth: logoW, maxHeight: '90%', filter: 'invert(1)' }} />
         <span className="font-bold tracking-wider whitespace-nowrap" style={{ fontSize: phoneFs }}>+45 71 99 33 66</span>
       </div>
-      <div className="bg-white text-black text-center flex-shrink-0 px-3" style={{ height: `${kitSection}mm`, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+      <div className="bg-white text-black text-center flex-shrink-0 px-3" style={{ height: `${BOX_KIT_H}mm`, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
         <div className="font-bold uppercase tracking-wider leading-tight" style={{ fontSize: kitFs }}>{data.kitName}</div>
       </div>
-      <div className="flex-1 flex flex-col min-h-0 p-2 overflow-hidden">
+      <div className="flex-1 flex flex-col min-h-0 p-2">
         <div className="grid gap-0.5" style={{ gridTemplateColumns: '1fr' }}>
           {items.map((item, idx) => (
             <div key={idx} className="flex items-center px-2 rounded" style={{ fontSize: itemFs, height: `${itemRowH}mm`, borderBottom: '1px solid white' }}>
