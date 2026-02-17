@@ -11,9 +11,6 @@ import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { RefreshCw, Printer, Tag, Cable, ArrowRightLeft, Upload, Trash2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import * as pdfjsLib from "pdfjs-dist";
-
-pdfjsLib.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjsLib.version}/pdf.worker.min.mjs`;
 
 type LabelMode = "equipment" | "cable";
 
@@ -197,39 +194,12 @@ function CableLabelContent({ data, isPreview = false }: { data: CableFormValues;
 }
 
 async function parsePdfFile(file: File): Promise<ParsedItem[]> {
-  const arrayBuffer = await file.arrayBuffer();
-  const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
-  const items: ParsedItem[] = [];
-
-  for (let i = 1; i <= pdf.numPages; i++) {
-    const page = await pdf.getPage(i);
-    const textContent = await page.getTextContent();
-    const lines = textContent.items
-      .filter((item: any) => item.str && item.str.trim() !== "")
-      .map((item: any) => item.str.trim());
-
-    let currentId = "";
-    let currentGroup = "";
-
-    for (let j = 0; j < lines.length; j++) {
-      const line = lines[j];
-
-      if (/^\d{3,}$/.test(line) || /^[A-Z]{2,}-\d+$/i.test(line)) {
-        currentId = line;
-      } else if (/^(KIT|SET|GRP|GRUPPE)\s/i.test(line)) {
-        currentGroup = line;
-      } else if (currentId && line.length > 2 && !/^\d+$/.test(line)) {
-        items.push({
-          id: currentId,
-          name: line,
-          group: currentGroup,
-        });
-        currentId = "";
-      }
-    }
-  }
-
-  return items;
+  const formData = new FormData();
+  formData.append("pdf", file);
+  const response = await fetch("/api/parse-pdf", { method: "POST", body: formData });
+  if (!response.ok) throw new Error("Server fejl");
+  const data = await response.json();
+  return data.items;
 }
 
 export default function LabelGenerator() {
@@ -318,15 +288,18 @@ export default function LabelGenerator() {
   const handlePdfUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
+    console.log("PDF file selected:", file.name, file.size, file.type);
     try {
       const items = await parsePdfFile(file);
+      console.log("Parsed items:", items);
       if (items.length === 0) {
         toast({ title: "Ingen data fundet", description: "PDF'en indeholdt ingen genkendelige labels.", variant: "destructive" });
         return;
       }
       setBatchItems(items);
       toast({ title: `${items.length} labels indlæst`, description: "Labels fra PDF er klar til forhåndsvisning og print." });
-    } catch {
+    } catch (err) {
+      console.error("PDF upload error:", err);
       toast({ title: "Fejl ved indlæsning", description: "Kunne ikke læse PDF-filen. Prøv en anden fil.", variant: "destructive" });
     }
     if (fileInputRef.current) fileInputRef.current.value = "";
