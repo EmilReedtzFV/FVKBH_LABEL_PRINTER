@@ -9,7 +9,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { RefreshCw, Printer, Tag, Cable, ArrowRightLeft, Upload, Trash2, Box, Plus } from "lucide-react";
+import { RefreshCw, Printer, Tag, Cable, ArrowRightLeft, Upload, Trash2, Box, Plus, Wand2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
 type LabelMode = "equipment" | "cable" | "box";
@@ -103,13 +103,13 @@ function EquipmentLabelDesignA({ data, isPreview = false }: { data: EquipmentFor
   const pad = isTiny ? '0.5mm 1mm' : '0.5rem';
 
   return (
-    <div className="bg-black text-white relative flex flex-col border-0" style={{ width: `${width}mm`, height: `${height}mm`, boxSizing: "border-box", pageBreakInside: "avoid", border: isPreview ? '1px solid #e5e7eb' : 'none', overflow: 'hidden' }}>
+    <div data-label-root className="bg-black text-white relative flex flex-col border-0" style={{ width: `${width}mm`, height: `${height}mm`, boxSizing: "border-box", pageBreakInside: "avoid", border: isPreview ? '1px solid #e5e7eb' : 'none', overflow: 'hidden' }}>
       <div className="bg-white text-black flex items-center justify-center px-0.5 w-full flex-shrink-0 gap-0.5" style={{ height: barH, minHeight: 0 }}>
         <img src="/logo.png" alt="Logo" className="object-contain flex-shrink-0" style={{ height: logoH, maxHeight: '90%' }} />
         <span className="font-bold uppercase flex-shrink truncate" style={{ fontSize: infoFs, lineHeight: 1.1 }}>Filmværksted København</span>
         <span className="font-bold tracking-wider flex-shrink-0" style={{ fontSize: infoFs, lineHeight: 1.1 }}>+45 71 99 33 66</span>
       </div>
-      <div className="flex-1 flex items-center justify-center min-h-0" style={{ padding: pad }}>
+      <div data-label-content className="flex-1 flex items-center justify-center min-h-0" style={{ padding: pad }}>
         <div className="flex flex-row items-center h-full max-w-full" style={{ gap: isTiny ? '2px' : '0.75rem' }}>
           {showQr && (
             <>
@@ -153,6 +153,7 @@ function CableLabelContent({ data, isPreview = false }: { data: CableFormValues;
 
   return (
     <div
+      data-label-root
       className="bg-white text-black relative flex overflow-hidden"
       style={{
         width: `${width}mm`,
@@ -206,7 +207,7 @@ function CableLabelContent({ data, isPreview = false }: { data: CableFormValues;
       )}
 
       {/* Main content - horizontal strip */}
-      <div className="flex-1 flex items-center justify-between px-2 min-w-0 overflow-hidden">
+      <div data-label-content className="flex-1 flex items-center justify-between px-2 min-w-0 overflow-hidden">
         <div className="flex items-center gap-2 min-w-0 overflow-hidden flex-1">
           <span className="font-bold uppercase truncate whitespace-nowrap" style={{ fontSize }}>
             {data.name}
@@ -281,6 +282,62 @@ export default function LabelGenerator() {
   const [mode, setMode] = useState<LabelMode>("equipment");
   const [batchItems, setBatchItems] = useState<ParsedItem[]>([]);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const previewLabelRef = useRef<HTMLDivElement>(null);
+
+  const optimizeLabel = () => {
+    const el = previewLabelRef.current;
+    if (!el) return;
+
+    const labelEl = el.querySelector('[data-label-root]') as HTMLElement;
+    if (!labelEl) return;
+
+    const contentEl = labelEl.querySelector('[data-label-content]') as HTMLElement;
+    if (!contentEl) return;
+
+    const isOverflowing = contentEl.scrollHeight > contentEl.clientHeight + 1 ||
+                          contentEl.scrollWidth > contentEl.clientWidth + 1;
+
+    if (mode === "equipment") {
+      let w = equipmentForm.getValues("width");
+      let h = equipmentForm.getValues("height");
+
+      if (isOverflowing) {
+        const ratio = w / h;
+        for (let i = 0; i < 20; i++) {
+          h = Math.min(300, h + 2);
+          w = Math.min(100, Math.round(h * ratio));
+          if (w > 100) { w = 100; h = Math.round(w / ratio); }
+        }
+      } else {
+        if (h < 20) {
+          const ratio = w / h;
+          h = Math.min(20, h + 5);
+          w = Math.min(100, Math.round(h * ratio));
+          if (w > 100) { w = 100; }
+        }
+      }
+
+      equipmentForm.setValue("width", w);
+      equipmentForm.setValue("height", h);
+      equipmentForm.setValue("preset", "custom");
+      setLabelData(prev => ({ ...prev, width: w, height: h, preset: "custom" }));
+      toast({ title: "Label optimeret", description: `Justeret til ${w}×${h}mm for bedste læsbarhed.` });
+    } else if (mode === "cable") {
+      let w = cableForm.getValues("width");
+      let h = cableForm.getValues("height");
+
+      if (isOverflowing || h < 10) {
+        h = Math.min(300, Math.max(10, h + 3));
+        w = Math.min(100, Math.max(40, w + 5));
+      }
+
+      cableForm.setValue("width", w);
+      cableForm.setValue("height", h);
+      cableForm.setValue("preset", "custom");
+      setCableData(prev => ({ ...prev, width: w, height: h, preset: "custom" }));
+      toast({ title: "Label optimeret", description: `Justeret til ${w}×${h}mm for bedste læsbarhed.` });
+    }
+  };
 
   const [labelData, setLabelData] = useState<EquipmentFormValues>({
     name: "Kamera 1",
@@ -934,29 +991,44 @@ export default function LabelGenerator() {
               </CardDescription>
             </CardHeader>
             <CardContent className="flex-1 flex flex-col items-center justify-center bg-muted/20 p-8 rounded-lg border-dashed border-2 m-6 overflow-auto gap-4">
-              {mode === "box" ? (
-                <BoxLabelContent data={boxData} items={boxItems} isPreview={true} />
-              ) : batchItems.length > 0 ? (
-                batchItems.map((item, idx) => (
-                  mode === "equipment" ? (
-                    <EquipmentLabelContent
-                      key={idx}
-                      data={{ ...labelData, name: item.name, id: item.id, group: item.group }}
-                      isPreview={true}
-                    />
-                  ) : (
-                    <CableLabelContent
-                      key={idx}
-                      data={{ ...cableData, name: item.name, id: item.id, group: item.group }}
-                      isPreview={true}
-                    />
-                  )
-                ))
-              ) : mode === "equipment" ? (
-                <EquipmentLabelContent data={labelData} isPreview={true} />
-              ) : (
-                <CableLabelContent data={cableData} isPreview={true} />
+              {mode !== "box" && (
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  className="gap-2 self-end"
+                  onClick={optimizeLabel}
+                  data-testid="button-optimize-label"
+                >
+                  <Wand2 className="h-4 w-4" />
+                  Optimer Tekst
+                </Button>
               )}
+              <div ref={previewLabelRef}>
+                {mode === "box" ? (
+                  <BoxLabelContent data={boxData} items={boxItems} isPreview={true} />
+                ) : batchItems.length > 0 ? (
+                  batchItems.map((item, idx) => (
+                    mode === "equipment" ? (
+                      <EquipmentLabelContent
+                        key={idx}
+                        data={{ ...labelData, name: item.name, id: item.id, group: item.group }}
+                        isPreview={true}
+                      />
+                    ) : (
+                      <CableLabelContent
+                        key={idx}
+                        data={{ ...cableData, name: item.name, id: item.id, group: item.group }}
+                        isPreview={true}
+                      />
+                    )
+                  ))
+                ) : mode === "equipment" ? (
+                  <EquipmentLabelContent data={labelData} isPreview={true} />
+                ) : (
+                  <CableLabelContent data={cableData} isPreview={true} />
+                )}
+              </div>
             </CardContent>
           </Card>
         </div>
