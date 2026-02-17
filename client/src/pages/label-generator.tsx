@@ -115,8 +115,8 @@ function EquipmentLabelDesignA({ data, isPreview = false, fontScale = 1, element
         <span className="font-bold uppercase flex-shrink truncate" style={{ fontSize: infoFs, lineHeight: 1.1 }}>Filmværksted København</span>
         <span className="font-bold tracking-wider flex-shrink-0" style={{ fontSize: infoFs, lineHeight: 1.1 }}>+45 71 99 33 66</span>
       </div>
-      <div data-label-content className="flex-1 flex items-center justify-center min-h-0" style={{ padding: pad, paddingTop: isTiny ? '1.5mm' : undefined }}>
-        <div className="flex flex-row items-center h-full max-w-full" style={{ gap: contentGap }}>
+      <div data-label-content className="flex-1 flex items-stretch min-h-0" style={{ padding: pad, paddingTop: isTiny ? '1.5mm' : undefined }}>
+        <div className="flex flex-row items-center h-full w-full" style={{ gap: contentGap }}>
           {showQr && (
             <>
               <div className="flex items-center justify-center flex-shrink-0 bg-white rounded" style={{ width: `${qrSize}mm`, height: `${qrSize}mm`, padding: `${qrSize * 0.06}mm`, border: `${Math.max(0.3, qrSize * 0.03)}mm solid white` }}>
@@ -125,7 +125,7 @@ function EquipmentLabelDesignA({ data, isPreview = false, fontScale = 1, element
               <div className="w-[2.5px] bg-white flex-shrink-0" style={{ height: `${qrSize}mm` }}></div>
             </>
           )}
-          <div className="flex flex-col justify-center min-w-0 w-full text-left" style={{ overflow: 'hidden', gap: isTiny ? '1px' : `${Math.max(1, spacing * 0.15)}px` }}>
+          <div className="flex flex-col justify-center min-w-0 flex-1 text-left" style={{ overflow: 'hidden', gap: isTiny ? '1px' : `${Math.max(1, spacing * 0.15)}px` }}>
             {elementOrder.map((el) => {
               if (el === 'name') return <div key="name" className="font-bold uppercase leading-tight" data-label-name style={{ fontSize: nameFs, wordBreak: 'break-word', overflowWrap: 'break-word', lineHeight: 1.15 }}>{data.name}</div>;
               if (el === 'id' && data.id) return <div key="id" className="font-mono tracking-wider font-bold" data-label-id style={{ fontSize: idFs, wordBreak: 'break-all', overflowWrap: 'break-word', lineHeight: 1.1 }}>#{data.id}</div>;
