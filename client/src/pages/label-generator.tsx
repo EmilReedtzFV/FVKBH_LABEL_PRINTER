@@ -610,28 +610,19 @@ export default function LabelGenerator() {
               {mode === "box" ? (
                 <Form {...boxForm}>
                   <form onSubmit={boxForm.handleSubmit(onBoxSubmit)} className="space-y-6">
-                    <FormField
-                      control={boxForm.control}
-                      name="kitName"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Kit / Kasse Navn</FormLabel>
-                          <FormControl>
-                            <Input
-                              placeholder="F.eks. Lys Kit 1"
-                              {...field}
-                              value={field.value ?? ""}
-                              onChange={e => {
-                                field.onChange(e);
-                                setBoxData(prev => ({ ...prev, kitName: e.target.value }));
-                              }}
-                              data-testid="input-box-kit"
-                            />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
+                    <div className="space-y-2">
+                      <label className="text-sm font-medium leading-none">Kit / Kasse Navn</label>
+                      <Input
+                        placeholder="F.eks. Lys Kit 1"
+                        value={boxData.kitName}
+                        onChange={e => {
+                          const val = e.target.value;
+                          setBoxData(prev => ({ ...prev, kitName: val }));
+                          boxForm.setValue("kitName", val);
+                        }}
+                        data-testid="input-box-kit"
+                      />
+                    </div>
                     <div>
                       <label className="text-sm font-medium leading-none">Genstande i kassen</label>
                       <div className="mt-2 space-y-2">
