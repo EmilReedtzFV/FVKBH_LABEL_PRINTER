@@ -218,29 +218,29 @@ function CableLabelContent({ data, isPreview = false }: { data: CableFormValues;
 
 function BoxLabelContent({ data, items, isPreview = false }: { data: BoxFormValues; items: BoxItem[]; isPreview?: boolean }) {
   const { width, height } = data;
-  const headerH = `${Math.max(height * 0.1, 8)}mm`;
-  const logoH = `${Math.max(14, height * 0.07)}px`;
-  const infoFs = `${Math.max(8, width * 0.045)}px`;
-  const kitFs = `${Math.max(12, Math.min(width, height) * 0.1)}px`;
-  const itemFs = `${Math.max(9, Math.min(width, height) * 0.055)}px`;
+  const infoFs = `${Math.max(7, width * 0.09)}px`;
+  const barH = `${Math.max(height * 0.08, 5)}mm`;
+  const logoH = `${Math.max(10, height * 0.05)}px`;
+  const kitFs = `${Math.max(16, width * 0.22)}px`;
+  const itemFs = `${Math.max(8, width * 0.07)}px`;
 
   return (
     <div className="bg-black text-white relative flex flex-col overflow-hidden border-0" style={{ width: `${width}mm`, height: `${height}mm`, boxSizing: "border-box", pageBreakInside: "avoid", border: isPreview ? '1px solid #e5e7eb' : 'none' }}>
-      <div className="bg-white text-black flex items-center justify-center px-2 w-full flex-shrink-0 gap-2" style={{ height: headerH }}>
+      <div className="bg-white text-black flex items-center justify-center px-1 w-full flex-shrink-0 gap-1" style={{ height: barH }}>
         <img src="/logo.png" alt="Logo" className="object-contain flex-shrink-0" style={{ height: logoH }} />
         <span className="font-bold uppercase whitespace-nowrap flex-shrink-0" style={{ fontSize: infoFs }}>Filmværksted København</span>
         <span className="font-bold tracking-wider whitespace-nowrap flex-shrink-0" style={{ fontSize: infoFs }}>+45 71 99 33 66</span>
       </div>
-      <div className="flex-1 flex flex-col min-h-0 p-3 overflow-hidden">
-        <div className="text-center mb-2 pb-2 border-b border-white/30">
-          <div className="font-bold uppercase tracking-wider" style={{ fontSize: kitFs }}>{data.kitName}</div>
+      <div className="flex flex-col min-h-0 p-3 overflow-hidden">
+        <div className="text-center mb-3 pb-2 border-b-2 border-white/40">
+          <div className="font-bold uppercase tracking-wider leading-tight" style={{ fontSize: kitFs }}>{data.kitName}</div>
         </div>
         <div className="flex-1 overflow-hidden">
-          <div className="grid gap-1" style={{ gridTemplateColumns: items.length > 8 ? 'repeat(2, 1fr)' : '1fr' }}>
+          <div className="grid gap-1" style={{ gridTemplateColumns: '1fr' }}>
             {items.map((item, idx) => (
               <div key={idx} className="flex items-center gap-2 px-2 py-0.5 bg-white/10 rounded" style={{ fontSize: itemFs }}>
                 <span className="text-gray-400 font-mono" style={{ fontSize: `calc(${itemFs} * 0.8)` }}>{idx + 1}.</span>
-                <span className="font-medium truncate">{item.name}</span>
+                <span className="font-medium">{item.name}</span>
               </div>
             ))}
           </div>
@@ -286,8 +286,8 @@ export default function LabelGenerator() {
 
   const [boxData, setBoxData] = useState<BoxFormValues>({
     kitName: "Lys Kit 1",
-    width: 200,
-    height: 100,
+    width: 100,
+    height: 200,
   });
   const [boxItems, setBoxItems] = useState<BoxItem[]>([{ name: "Eksempel genstand" }]);
   const [newBoxItemName, setNewBoxItemName] = useState("");
