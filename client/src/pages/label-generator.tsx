@@ -1046,7 +1046,7 @@ export default function LabelGenerator() {
         <style type="text/css" media="print">
           {`
             @page {
-              size: auto;
+              size: 100mm auto;
               margin: 0mm;
             }
             body {
@@ -1058,27 +1058,36 @@ export default function LabelGenerator() {
           Array.from({ length: boxCopies }).map((_, i) => (
             <BoxLabelContent key={i} data={boxData} items={boxItems} />
           ))
-        ) : batchItems.length > 0 ? (
-          batchItems.map((item, idx) => (
-            mode === "equipment" ? (
-              <EquipmentLabelContent
-                key={idx}
-                data={{ ...labelData, name: item.name, id: item.id, group: item.group }}
-                fontScale={fontScale}
-              />
-            ) : (
-              <CableLabelContent
-                key={idx}
-                data={{ ...cableData, name: item.name, id: item.id, group: item.group }}
-                fontScale={fontScale}
-              />
-            )
-          ))
-        ) : mode === "equipment" ? (
-          <EquipmentLabelContent data={labelData} fontScale={fontScale} />
-        ) : (
-          <CableLabelContent data={cableData} fontScale={fontScale} />
-        )}
+        ) : (() => {
+          const printWidth = mode === "equipment" ? labelData.width : cableData.width;
+          const cols = Math.max(1, Math.floor(100 / printWidth));
+          const items = batchItems.length > 0
+            ? batchItems.map(item => ({ name: item.name, id: item.id, group: item.group }))
+            : [{ name: mode === "equipment" ? labelData.name : cableData.name, id: mode === "equipment" ? labelData.id : cableData.id, group: mode === "equipment" ? labelData.group : cableData.group }];
+          const rows: typeof items[] = [];
+          for (let i = 0; i < items.length; i += cols) {
+            rows.push(items.slice(i, i + cols));
+          }
+          return rows.map((row, rowIdx) => (
+            <div key={rowIdx} style={{ display: 'flex', flexDirection: 'row', gap: '0mm' }}>
+              {row.map((item, colIdx) => (
+                mode === "equipment" ? (
+                  <EquipmentLabelContent
+                    key={`${rowIdx}-${colIdx}`}
+                    data={{ ...labelData, name: item.name, id: item.id, group: item.group }}
+                    fontScale={fontScale}
+                  />
+                ) : (
+                  <CableLabelContent
+                    key={`${rowIdx}-${colIdx}`}
+                    data={{ ...cableData, name: item.name, id: item.id, group: item.group }}
+                    fontScale={fontScale}
+                  />
+                )
+              ))}
+            </div>
+          ));
+        })()}
       </div>
     </div>
   );
