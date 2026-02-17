@@ -89,11 +89,11 @@ function EquipmentLabelDesignA({ data, isPreview = false, fontScale = 1, element
 
   const contentH = isSmall ? height * 0.78 : height * 0.82;
   const namePx = (isSmall
-    ? Math.max(8, Math.min(width * 0.22, contentH * 0.45))
-    : Math.max(8, Math.min(width, height) * 0.22)) * s;
+    ? Math.max(8, Math.min(width * 0.16, contentH * 0.32))
+    : Math.max(8, Math.min(width, height) * 0.15)) * s;
   const idPx = (isSmall
-    ? Math.max(7, Math.min(width * 0.2, contentH * 0.4))
-    : Math.max(9, Math.min(width, height) * 0.22)) * s;
+    ? Math.max(8, Math.min(width * 0.24, contentH * 0.5))
+    : Math.max(10, Math.min(width, height) * 0.28)) * s;
   const groupPx = (isSmall
     ? Math.max(5, Math.min(width * 0.1, contentH * 0.22))
     : Math.max(6, Math.min(width, height) * 0.12)) * s;
@@ -103,10 +103,10 @@ function EquipmentLabelDesignA({ data, isPreview = false, fontScale = 1, element
   const infoFs = `${Math.max(4, Math.min(width * 0.08, height * 0.14))}px`;
   const barH = isSmall ? `${Math.max(height * 0.2, 2.5)}mm` : `${Math.max(height * 0.18, 5)}mm`;
   const isLarge = width >= 40 && height >= 40;
-  const qrSize = Math.min(width * 0.3, height * 0.5);
+  const qrSize = Math.min(width * 0.42, height * 0.65);
   const logoH = `${Math.max(5, height * 0.12)}px`;
   const pad = isTiny ? '1mm 1mm' : isLarge ? `${height * 0.08}mm ${width * 0.06}mm` : '0.5rem';
-  const contentGap = isTiny ? '2px' : isLarge ? `${width * 0.04}mm` : '0.75rem';
+  const contentGap = isTiny ? '2px' : isLarge ? `${width * 0.03}mm` : '0.5rem';
 
   return (
     <div data-label-root className="bg-black text-white relative flex flex-col border-0" style={{ width: `${width}mm`, height: `${height}mm`, boxSizing: "border-box", pageBreakInside: "avoid", border: isPreview ? '1px solid #e5e7eb' : 'none', overflow: 'hidden' }}>
@@ -119,16 +119,16 @@ function EquipmentLabelDesignA({ data, isPreview = false, fontScale = 1, element
         <div className="flex flex-row items-center h-full max-w-full" style={{ gap: contentGap }}>
           {showQr && (
             <>
-              <div className="flex items-center justify-center flex-shrink-0 bg-white p-0.5 rounded" style={{ width: `${qrSize}mm`, height: `${qrSize}mm` }}>
+              <div className="flex items-center justify-center flex-shrink-0 bg-white rounded" style={{ width: `${qrSize}mm`, height: `${qrSize}mm`, padding: `${qrSize * 0.06}mm`, border: `${Math.max(0.3, qrSize * 0.03)}mm solid white` }}>
                 <QRCode value={data.id} style={{ height: "100%", width: "100%", maxWidth: "100%", objectFit: "contain" }} viewBox="0 0 256 256" />
               </div>
-              <div className="w-[2px] bg-white rounded-full flex-shrink-0" style={{ height: `${qrSize}mm` }}></div>
+              <div className="w-[2.5px] bg-white flex-shrink-0" style={{ height: `${qrSize}mm` }}></div>
             </>
           )}
-          <div className="flex flex-col items-center justify-center min-w-0 w-full text-center" style={{ overflow: 'hidden', gap: isTiny ? '1px' : `${Math.max(1, spacing * 0.15)}px` }}>
+          <div className="flex flex-col justify-center min-w-0 w-full text-left" style={{ overflow: 'hidden', gap: isTiny ? '1px' : `${Math.max(1, spacing * 0.15)}px` }}>
             {elementOrder.map((el) => {
-              if (el === 'name') return <div key="name" className="font-bold uppercase leading-none" data-label-name style={{ fontSize: nameFs, wordBreak: 'break-word', overflowWrap: 'break-word', lineHeight: 1.1 }}>{data.name}</div>;
-              if (el === 'id' && data.id) return <div key="id" className="font-mono tracking-wider font-bold" data-label-id style={{ fontSize: idFs, wordBreak: 'break-all', overflowWrap: 'break-word', lineHeight: 1.1, marginBottom: isTiny ? '0px' : '-1px' }}>#{data.id}</div>;
+              if (el === 'name') return <div key="name" className="font-bold uppercase leading-tight" data-label-name style={{ fontSize: nameFs, wordBreak: 'break-word', overflowWrap: 'break-word', lineHeight: 1.15 }}>{data.name}</div>;
+              if (el === 'id' && data.id) return <div key="id" className="font-mono tracking-wider font-bold" data-label-id style={{ fontSize: idFs, wordBreak: 'break-all', overflowWrap: 'break-word', lineHeight: 1.1 }}>#{data.id}</div>;
               if (el === 'group' && data.group) return <div key="group"><span className="bg-white text-black font-bold uppercase tracking-wider rounded inline-block" data-label-group style={{ fontSize: groupFs, padding: isTiny ? '0px 2px' : '2px 8px', lineHeight: 1.15 }}>{data.group}</span></div>;
               return null;
             })}
