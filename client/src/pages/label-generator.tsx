@@ -90,8 +90,8 @@ function EquipmentLabelDesignA({ data, isPreview = false, fontScale = 1 }: { dat
     ? Math.max(8, Math.min(width * 0.22, contentH * 0.45))
     : Math.max(8, Math.min(width, height) * 0.22)) * s;
   const idPx = (isSmall
-    ? Math.max(6, Math.min(width * 0.16, contentH * 0.35))
-    : Math.max(8, Math.min(width, height) * 0.19)) * s;
+    ? Math.max(7, Math.min(width * 0.2, contentH * 0.4))
+    : Math.max(9, Math.min(width, height) * 0.22)) * s;
   const groupPx = (isSmall
     ? Math.max(5, Math.min(width * 0.1, contentH * 0.22))
     : Math.max(6, Math.min(width, height) * 0.12)) * s;
@@ -123,7 +123,7 @@ function EquipmentLabelDesignA({ data, isPreview = false, fontScale = 1 }: { dat
               <div className="h-[70%] w-[2px] bg-white rounded-full flex-shrink-0"></div>
             </>
           )}
-          <div className="flex flex-col items-center min-w-0 w-full text-center" style={{ overflow: 'hidden', justifyContent: (data.id || data.group) ? 'space-evenly' : 'center', height: '100%' }}>
+          <div className="flex flex-col items-center justify-center min-w-0 w-full text-center" style={{ overflow: 'hidden', gap: isTiny ? '1px' : '3px' }}>
             <div className="font-bold uppercase leading-none" data-label-name style={{ fontSize: nameFs, wordBreak: 'break-word', overflowWrap: 'break-word', lineHeight: 1.1 }}>{data.name}</div>
             {data.id && (
               <div className="font-mono tracking-wider" data-label-id style={{ fontSize: idFs, wordBreak: 'break-all', overflowWrap: 'break-word', lineHeight: 1.1 }}>#{data.id}</div>
@@ -322,8 +322,8 @@ function EquipmentLabelByDesign({ design, data, isPreview = false, fontScale = 1
   }
 }
 
-function EquipmentLabelContent({ data, isPreview = false, fontScale = 1, design = 'A' }: { data: EquipmentFormValues; isPreview?: boolean; fontScale?: number; design?: EquipmentDesign }) {
-  return <EquipmentLabelByDesign design={design} data={data} isPreview={isPreview} fontScale={fontScale} />;
+function EquipmentLabelContent({ data, isPreview = false, fontScale = 1 }: { data: EquipmentFormValues; isPreview?: boolean; fontScale?: number }) {
+  return <EquipmentLabelDesignA data={data} isPreview={isPreview} fontScale={fontScale} />;
 }
 
 // Cable Label Component - narrow strip that wraps around a cable
@@ -481,8 +481,6 @@ export default function LabelGenerator() {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const previewLabelRef = useRef<HTMLDivElement>(null);
   const [fontScales, setFontScales] = useState<Record<number, number>>({});
-  const [equipDesign, setEquipDesign] = useState<EquipmentDesign>('A');
-  const [showDesignPicker, setShowDesignPicker] = useState(false);
 
   const getFontScale = (idx: number) => fontScales[idx] ?? 1;
 
@@ -1278,80 +1276,46 @@ export default function LabelGenerator() {
               </CardDescription>
             </CardHeader>
             <CardContent className="flex-1 flex flex-col items-center justify-center bg-muted/20 p-8 rounded-lg border-dashed border-2 m-6 overflow-auto gap-4">
-              <div className="flex gap-2 self-end">
-                {mode === "equipment" && (
-                  <Button
-                    type="button"
-                    variant={showDesignPicker ? "default" : "outline"}
-                    size="sm"
-                    className="gap-2"
-                    onClick={() => setShowDesignPicker(!showDesignPicker)}
-                    data-testid="button-toggle-designs"
-                  >
-                    Vælg Design
-                  </Button>
-                )}
-                {mode !== "box" && (
-                  <Button
-                    type="button"
-                    variant="outline"
-                    size="sm"
-                    className="gap-2"
-                    onClick={optimizeLabel}
-                    data-testid="button-optimize-label"
-                  >
-                    <Wand2 className="h-4 w-4" />
-                    Optimer Tekst
-                  </Button>
+              {mode !== "box" && (
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  className="gap-2 self-end"
+                  onClick={optimizeLabel}
+                  data-testid="button-optimize-label"
+                >
+                  <Wand2 className="h-4 w-4" />
+                  Optimer Tekst
+                </Button>
+              )}
+              <div ref={previewLabelRef}>
+                {mode === "box" ? (
+                  <BoxLabelContent data={boxData} items={boxItems} isPreview={true} />
+                ) : batchItems.length > 0 ? (
+                  batchItems.map((item, idx) => (
+                    mode === "equipment" ? (
+                      <EquipmentLabelContent
+                        key={idx}
+                        data={{ ...labelData, name: item.name, id: item.id, group: item.group }}
+                        isPreview={true}
+                        fontScale={getFontScale(idx)}
+                      />
+                    ) : (
+                      <CableLabelContent
+                        key={idx}
+                        data={{ ...cableData, name: item.name, id: item.id, group: item.group }}
+                        isPreview={true}
+                        fontScale={getFontScale(idx)}
+                      />
+                    )
+                  ))
+                ) : mode === "equipment" ? (
+                  <EquipmentLabelContent data={labelData} isPreview={true} fontScale={getFontScale(0)} />
+                ) : (
+                  <CableLabelContent data={cableData} isPreview={true} fontScale={getFontScale(0)} />
                 )}
               </div>
-              {showDesignPicker && mode === "equipment" ? (
-                <div className="grid grid-cols-2 gap-6 w-full">
-                  {equipmentDesigns.map((d) => (
-                    <div
-                      key={d}
-                      className={`flex flex-col items-center gap-2 p-3 rounded-lg border-2 cursor-pointer transition-all ${equipDesign === d ? 'border-primary bg-primary/5 shadow-md' : 'border-muted hover:border-muted-foreground/30'}`}
-                      onClick={() => { setEquipDesign(d); setShowDesignPicker(false); }}
-                      data-testid={`button-design-${d}`}
-                    >
-                      <span className="text-sm font-semibold">Design {d}</span>
-                      <span className="text-xs text-muted-foreground mb-1">{designLabels[d]}</span>
-                      <div className="transform scale-75 origin-top">
-                        <EquipmentLabelByDesign design={d} data={labelData} isPreview={true} fontScale={1} />
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              ) : (
-                <div ref={previewLabelRef}>
-                  {mode === "box" ? (
-                    <BoxLabelContent data={boxData} items={boxItems} isPreview={true} />
-                  ) : batchItems.length > 0 ? (
-                    batchItems.map((item, idx) => (
-                      mode === "equipment" ? (
-                        <EquipmentLabelContent
-                          key={idx}
-                          data={{ ...labelData, name: item.name, id: item.id, group: item.group }}
-                          isPreview={true}
-                          fontScale={getFontScale(idx)}
-                          design={equipDesign}
-                        />
-                      ) : (
-                        <CableLabelContent
-                          key={idx}
-                          data={{ ...cableData, name: item.name, id: item.id, group: item.group }}
-                          isPreview={true}
-                          fontScale={getFontScale(idx)}
-                        />
-                      )
-                    ))
-                  ) : mode === "equipment" ? (
-                    <EquipmentLabelContent data={labelData} isPreview={true} fontScale={getFontScale(0)} design={equipDesign} />
-                  ) : (
-                    <CableLabelContent data={cableData} isPreview={true} fontScale={getFontScale(0)} />
-                  )}
-                </div>
-              )}
             </CardContent>
           </Card>
         </div>
@@ -1393,7 +1357,6 @@ export default function LabelGenerator() {
                     key={`${rowIdx}-${colIdx}`}
                     data={{ ...labelData, name: item.name, id: item.id, group: item.group }}
                     fontScale={getFontScale(globalIdx)}
-                    design={equipDesign}
                   />
                 ) : (
                   <CableLabelContent
