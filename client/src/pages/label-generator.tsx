@@ -285,13 +285,15 @@ export default function LabelGenerator() {
   const [batchItems, setBatchItems] = useState<ParsedItem[]>([]);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const previewLabelRef = useRef<HTMLDivElement>(null);
-  const [fontScale, setFontScale] = useState(1);
-  const optimizeIterRef = useRef(0);
+  const [fontScales, setFontScales] = useState<Record<number, number>>({});
 
-  const checkOverflow = useCallback(() => {
+  const getFontScale = (idx: number) => fontScales[idx] ?? 1;
+
+  const checkOverflowAt = useCallback((idx: number) => {
     const el = previewLabelRef.current;
     if (!el) return false;
-    const labelEl = el.querySelector('[data-label-root]') as HTMLElement;
+    const allLabels = el.querySelectorAll('[data-label-root]');
+    const labelEl = allLabels[idx] as HTMLElement;
     if (!labelEl) return false;
     const contentEl = labelEl.querySelector('[data-label-content]') as HTMLElement;
     if (!contentEl) return false;
@@ -300,47 +302,65 @@ export default function LabelGenerator() {
   }, []);
 
   const optimizeLabel = useCallback(() => {
-    setFontScale(1);
-    optimizeIterRef.current = 0;
+    const el = previewLabelRef.current;
+    if (!el) return;
+    const count = el.querySelectorAll('[data-label-root]').length;
+    if (count === 0) return;
 
-    const runStep = (lo: number, hi: number, step: number) => {
-      if (step > 15) {
-        setFontScale(lo);
-        toast({ title: "Tekst optimeret", description: `Teksten er nu så stor som muligt (${Math.round(lo * 100)}%).` });
+    setFontScales({});
+
+    const optimizeOne = (idx: number, scales: Record<number, number>) => {
+      if (idx >= count) {
+        setFontScales(scales);
+        toast({ title: "Tekst optimeret", description: `${count} label${count > 1 ? 's' : ''} optimeret individuelt.` });
         return;
       }
 
-      const mid = Math.round(((lo + hi) / 2) * 100) / 100;
-      setFontScale(mid);
+      const runStep = (lo: number, hi: number, step: number, currentScales: Record<number, number>) => {
+        if (step > 15 || hi - lo < 0.05) {
+          const final = { ...currentScales, [idx]: lo };
+          setFontScales(final);
+          requestAnimationFrame(() => {
+            optimizeOne(idx + 1, final);
+          });
+          return;
+        }
+
+        const mid = Math.round(((lo + hi) / 2) * 100) / 100;
+        const next = { ...currentScales, [idx]: mid };
+        setFontScales(next);
+
+        requestAnimationFrame(() => {
+          requestAnimationFrame(() => {
+            const overflows = checkOverflowAt(idx);
+            if (overflows) {
+              runStep(lo, mid - 0.05, step + 1, currentScales);
+            } else {
+              runStep(mid, hi, step + 1, next);
+            }
+          });
+        });
+      };
+
+      const initial = { ...scales, [idx]: 1 };
+      setFontScales(initial);
 
       requestAnimationFrame(() => {
         requestAnimationFrame(() => {
-          const overflows = checkOverflow();
+          const overflows = checkOverflowAt(idx);
           if (overflows) {
-            runStep(lo, mid - 0.05, step + 1);
+            runStep(0.5, 1.0, 0, scales);
           } else {
-            if (hi - mid < 0.05) {
-              setFontScale(mid);
-              toast({ title: "Tekst optimeret", description: `Teksten er nu så stor som muligt (${Math.round(mid * 100)}%).` });
-              return;
-            }
-            runStep(mid, hi, step + 1);
+            runStep(1.0, 3.0, 0, initial);
           }
         });
       });
     };
 
     requestAnimationFrame(() => {
-      requestAnimationFrame(() => {
-        const overflows = checkOverflow();
-        if (overflows) {
-          runStep(0.5, 1.0, 0);
-        } else {
-          runStep(1.0, 3.0, 0);
-        }
-      });
+      optimizeOne(0, {});
     });
-  }, [checkOverflow, toast]);
+  }, [checkOverflowAt, toast]);
 
   const [labelData, setLabelData] = useState<EquipmentFormValues>({
     name: "Kamera 1",
@@ -411,13 +431,13 @@ export default function LabelGenerator() {
 
   const onEquipmentSubmit = (data: EquipmentFormValues) => {
     setLabelData(data);
-    setFontScale(1);
+    setFontScales({});
     toast({ title: "Label opdateret", description: "Visningen er blevet opdateret." });
   };
 
   const onCableSubmit = (data: CableFormValues) => {
     setCableData(data);
-    setFontScale(1);
+    setFontScales({});
     toast({ title: "Kabel label opdateret", description: "Visningen er blevet opdateret." });
   };
 
@@ -1019,21 +1039,21 @@ export default function LabelGenerator() {
                         key={idx}
                         data={{ ...labelData, name: item.name, id: item.id, group: item.group }}
                         isPreview={true}
-                        fontScale={fontScale}
+                        fontScale={getFontScale(idx)}
                       />
                     ) : (
                       <CableLabelContent
                         key={idx}
                         data={{ ...cableData, name: item.name, id: item.id, group: item.group }}
                         isPreview={true}
-                        fontScale={fontScale}
+                        fontScale={getFontScale(idx)}
                       />
                     )
                   ))
                 ) : mode === "equipment" ? (
-                  <EquipmentLabelContent data={labelData} isPreview={true} fontScale={fontScale} />
+                  <EquipmentLabelContent data={labelData} isPreview={true} fontScale={getFontScale(0)} />
                 ) : (
-                  <CableLabelContent data={cableData} isPreview={true} fontScale={fontScale} />
+                  <CableLabelContent data={cableData} isPreview={true} fontScale={getFontScale(0)} />
                 )}
               </div>
             </CardContent>
@@ -1070,21 +1090,22 @@ export default function LabelGenerator() {
           }
           return rows.map((row, rowIdx) => (
             <div key={rowIdx} style={{ display: 'flex', flexDirection: 'row', gap: '0mm' }}>
-              {row.map((item, colIdx) => (
-                mode === "equipment" ? (
+              {row.map((item, colIdx) => {
+                const globalIdx = rowIdx * cols + colIdx;
+                return mode === "equipment" ? (
                   <EquipmentLabelContent
                     key={`${rowIdx}-${colIdx}`}
                     data={{ ...labelData, name: item.name, id: item.id, group: item.group }}
-                    fontScale={fontScale}
+                    fontScale={getFontScale(globalIdx)}
                   />
                 ) : (
                   <CableLabelContent
                     key={`${rowIdx}-${colIdx}`}
                     data={{ ...cableData, name: item.name, id: item.id, group: item.group }}
-                    fontScale={fontScale}
+                    fontScale={getFontScale(globalIdx)}
                   />
-                )
-              ))}
+                );
+              })}
             </div>
           ));
         })()}
