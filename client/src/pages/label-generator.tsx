@@ -78,18 +78,29 @@ const CABLE_PRESETS: Record<string, { width: number; height: number; label: stri
 // Design A: Top bar with company info, QR left, text right (horizontal)
 function EquipmentLabelDesignA({ data, isPreview = false }: { data: EquipmentFormValues; isPreview?: boolean }) {
   const { width, height } = data;
-  const isSmall = width < 20 || height < 20;
-  const minDim = Math.min(width, height);
-  const showQr = data.id && !isSmall;
+  const isSmall = height < 20;
+  const isNarrow = width < 20;
+  const isTiny = isSmall || isNarrow;
+  const showQr = data.id && !isTiny;
 
-  const groupFs = `${Math.max(4, minDim * 0.12)}px`;
-  const nameFs = `${Math.max(5, minDim * (isSmall ? 0.28 : 0.22))}px`;
-  const idFs = `${Math.max(4, minDim * 0.15)}px`;
-  const infoFs = `${Math.max(4, Math.min(width * 0.09, height * 0.15))}px`;
-  const barH = isSmall ? `${Math.max(height * 0.22, 3)}mm` : `${Math.max(height * 0.18, 5)}mm`;
+  const contentH = isSmall ? height * 0.78 : height * 0.82;
+  const namePx = isSmall
+    ? Math.max(8, Math.min(width * 0.22, contentH * 0.45))
+    : Math.max(8, Math.min(width, height) * 0.22);
+  const idPx = isSmall
+    ? Math.max(6, Math.min(width * 0.14, contentH * 0.3))
+    : Math.max(7, Math.min(width, height) * 0.15);
+  const groupPx = isSmall
+    ? Math.max(5, Math.min(width * 0.1, contentH * 0.22))
+    : Math.max(6, Math.min(width, height) * 0.12);
+  const groupFs = `${groupPx}px`;
+  const nameFs = `${namePx}px`;
+  const idFs = `${idPx}px`;
+  const infoFs = `${Math.max(4, Math.min(width * 0.08, height * 0.14))}px`;
+  const barH = isSmall ? `${Math.max(height * 0.2, 2.5)}mm` : `${Math.max(height * 0.18, 5)}mm`;
   const qrSize = Math.min(width * 0.35, height * 0.6);
-  const logoH = `${Math.max(6, height * 0.13)}px`;
-  const pad = isSmall ? '1px' : '0.5rem';
+  const logoH = `${Math.max(5, height * 0.12)}px`;
+  const pad = isTiny ? '0.5mm 1mm' : '0.5rem';
 
   return (
     <div className="bg-black text-white relative flex flex-col border-0" style={{ width: `${width}mm`, height: `${height}mm`, boxSizing: "border-box", pageBreakInside: "avoid", border: isPreview ? '1px solid #e5e7eb' : 'none', overflow: 'hidden' }}>
@@ -99,7 +110,7 @@ function EquipmentLabelDesignA({ data, isPreview = false }: { data: EquipmentFor
         <span className="font-bold tracking-wider flex-shrink-0" style={{ fontSize: infoFs, lineHeight: 1.1 }}>+45 71 99 33 66</span>
       </div>
       <div className="flex-1 flex items-center justify-center min-h-0" style={{ padding: pad }}>
-        <div className="flex flex-row items-center gap-1 h-full max-w-full" style={{ gap: isSmall ? '2px' : '0.75rem' }}>
+        <div className="flex flex-row items-center h-full max-w-full" style={{ gap: isTiny ? '2px' : '0.75rem' }}>
           {showQr && (
             <>
               <div className="flex items-center justify-center flex-shrink-0 bg-white p-0.5 rounded" style={{ width: `${qrSize}mm`, height: `${qrSize}mm` }}>
@@ -109,13 +120,13 @@ function EquipmentLabelDesignA({ data, isPreview = false }: { data: EquipmentFor
             </>
           )}
           <div className="flex flex-col justify-center min-w-0" style={{ overflow: 'visible' }}>
-            <div className="font-bold uppercase leading-none" style={{ fontSize: nameFs, wordBreak: 'break-word', overflowWrap: 'break-word', lineHeight: 1.1 }}>{data.name}</div>
+            <div className="font-bold uppercase leading-none" style={{ fontSize: nameFs, wordBreak: 'break-word', overflowWrap: 'break-word', lineHeight: 1.05 }}>{data.name}</div>
             {data.id && (
-              <div className="font-mono tracking-wider" style={{ fontSize: idFs, wordBreak: 'break-all', overflowWrap: 'break-word', lineHeight: 1.1, marginTop: isSmall ? '0px' : '2px' }}>#{data.id}</div>
+              <div className="font-mono tracking-wider" style={{ fontSize: idFs, wordBreak: 'break-all', overflowWrap: 'break-word', lineHeight: 1.05, marginTop: isTiny ? '0px' : '2px' }}>#{data.id}</div>
             )}
             {data.group && (
-              <div style={{ marginTop: isSmall ? '0px' : '2px' }}>
-                <span className="bg-white text-black font-bold uppercase tracking-wider rounded inline-block" style={{ fontSize: groupFs, padding: isSmall ? '0px 2px' : '1px 6px', lineHeight: 1.2 }}>{data.group}</span>
+              <div style={{ marginTop: isTiny ? '0px' : '2px' }}>
+                <span className="bg-white text-black font-bold uppercase tracking-wider rounded inline-block" style={{ fontSize: groupFs, padding: isTiny ? '0px 2px' : '1px 6px', lineHeight: 1.15 }}>{data.group}</span>
               </div>
             )}
           </div>
