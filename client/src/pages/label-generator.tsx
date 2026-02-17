@@ -25,7 +25,7 @@ const equipmentSchema = z.object({
   name: z.string().min(1, "Navn er påkrævet"),
   id: z.string().min(1, "ID nummer er påkrævet"),
   group: z.string().optional(),
-  width: z.number().min(20, "Minimum bredde er 20mm").max(100, "Maksimum bredde er 100mm"),
+  width: z.number().min(10, "Minimum bredde er 10mm").max(100, "Maksimum bredde er 100mm"),
   height: z.number().min(10, "Minimum højde er 10mm").max(300, "Maksimum højde er 300mm"),
   preset: z.string().optional(),
 });
@@ -96,7 +96,7 @@ function EquipmentLabelDesignA({ data, isPreview = false }: { data: EquipmentFor
       </div>
       <div className="flex-1 flex items-center justify-center min-h-0 p-2 overflow-hidden">
         <div className="flex flex-row items-center gap-3 h-full max-w-full overflow-hidden">
-          {data.id && (
+          {data.id && width >= 20 && (
             <>
               <div className="flex items-center justify-center flex-shrink-0 bg-white p-0.5 rounded" style={{ width: `${qrSize}mm`, height: `${qrSize}mm` }}>
                 <QRCode value={data.id} style={{ height: "100%", width: "100%", maxWidth: "100%", objectFit: "contain" }} viewBox="0 0 256 256" />
