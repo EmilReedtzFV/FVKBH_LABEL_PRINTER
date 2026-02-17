@@ -218,32 +218,31 @@ function CableLabelContent({ data, isPreview = false }: { data: CableFormValues;
 
 function BoxLabelContent({ data, items, isPreview = false }: { data: BoxFormValues; items: BoxItem[]; isPreview?: boolean }) {
   const { width, height } = data;
-  const infoFs = `${Math.max(7, width * 0.09)}px`;
-  const barH = `${Math.max(height * 0.08, 5)}mm`;
-  const logoH = `${Math.max(10, height * 0.05)}px`;
-  const kitFs = `${Math.max(16, width * 0.22)}px`;
-  const itemFs = `${Math.max(8, width * 0.07)}px`;
+  const itemCount = Math.max(items.length, 1);
+  const logoSection = height * 0.15;
+  const kitSection = height * 0.12;
+  const remainingH = height - logoSection - kitSection - 6;
+  const itemRowH = Math.min(remainingH / itemCount, 8);
+  const itemFs = `${Math.max(7, Math.min(itemRowH * 0.55, width * 0.08))}px`;
+  const kitFs = `${Math.max(16, width * 0.25)}px`;
+  const logoW = `${width * 0.7}mm`;
 
   return (
     <div className="bg-black text-white relative flex flex-col overflow-hidden border-0" style={{ width: `${width}mm`, height: `${height}mm`, boxSizing: "border-box", pageBreakInside: "avoid", border: isPreview ? '1px solid #e5e7eb' : 'none' }}>
-      <div className="bg-white text-black flex items-center justify-center px-1 w-full flex-shrink-0 gap-1" style={{ height: barH }}>
-        <img src="/logo.png" alt="Logo" className="object-contain flex-shrink-0" style={{ height: logoH }} />
-        <span className="font-bold uppercase whitespace-nowrap flex-shrink-0" style={{ fontSize: infoFs }}>Filmværksted København</span>
-        <span className="font-bold tracking-wider whitespace-nowrap flex-shrink-0" style={{ fontSize: infoFs }}>+45 71 99 33 66</span>
+      <div className="flex items-center justify-center flex-shrink-0" style={{ height: `${logoSection}mm`, padding: '2mm' }}>
+        <img src="/logo-black.png" alt="Filmværksted København" className="object-contain" style={{ maxWidth: logoW, maxHeight: '100%', filter: 'invert(1)' }} />
       </div>
-      <div className="flex flex-col min-h-0 p-3 overflow-hidden">
-        <div className="text-center mb-3 pb-2 border-b-2 border-white/40">
-          <div className="font-bold uppercase tracking-wider leading-tight" style={{ fontSize: kitFs }}>{data.kitName}</div>
-        </div>
-        <div className="flex-1 overflow-hidden">
-          <div className="grid gap-1" style={{ gridTemplateColumns: '1fr' }}>
-            {items.map((item, idx) => (
-              <div key={idx} className="flex items-center gap-2 px-2 py-0.5 bg-white/10 rounded" style={{ fontSize: itemFs }}>
-                <span className="text-gray-400 font-mono" style={{ fontSize: `calc(${itemFs} * 0.8)` }}>{idx + 1}.</span>
-                <span className="font-medium">{item.name}</span>
-              </div>
-            ))}
-          </div>
+      <div className="text-center flex-shrink-0 px-3 pb-2 border-b-2 border-white/40" style={{ height: `${kitSection}mm`, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        <div className="font-bold uppercase tracking-wider leading-tight" style={{ fontSize: kitFs }}>{data.kitName}</div>
+      </div>
+      <div className="flex-1 flex flex-col min-h-0 p-2 overflow-hidden">
+        <div className="grid gap-0.5" style={{ gridTemplateColumns: '1fr' }}>
+          {items.map((item, idx) => (
+            <div key={idx} className="flex items-center gap-2 px-2 bg-white/10 rounded" style={{ fontSize: itemFs, height: `${itemRowH}mm` }}>
+              <span className="text-gray-400 font-mono" style={{ fontSize: `calc(${itemFs} * 0.8)` }}>{idx + 1}.</span>
+              <span className="font-medium">{item.name}</span>
+            </div>
+          ))}
         </div>
       </div>
     </div>
