@@ -231,9 +231,9 @@ function BoxLabelContent({ data, items, isPreview = false }: { data: BoxFormValu
 
   return (
     <div className="bg-black text-white relative flex flex-col overflow-hidden border-0" style={{ width: `${width}mm`, height: `${height}mm`, boxSizing: "border-box", pageBreakInside: "avoid", border: isPreview ? '1px solid #e5e7eb' : 'none' }}>
-      <div className="flex flex-col items-center justify-center flex-shrink-0" style={{ height: `${logoSection}mm`, padding: '1.5mm 2mm' }}>
-        <img src="/logo-black.png" alt="Filmværksted København" className="object-contain" style={{ maxWidth: logoW, maxHeight: '70%', filter: 'invert(1)' }} />
-        <span className="font-bold tracking-wider" style={{ fontSize: phoneFs }}>+45 71 99 33 66</span>
+      <div className="flex items-center justify-center gap-2 flex-shrink-0" style={{ height: `${logoSection}mm`, padding: '1.5mm 2mm' }}>
+        <img src="/logo-black.png" alt="Filmværksted København" className="object-contain" style={{ maxWidth: logoW, maxHeight: '90%', filter: 'invert(1)' }} />
+        <span className="font-bold tracking-wider whitespace-nowrap" style={{ fontSize: phoneFs }}>+45 71 99 33 66</span>
       </div>
       <div className="bg-white text-black text-center flex-shrink-0 px-3" style={{ height: `${kitSection}mm`, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
         <div className="font-bold uppercase tracking-wider leading-tight" style={{ fontSize: kitFs }}>{data.kitName}</div>
