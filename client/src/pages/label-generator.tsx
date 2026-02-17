@@ -222,10 +222,12 @@ function BoxLabelContent({ data, items, isPreview = false }: { data: BoxFormValu
   const itemCount = Math.max(items.length, 1);
   const logoSection = height * 0.08;
   const kitSection = height * 0.12;
-  const remainingH = height - logoSection - kitSection - 6;
+  const phoneSection = height * 0.05;
+  const remainingH = height - logoSection - kitSection - phoneSection - 6;
   const itemRowH = Math.min(remainingH / itemCount, 10);
   const itemFs = `${Math.max(9, Math.min(itemRowH * 0.6, width * 0.1))}px`;
   const kitFs = `${Math.max(16, width * 0.25)}px`;
+  const phoneFs = `${Math.max(8, width * 0.09)}px`;
   const logoW = `${width * 0.55}mm`;
 
   return (
@@ -245,6 +247,9 @@ function BoxLabelContent({ data, items, isPreview = false }: { data: BoxFormValu
             </div>
           ))}
         </div>
+      </div>
+      <div className="flex-shrink-0 text-center" style={{ height: `${phoneSection}mm`, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        <span className="font-bold tracking-wider" style={{ fontSize: phoneFs }}>+45 71 99 33 66</span>
       </div>
     </div>
   );
