@@ -78,25 +78,29 @@ const CABLE_PRESETS: Record<string, { width: number; height: number; label: stri
 // Design A: Top bar with company info, QR left, text right (horizontal)
 function EquipmentLabelDesignA({ data, isPreview = false }: { data: EquipmentFormValues; isPreview?: boolean }) {
   const { width, height } = data;
+  const isSmall = width < 20 || height < 20;
   const minDim = Math.min(width, height);
-  const groupFs = `${Math.max(6, minDim * 0.12)}px`;
-  const nameFs = `${Math.max(8, minDim * 0.22)}px`;
-  const idFs = `${Math.max(7, minDim * 0.15)}px`;
-  const infoFs = `${Math.max(7, width * 0.09)}px`;
-  const barH = `${Math.max(height * 0.18, 5)}mm`;
+  const showQr = data.id && !isSmall;
+
+  const groupFs = `${Math.max(4, minDim * 0.12)}px`;
+  const nameFs = `${Math.max(5, minDim * (isSmall ? 0.28 : 0.22))}px`;
+  const idFs = `${Math.max(4, minDim * 0.15)}px`;
+  const infoFs = `${Math.max(4, Math.min(width * 0.09, height * 0.15))}px`;
+  const barH = isSmall ? `${Math.max(height * 0.22, 3)}mm` : `${Math.max(height * 0.18, 5)}mm`;
   const qrSize = Math.min(width * 0.35, height * 0.6);
-  const logoH = `${Math.max(10, height * 0.13)}px`;
+  const logoH = `${Math.max(6, height * 0.13)}px`;
+  const pad = isSmall ? '1px' : '0.5rem';
 
   return (
-    <div className="bg-black text-white relative flex flex-col overflow-hidden border-0" style={{ width: `${width}mm`, height: `${height}mm`, boxSizing: "border-box", pageBreakInside: "avoid", border: isPreview ? '1px solid #e5e7eb' : 'none' }}>
-      <div className="bg-white text-black flex items-center justify-center px-1 w-full flex-shrink-0 gap-1" style={{ height: barH }}>
-        <img src="/logo.png" alt="Logo" className="object-contain flex-shrink-0" style={{ height: logoH }} />
-        <span className="font-bold uppercase whitespace-nowrap flex-shrink-0" style={{ fontSize: infoFs }}>Filmværksted København</span>
-        <span className="font-bold tracking-wider whitespace-nowrap flex-shrink-0" style={{ fontSize: infoFs }}>+45 71 99 33 66</span>
+    <div className="bg-black text-white relative flex flex-col border-0" style={{ width: `${width}mm`, height: `${height}mm`, boxSizing: "border-box", pageBreakInside: "avoid", border: isPreview ? '1px solid #e5e7eb' : 'none', overflow: 'hidden' }}>
+      <div className="bg-white text-black flex items-center justify-center px-0.5 w-full flex-shrink-0 gap-0.5" style={{ height: barH, minHeight: 0 }}>
+        <img src="/logo.png" alt="Logo" className="object-contain flex-shrink-0" style={{ height: logoH, maxHeight: '90%' }} />
+        <span className="font-bold uppercase flex-shrink truncate" style={{ fontSize: infoFs, lineHeight: 1.1 }}>Filmværksted København</span>
+        <span className="font-bold tracking-wider flex-shrink-0" style={{ fontSize: infoFs, lineHeight: 1.1 }}>+45 71 99 33 66</span>
       </div>
-      <div className="flex-1 flex items-center justify-center min-h-0 p-2 overflow-hidden">
-        <div className="flex flex-row items-center gap-3 h-full max-w-full overflow-hidden">
-          {data.id && width >= 20 && (
+      <div className="flex-1 flex items-center justify-center min-h-0" style={{ padding: pad }}>
+        <div className="flex flex-row items-center gap-1 h-full max-w-full" style={{ gap: isSmall ? '2px' : '0.75rem' }}>
+          {showQr && (
             <>
               <div className="flex items-center justify-center flex-shrink-0 bg-white p-0.5 rounded" style={{ width: `${qrSize}mm`, height: `${qrSize}mm` }}>
                 <QRCode value={data.id} style={{ height: "100%", width: "100%", maxWidth: "100%", objectFit: "contain" }} viewBox="0 0 256 256" />
@@ -104,14 +108,14 @@ function EquipmentLabelDesignA({ data, isPreview = false }: { data: EquipmentFor
               <div className="h-[70%] w-[2px] bg-white rounded-full flex-shrink-0"></div>
             </>
           )}
-          <div className="flex flex-col justify-center min-w-0 overflow-hidden">
-            <div className="font-bold uppercase leading-tight" style={{ fontSize: nameFs, wordBreak: 'break-word', overflowWrap: 'break-word', lineHeight: 1.15 }}>{data.name}</div>
+          <div className="flex flex-col justify-center min-w-0" style={{ overflow: 'visible' }}>
+            <div className="font-bold uppercase leading-none" style={{ fontSize: nameFs, wordBreak: 'break-word', overflowWrap: 'break-word', lineHeight: 1.1 }}>{data.name}</div>
             {data.id && (
-              <div className="font-mono tracking-widest mt-1 text-gray-400" style={{ fontSize: idFs, wordBreak: 'break-all', overflowWrap: 'break-word', lineHeight: 1.1 }}>#{data.id}</div>
+              <div className="font-mono tracking-wider" style={{ fontSize: idFs, wordBreak: 'break-all', overflowWrap: 'break-word', lineHeight: 1.1, marginTop: isSmall ? '0px' : '2px' }}>#{data.id}</div>
             )}
             {data.group && (
-              <div className="mt-1">
-                <span className="bg-white text-black font-bold uppercase tracking-wider rounded inline-block" style={{ fontSize: groupFs, padding: '1px 6px' }}>{data.group}</span>
+              <div style={{ marginTop: isSmall ? '0px' : '2px' }}>
+                <span className="bg-white text-black font-bold uppercase tracking-wider rounded inline-block" style={{ fontSize: groupFs, padding: isSmall ? '0px 2px' : '1px 6px', lineHeight: 1.2 }}>{data.group}</span>
               </div>
             )}
           </div>
