@@ -44,7 +44,8 @@ const cableSchema = z.object({
 const boxSchema = z.object({
   kitName: z.string().min(1, "Kit navn er påkrævet"),
   width: z.number().min(50, "Minimum bredde er 50mm").max(200, "Maksimum bredde er 200mm"),
-  height: z.number().min(50, "Minimum højde er 50mm").max(300, "Maksimum højde er 300mm"),
+  height: z.number().min(20, "Minimum højde er 20mm").max(600, "Maksimum højde er 600mm"),
+  autoHeight: z.boolean().optional(),
 });
 
 type EquipmentFormValues = z.infer<typeof equipmentSchema>;
@@ -238,11 +239,20 @@ function CableLabelContent({ data, isPreview = false, fontScale = 1 }: { data: C
   );
 }
 
+function calcBoxAutoHeight(width: number, itemCount: number): number {
+  const logoSection = 14;
+  const kitSection = 14;
+  const padding = 6;
+  const itemRowH = Math.max(5, Math.min(8, width * 0.07));
+  return Math.max(50, Math.ceil(logoSection + kitSection + padding + itemCount * itemRowH));
+}
+
 function BoxLabelContent({ data, items, isPreview = false }: { data: BoxFormValues; items: BoxItem[]; isPreview?: boolean }) {
-  const { width, height } = data;
+  const { width } = data;
   const itemCount = Math.max(items.length, 1);
-  const logoSection = height * 0.12;
-  const kitSection = height * 0.12;
+  const height = data.autoHeight ? calcBoxAutoHeight(width, itemCount) : data.height;
+  const logoSection = Math.max(12, height * 0.07);
+  const kitSection = Math.max(12, height * 0.07);
   const remainingH = height - logoSection - kitSection - 6;
   const itemRowH = Math.min(remainingH / itemCount, 10);
   const itemFs = `${Math.max(9, Math.min(itemRowH * 0.6, width * 0.1))}px`;
@@ -398,6 +408,7 @@ export default function LabelGenerator() {
     kitName: "Lys Kit 1",
     width: 100,
     height: 200,
+    autoHeight: true,
   });
   const [boxItems, setBoxItems] = useState<BoxItem[]>([{ name: "Eksempel genstand" }]);
   const [newBoxItemName, setNewBoxItemName] = useState("");
@@ -658,58 +669,58 @@ export default function LabelGenerator() {
                       </div>
                     </div>
                     <div>
-                      <label className="text-sm font-medium leading-none">Label Type</label>
-                      <div className="mt-2 grid grid-cols-3 gap-2">
-                        {[
-                          { label: "Peli Air 1555", w: 100, h: 200 },
-                          { label: "CRDBAG Half", w: 100, h: 100 },
-                          { label: "CRDBAG Full", w: 100, h: 150 },
-                        ].map(preset => (
-                          <Button
-                            key={preset.label}
-                            type="button"
-                            variant={boxData.width === preset.w && boxData.height === preset.h ? "default" : "outline"}
-                            className="text-xs"
-                            onClick={() => {
-                              boxForm.setValue("width", preset.w);
-                              boxForm.setValue("height", preset.h);
-                              setBoxData(prev => ({ ...prev, width: preset.w, height: preset.h }));
-                            }}
-                            data-testid={`button-box-preset-${preset.label.toLowerCase().replace(/\s/g, '-')}`}
-                          >
-                            {preset.label}<br />{preset.w}x{preset.h}mm
-                          </Button>
-                        ))}
+                      <label className="text-sm font-medium leading-none">Bredde (mm)</label>
+                      <div className="mt-2">
+                        <Input
+                          type="number"
+                          value={boxData.width}
+                          onChange={e => {
+                            const val = Number(e.target.value);
+                            boxForm.setValue("width", val);
+                            setBoxData(prev => ({ ...prev, width: val }));
+                          }}
+                          data-testid="input-box-width"
+                        />
                       </div>
                     </div>
-                    <div className="grid grid-cols-2 gap-4">
-                      <FormField
-                        control={boxForm.control}
-                        name="width"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Bredde (mm)</FormLabel>
-                            <FormControl>
-                              <Input type="number" {...field} onChange={e => field.onChange(Number(e.target.value))} data-testid="input-box-width" />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
+                    <div className="flex items-center gap-3">
+                      <input
+                        type="checkbox"
+                        id="box-auto-height"
+                        checked={boxData.autoHeight ?? true}
+                        onChange={e => {
+                          const checked = e.target.checked;
+                          setBoxData(prev => ({ ...prev, autoHeight: checked }));
+                        }}
+                        className="h-4 w-4 rounded border-gray-300"
+                        data-testid="checkbox-box-auto-height"
                       />
-                      <FormField
-                        control={boxForm.control}
-                        name="height"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Højde (mm)</FormLabel>
-                            <FormControl>
-                              <Input type="number" {...field} onChange={e => field.onChange(Number(e.target.value))} data-testid="input-box-height" />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
+                      <label htmlFor="box-auto-height" className="text-sm font-medium leading-none cursor-pointer">
+                        Tilpas højde automatisk til antal genstande
+                      </label>
                     </div>
+                    {!boxData.autoHeight && (
+                      <div>
+                        <label className="text-sm font-medium leading-none">Højde (mm)</label>
+                        <div className="mt-2">
+                          <Input
+                            type="number"
+                            value={boxData.height}
+                            onChange={e => {
+                              const val = Number(e.target.value);
+                              boxForm.setValue("height", val);
+                              setBoxData(prev => ({ ...prev, height: val }));
+                            }}
+                            data-testid="input-box-height"
+                          />
+                        </div>
+                      </div>
+                    )}
+                    {boxData.autoHeight && boxItems.length > 0 && (
+                      <div className="text-sm text-muted-foreground">
+                        Beregnet højde: {calcBoxAutoHeight(boxData.width, boxItems.length)}mm for {boxItems.length} genstand{boxItems.length !== 1 ? 'e' : ''}
+                      </div>
+                    )}
                     <Button type="submit" className="w-full" data-testid="button-update-box">Opdater Visning</Button>
                   </form>
                 </Form>
