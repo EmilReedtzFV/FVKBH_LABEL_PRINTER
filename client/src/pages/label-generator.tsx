@@ -229,17 +229,17 @@ function BoxLabelContent({ data, items, isPreview = false }: { data: BoxFormValu
   const logoW = `${width * 0.55}mm`;
 
   return (
-    <div className="bg-white text-black relative flex flex-col overflow-hidden border-0" style={{ width: `${width}mm`, height: `${height}mm`, boxSizing: "border-box", pageBreakInside: "avoid", border: isPreview ? '1px solid #e5e7eb' : 'none' }}>
+    <div className="bg-black text-white relative flex flex-col overflow-hidden border-0" style={{ width: `${width}mm`, height: `${height}mm`, boxSizing: "border-box", pageBreakInside: "avoid", border: isPreview ? '1px solid #e5e7eb' : 'none' }}>
       <div className="flex items-center justify-center flex-shrink-0" style={{ height: `${logoSection}mm`, padding: '1.5mm 2mm' }}>
-        <img src="/logo-black.png" alt="Filmværksted København" className="object-contain" style={{ maxWidth: logoW, maxHeight: '100%' }} />
+        <img src="/logo-black.png" alt="Filmværksted København" className="object-contain" style={{ maxWidth: logoW, maxHeight: '100%', filter: 'invert(1)' }} />
       </div>
-      <div className="bg-black text-white text-center flex-shrink-0 px-3" style={{ height: `${kitSection}mm`, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+      <div className="bg-white text-black text-center flex-shrink-0 px-3" style={{ height: `${kitSection}mm`, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
         <div className="font-bold uppercase tracking-wider leading-tight" style={{ fontSize: kitFs }}>{data.kitName}</div>
       </div>
       <div className="flex-1 flex flex-col min-h-0 p-2 overflow-hidden">
         <div className="grid gap-0.5" style={{ gridTemplateColumns: '1fr' }}>
           {items.map((item, idx) => (
-            <div key={idx} className="flex items-center px-2 rounded" style={{ fontSize: itemFs, height: `${itemRowH}mm`, borderBottom: '1px solid black' }}>
+            <div key={idx} className="flex items-center px-2 rounded" style={{ fontSize: itemFs, height: `${itemRowH}mm`, borderBottom: '1px solid white' }}>
               <span className="font-bold">{item.name}</span>
               {item.id && <span className="ml-auto font-mono font-bold flex-shrink-0" style={{ fontSize: `calc(${itemFs} * 0.85)` }}>#{item.id}</span>}
             </div>
