@@ -110,7 +110,7 @@ function EquipmentLabelDesignA({ data, isPreview = false, fontScale = 1 }: { dat
         <span className="font-bold uppercase flex-shrink truncate" style={{ fontSize: infoFs, lineHeight: 1.1 }}>Filmværksted København</span>
         <span className="font-bold tracking-wider flex-shrink-0" style={{ fontSize: infoFs, lineHeight: 1.1 }}>+45 71 99 33 66</span>
       </div>
-      <div data-label-content className="flex-1 flex items-center justify-center min-h-0" style={{ padding: pad }}>
+      <div data-label-content className="flex-1 flex items-center justify-center min-h-0" style={{ padding: isTiny ? '1mm 1mm' : '0.5rem', paddingTop: isTiny ? '1.5mm' : '0.5rem' }}>
         <div className="flex flex-row items-center h-full max-w-full" style={{ gap: isTiny ? '2px' : '0.75rem' }}>
           {showQr && (
             <>
@@ -120,13 +120,13 @@ function EquipmentLabelDesignA({ data, isPreview = false, fontScale = 1 }: { dat
               <div className="h-[70%] w-[2px] bg-white rounded-full flex-shrink-0"></div>
             </>
           )}
-          <div className="flex flex-col justify-center min-w-0" style={{ overflow: 'visible' }}>
+          <div className="flex flex-col justify-center items-center min-w-0 w-full text-center" style={{ overflow: 'visible' }}>
             <div className="font-bold uppercase leading-none" style={{ fontSize: nameFs, wordBreak: 'break-word', overflowWrap: 'break-word', lineHeight: 1.05 }}>{data.name}</div>
             {data.id && (
-              <div className="font-mono tracking-wider" style={{ fontSize: idFs, wordBreak: 'break-all', overflowWrap: 'break-word', lineHeight: 1.05, marginTop: isTiny ? '0px' : '2px' }}>#{data.id}</div>
+              <div className="font-mono tracking-wider" style={{ fontSize: idFs, wordBreak: 'break-all', overflowWrap: 'break-word', lineHeight: 1.05, marginTop: isTiny ? '1px' : '2px' }}>#{data.id}</div>
             )}
             {data.group && (
-              <div style={{ marginTop: isTiny ? '0px' : '2px' }}>
+              <div style={{ marginTop: isTiny ? '1px' : '2px' }}>
                 <span className="bg-white text-black font-bold uppercase tracking-wider rounded inline-block" style={{ fontSize: groupFs, padding: isTiny ? '0px 2px' : '1px 6px', lineHeight: 1.15 }}>{data.group}</span>
               </div>
             )}
