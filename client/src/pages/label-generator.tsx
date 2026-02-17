@@ -146,7 +146,7 @@ function CableLabelContent({ data, isPreview = false }: { data: CableFormValues;
         border: isPreview ? '1px solid #e5e7eb' : 'none'
       }}
     >
-      {/* Left black section with logo + phone */}
+      {/* Left black section with logo + phone + company */}
       <div
         className="bg-black text-white flex items-center justify-center gap-1 flex-shrink-0 px-2"
         style={{ width: `${Math.max(20, width * 0.3)}mm` }}
@@ -155,11 +155,16 @@ function CableLabelContent({ data, isPreview = false }: { data: CableFormValues;
           src="/logo.png"
           alt="Logo"
           className="object-contain filter invert brightness-0 saturate-100 invert-[1]"
-          style={{ height: logoH, maxWidth: '50%' }}
+          style={{ height: logoH, maxWidth: '30%' }}
         />
-        <span className="font-bold whitespace-nowrap" style={{ fontSize: smallFontSize }}>
-          +45 71 99 33 66
-        </span>
+        <div className="flex flex-col items-center leading-none">
+          <span className="font-bold whitespace-nowrap" style={{ fontSize: smallFontSize }}>
+            +45 71 99 33 66
+          </span>
+          <span className="whitespace-nowrap" style={{ fontSize: `${Math.max(3, height * 0.22)}px` }}>
+            Filmværksted København
+          </span>
+        </div>
       </div>
 
       {hasCode && data.id && (
