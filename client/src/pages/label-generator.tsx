@@ -239,9 +239,9 @@ function BoxLabelContent({ data, items, isPreview = false }: { data: BoxFormValu
       <div className="flex-1 flex flex-col min-h-0 p-2 overflow-hidden">
         <div className="grid gap-0.5" style={{ gridTemplateColumns: '1fr' }}>
           {items.map((item, idx) => (
-            <div key={idx} className="flex items-center px-2 bg-black/5 rounded" style={{ fontSize: itemFs, height: `${itemRowH}mm` }}>
-              <span className="font-medium">{item.name}</span>
-              {item.id && <span className="ml-auto text-gray-500 font-mono flex-shrink-0" style={{ fontSize: `calc(${itemFs} * 0.85)` }}>#{item.id}</span>}
+            <div key={idx} className="flex items-center px-2 rounded" style={{ fontSize: itemFs, height: `${itemRowH}mm`, borderBottom: '1px solid black' }}>
+              <span className="font-bold">{item.name}</span>
+              {item.id && <span className="ml-auto font-mono font-bold flex-shrink-0" style={{ fontSize: `calc(${itemFs} * 0.85)` }}>#{item.id}</span>}
             </div>
           ))}
         </div>
