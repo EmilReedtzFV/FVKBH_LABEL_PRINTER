@@ -84,13 +84,19 @@ function EquipmentLabelDesignA({ data, isPreview = false }: { data: EquipmentFor
       </div>
       <div className="flex-1 flex items-center justify-center min-h-0 p-2 overflow-hidden">
         <div className="flex flex-row items-center gap-3 h-full max-w-full overflow-hidden">
-          <div className="flex items-center justify-center flex-shrink-0 bg-white p-0.5 rounded" style={{ width: `${qrSize}mm`, height: `${qrSize}mm` }}>
-            <QRCode value={data.id} style={{ height: "100%", width: "100%", maxWidth: "100%", objectFit: "contain" }} viewBox="0 0 256 256" />
-          </div>
-          <div className="h-[70%] w-[2px] bg-white rounded-full flex-shrink-0"></div>
+          {data.id && (
+            <>
+              <div className="flex items-center justify-center flex-shrink-0 bg-white p-0.5 rounded" style={{ width: `${qrSize}mm`, height: `${qrSize}mm` }}>
+                <QRCode value={data.id} style={{ height: "100%", width: "100%", maxWidth: "100%", objectFit: "contain" }} viewBox="0 0 256 256" />
+              </div>
+              <div className="h-[70%] w-[2px] bg-white rounded-full flex-shrink-0"></div>
+            </>
+          )}
           <div className="flex flex-col justify-center min-w-0 overflow-hidden">
             <div className="font-bold uppercase leading-tight" style={{ fontSize: nameFs, wordBreak: 'break-word', overflowWrap: 'break-word', lineHeight: 1.15 }}>{data.name}</div>
-            <div className="font-mono tracking-widest mt-1 text-gray-400" style={{ fontSize: idFs, wordBreak: 'break-all', overflowWrap: 'break-word', lineHeight: 1.1 }}>#{data.id}</div>
+            {data.id && (
+              <div className="font-mono tracking-widest mt-1 text-gray-400" style={{ fontSize: idFs, wordBreak: 'break-all', overflowWrap: 'break-word', lineHeight: 1.1 }}>#{data.id}</div>
+            )}
             {data.group && (
               <div className="mt-1">
                 <span className="bg-white text-black font-bold uppercase tracking-wider rounded inline-block" style={{ fontSize: groupFs, padding: '1px 6px' }}>{data.group}</span>
@@ -366,7 +372,7 @@ export default function LabelGenerator() {
               <div className="grid gap-2 max-h-60 overflow-y-auto">
                 {batchItems.map((item, idx) => (
                   <div key={idx} className="flex items-center gap-3 p-2 bg-muted/50 rounded text-sm" data-testid={`batch-item-${idx}`}>
-                    <span className="font-mono text-muted-foreground">#{item.id}</span>
+                    {item.id ? <span className="font-mono text-muted-foreground">#{item.id}</span> : <span className="text-muted-foreground text-xs italic">Intet nr.</span>}
                     <span className="font-bold flex-1">{item.name}</span>
                     {item.group && <span className="text-xs bg-primary/10 px-2 py-0.5 rounded">{item.group}</span>}
                     <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => setBatchItems(prev => prev.filter((_, i) => i !== idx))} data-testid={`button-remove-batch-${idx}`}>

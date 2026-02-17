@@ -24,13 +24,14 @@ export async function registerRoutes(
       const items: { id: string; name: string; group: string }[] = [];
       let currentId = "";
       let currentGroup = "";
+      const skipPattern = /^--|^\d{1,2}$|^page\s/i;
 
       for (const line of lines) {
         if (/^\d{3,}$/.test(line) || /^[A-Z]{2,}-\d+$/i.test(line)) {
           currentId = line;
         } else if (/^(KIT|SET|GRP|GRUPPE)\s/i.test(line)) {
           currentGroup = line;
-        } else if (currentId && line.length > 2 && !/^\d+$/.test(line)) {
+        } else if (line.length > 2 && !skipPattern.test(line) && !/^\d+$/.test(line)) {
           let name = line;
           let group = currentGroup;
           const tabMatch = line.match(/^(.+?)\t+(KIT|SET|GRP|GRUPPE)\s*(.*)$/i);
