@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import QRCode from "react-qr-code";
 import Barcode from "react-barcode";
 import { useForm } from "react-hook-form";
@@ -76,23 +76,24 @@ const CABLE_PRESETS: Record<string, { width: number; height: number; label: stri
 // Equipment Label Component
 
 // Design A: Top bar with company info, QR left, text right (horizontal)
-function EquipmentLabelDesignA({ data, isPreview = false }: { data: EquipmentFormValues; isPreview?: boolean }) {
+function EquipmentLabelDesignA({ data, isPreview = false, fontScale = 1 }: { data: EquipmentFormValues; isPreview?: boolean; fontScale?: number }) {
   const { width, height } = data;
+  const s = fontScale;
   const isSmall = height < 20;
   const isNarrow = width < 20;
   const isTiny = isSmall || isNarrow;
   const showQr = data.id && !isTiny;
 
   const contentH = isSmall ? height * 0.78 : height * 0.82;
-  const namePx = isSmall
+  const namePx = (isSmall
     ? Math.max(8, Math.min(width * 0.22, contentH * 0.45))
-    : Math.max(8, Math.min(width, height) * 0.22);
-  const idPx = isSmall
+    : Math.max(8, Math.min(width, height) * 0.22)) * s;
+  const idPx = (isSmall
     ? Math.max(6, Math.min(width * 0.14, contentH * 0.3))
-    : Math.max(7, Math.min(width, height) * 0.15);
-  const groupPx = isSmall
+    : Math.max(7, Math.min(width, height) * 0.15)) * s;
+  const groupPx = (isSmall
     ? Math.max(5, Math.min(width * 0.1, contentH * 0.22))
-    : Math.max(6, Math.min(width, height) * 0.12);
+    : Math.max(6, Math.min(width, height) * 0.12)) * s;
   const groupFs = `${groupPx}px`;
   const nameFs = `${namePx}px`;
   const idFs = `${idPx}px`;
@@ -136,17 +137,18 @@ function EquipmentLabelDesignA({ data, isPreview = false }: { data: EquipmentFor
   );
 }
 
-function EquipmentLabelContent({ data, isPreview = false }: { data: EquipmentFormValues; isPreview?: boolean }) {
-  return <EquipmentLabelDesignA data={data} isPreview={isPreview} />;
+function EquipmentLabelContent({ data, isPreview = false, fontScale = 1 }: { data: EquipmentFormValues; isPreview?: boolean; fontScale?: number }) {
+  return <EquipmentLabelDesignA data={data} isPreview={isPreview} fontScale={fontScale} />;
 }
 
 // Cable Label Component - narrow strip that wraps around a cable
-function CableLabelContent({ data, isPreview = false }: { data: CableFormValues; isPreview?: boolean }) {
+function CableLabelContent({ data, isPreview = false, fontScale = 1 }: { data: CableFormValues; isPreview?: boolean; fontScale?: number }) {
   const width = data.width;
   const height = data.height;
+  const s = fontScale;
 
-  const fontSize = `${Math.max(6, height * 0.55)}px`;
-  const smallFontSize = `${Math.max(5, height * 0.35)}px`;
+  const fontSize = `${Math.max(6, height * 0.55) * s}px`;
+  const smallFontSize = `${Math.max(5, height * 0.35) * s}px`;
   const logoH = `${Math.max(10, height * 1.8)}px`;
   const hasCode = data.codeType !== "none";
   const codeSize = height * 0.85;
@@ -283,61 +285,62 @@ export default function LabelGenerator() {
   const [batchItems, setBatchItems] = useState<ParsedItem[]>([]);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const previewLabelRef = useRef<HTMLDivElement>(null);
+  const [fontScale, setFontScale] = useState(1);
+  const optimizeIterRef = useRef(0);
 
-  const optimizeLabel = () => {
+  const checkOverflow = useCallback(() => {
     const el = previewLabelRef.current;
-    if (!el) return;
-
+    if (!el) return false;
     const labelEl = el.querySelector('[data-label-root]') as HTMLElement;
-    if (!labelEl) return;
-
+    if (!labelEl) return false;
     const contentEl = labelEl.querySelector('[data-label-content]') as HTMLElement;
-    if (!contentEl) return;
+    if (!contentEl) return false;
+    return contentEl.scrollHeight > contentEl.clientHeight + 1 ||
+           contentEl.scrollWidth > contentEl.clientWidth + 1;
+  }, []);
 
-    const isOverflowing = contentEl.scrollHeight > contentEl.clientHeight + 1 ||
-                          contentEl.scrollWidth > contentEl.clientWidth + 1;
+  const optimizeLabel = useCallback(() => {
+    setFontScale(1);
+    optimizeIterRef.current = 0;
 
-    if (mode === "equipment") {
-      let w = equipmentForm.getValues("width");
-      let h = equipmentForm.getValues("height");
-
-      if (isOverflowing) {
-        const ratio = w / h;
-        for (let i = 0; i < 20; i++) {
-          h = Math.min(300, h + 2);
-          w = Math.min(100, Math.round(h * ratio));
-          if (w > 100) { w = 100; h = Math.round(w / ratio); }
-        }
-      } else {
-        if (h < 20) {
-          const ratio = w / h;
-          h = Math.min(20, h + 5);
-          w = Math.min(100, Math.round(h * ratio));
-          if (w > 100) { w = 100; }
-        }
+    const runStep = (lo: number, hi: number, step: number) => {
+      if (step > 15) {
+        setFontScale(lo);
+        toast({ title: "Tekst optimeret", description: `Teksten er nu så stor som muligt (${Math.round(lo * 100)}%).` });
+        return;
       }
 
-      equipmentForm.setValue("width", w);
-      equipmentForm.setValue("height", h);
-      equipmentForm.setValue("preset", "custom");
-      setLabelData(prev => ({ ...prev, width: w, height: h, preset: "custom" }));
-      toast({ title: "Label optimeret", description: `Justeret til ${w}×${h}mm for bedste læsbarhed.` });
-    } else if (mode === "cable") {
-      let w = cableForm.getValues("width");
-      let h = cableForm.getValues("height");
+      const mid = Math.round(((lo + hi) / 2) * 100) / 100;
+      setFontScale(mid);
 
-      if (isOverflowing || h < 10) {
-        h = Math.min(300, Math.max(10, h + 3));
-        w = Math.min(100, Math.max(40, w + 5));
-      }
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+          const overflows = checkOverflow();
+          if (overflows) {
+            runStep(lo, mid - 0.05, step + 1);
+          } else {
+            if (hi - mid < 0.05) {
+              setFontScale(mid);
+              toast({ title: "Tekst optimeret", description: `Teksten er nu så stor som muligt (${Math.round(mid * 100)}%).` });
+              return;
+            }
+            runStep(mid, hi, step + 1);
+          }
+        });
+      });
+    };
 
-      cableForm.setValue("width", w);
-      cableForm.setValue("height", h);
-      cableForm.setValue("preset", "custom");
-      setCableData(prev => ({ ...prev, width: w, height: h, preset: "custom" }));
-      toast({ title: "Label optimeret", description: `Justeret til ${w}×${h}mm for bedste læsbarhed.` });
-    }
-  };
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        const overflows = checkOverflow();
+        if (overflows) {
+          runStep(0.5, 1.0, 0);
+        } else {
+          runStep(1.0, 3.0, 0);
+        }
+      });
+    });
+  }, [checkOverflow, toast]);
 
   const [labelData, setLabelData] = useState<EquipmentFormValues>({
     name: "Kamera 1",
@@ -408,11 +411,13 @@ export default function LabelGenerator() {
 
   const onEquipmentSubmit = (data: EquipmentFormValues) => {
     setLabelData(data);
+    setFontScale(1);
     toast({ title: "Label opdateret", description: "Visningen er blevet opdateret." });
   };
 
   const onCableSubmit = (data: CableFormValues) => {
     setCableData(data);
+    setFontScale(1);
     toast({ title: "Kabel label opdateret", description: "Visningen er blevet opdateret." });
   };
 
@@ -1014,19 +1019,21 @@ export default function LabelGenerator() {
                         key={idx}
                         data={{ ...labelData, name: item.name, id: item.id, group: item.group }}
                         isPreview={true}
+                        fontScale={fontScale}
                       />
                     ) : (
                       <CableLabelContent
                         key={idx}
                         data={{ ...cableData, name: item.name, id: item.id, group: item.group }}
                         isPreview={true}
+                        fontScale={fontScale}
                       />
                     )
                   ))
                 ) : mode === "equipment" ? (
-                  <EquipmentLabelContent data={labelData} isPreview={true} />
+                  <EquipmentLabelContent data={labelData} isPreview={true} fontScale={fontScale} />
                 ) : (
-                  <CableLabelContent data={cableData} isPreview={true} />
+                  <CableLabelContent data={cableData} isPreview={true} fontScale={fontScale} />
                 )}
               </div>
             </CardContent>
@@ -1057,18 +1064,20 @@ export default function LabelGenerator() {
               <EquipmentLabelContent
                 key={idx}
                 data={{ ...labelData, name: item.name, id: item.id, group: item.group }}
+                fontScale={fontScale}
               />
             ) : (
               <CableLabelContent
                 key={idx}
                 data={{ ...cableData, name: item.name, id: item.id, group: item.group }}
+                fontScale={fontScale}
               />
             )
           ))
         ) : mode === "equipment" ? (
-          <EquipmentLabelContent data={labelData} />
+          <EquipmentLabelContent data={labelData} fontScale={fontScale} />
         ) : (
-          <CableLabelContent data={cableData} />
+          <CableLabelContent data={cableData} fontScale={fontScale} />
         )}
       </div>
     </div>
