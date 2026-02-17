@@ -258,8 +258,10 @@ function BoxLabelContent({ data, items, isPreview = false }: { data: BoxFormValu
   const phoneFs = `${Math.max(8, width * 0.09)}px`;
   const logoW = `${width * 0.55}mm`;
 
+  const heightStyle = data.autoHeight ? { minHeight: `${height}mm` } : { height: `${height}mm` };
+
   return (
-    <div className="bg-black text-white relative flex flex-col border-0" style={{ width: `${width}mm`, height: `${height}mm`, boxSizing: "border-box", pageBreakInside: "avoid", border: isPreview ? '1px solid #e5e7eb' : 'none', overflow: data.autoHeight ? 'visible' : 'hidden' }}>
+    <div className="bg-black text-white relative flex flex-col border-0" style={{ width: `${width}mm`, ...heightStyle, boxSizing: "border-box", pageBreakInside: "avoid", border: isPreview ? '1px solid #e5e7eb' : 'none', overflow: data.autoHeight ? 'visible' : 'hidden' }}>
       <div className="flex items-center justify-center gap-2 flex-shrink-0" style={{ height: `${BOX_LOGO_H}mm`, padding: '1.5mm 2mm' }}>
         <img src="/logo-black.png" alt="Filmværksted København" className="object-contain" style={{ maxWidth: logoW, maxHeight: '90%', filter: 'invert(1)' }} />
         <span className="font-bold tracking-wider whitespace-nowrap" style={{ fontSize: phoneFs }}>+45 71 99 33 66</span>
@@ -267,8 +269,8 @@ function BoxLabelContent({ data, items, isPreview = false }: { data: BoxFormValu
       <div className="bg-white text-black text-center flex-shrink-0 px-3" style={{ height: `${BOX_KIT_H}mm`, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
         <div className="font-bold uppercase tracking-wider leading-tight" style={{ fontSize: kitFs }}>{data.kitName}</div>
       </div>
-      <div className="flex-1 flex flex-col min-h-0 p-2">
-        <div className="grid gap-0.5" style={{ gridTemplateColumns: '1fr' }}>
+      <div className="p-2">
+        <div className="flex flex-col gap-0.5">
           {items.map((item, idx) => (
             <div key={idx} className="flex items-center px-2 rounded" style={{ fontSize: itemFs, height: `${itemRowH}mm`, borderBottom: '1px solid white' }}>
               <span className="font-bold">{item.name}</span>
