@@ -9,7 +9,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { RefreshCw, Printer, Tag, Cable, ArrowRightLeft, Upload, Trash2, Box, Plus, Wand2 } from "lucide-react";
+import { RefreshCw, Printer, Tag, Cable, ArrowRightLeft, Upload, Trash2, Box, Plus, Wand2, ChevronUp, ChevronDown } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
 type LabelMode = "equipment" | "cable" | "box";
@@ -649,9 +649,39 @@ export default function LabelGenerator() {
                             <Plus className="h-4 w-4" />
                           </Button>
                         </div>
-                        <div className="grid gap-1 max-h-48 overflow-y-auto">
+                        <div className="grid gap-1 max-h-64 overflow-y-auto">
                           {boxItems.map((item, idx) => (
-                            <div key={idx} className="flex items-center gap-2 p-2 bg-muted/50 rounded text-sm" data-testid={`box-item-${idx}`}>
+                            <div key={idx} className="flex items-center gap-1 p-1.5 bg-muted/50 rounded text-sm" data-testid={`box-item-${idx}`}>
+                              <div className="flex flex-col">
+                                <Button
+                                  variant="ghost"
+                                  size="icon"
+                                  className="h-5 w-5"
+                                  disabled={idx === 0}
+                                  onClick={() => setBoxItems(prev => {
+                                    const arr = [...prev];
+                                    [arr[idx - 1], arr[idx]] = [arr[idx], arr[idx - 1]];
+                                    return arr;
+                                  })}
+                                  data-testid={`button-move-up-${idx}`}
+                                >
+                                  <ChevronUp className="h-3 w-3" />
+                                </Button>
+                                <Button
+                                  variant="ghost"
+                                  size="icon"
+                                  className="h-5 w-5"
+                                  disabled={idx === boxItems.length - 1}
+                                  onClick={() => setBoxItems(prev => {
+                                    const arr = [...prev];
+                                    [arr[idx], arr[idx + 1]] = [arr[idx + 1], arr[idx]];
+                                    return arr;
+                                  })}
+                                  data-testid={`button-move-down-${idx}`}
+                                >
+                                  <ChevronDown className="h-3 w-3" />
+                                </Button>
+                              </div>
                               <span className="text-muted-foreground font-mono text-xs">{idx + 1}.</span>
                               <span className="flex-1 font-medium">{item.name}</span>
                               <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => setBoxItems(prev => prev.filter((_, i) => i !== idx))} data-testid={`button-remove-box-item-${idx}`}>
