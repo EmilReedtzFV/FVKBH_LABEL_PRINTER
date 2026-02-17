@@ -140,7 +140,7 @@ function EquipmentLabelDesignA({ data, isPreview = false, fontScale = 1 }: { dat
   );
 }
 
-// Design B: Name large on top, ID + Group side by side below
+// Design B: QR left, Navn øverst, Gruppe i midten, ID nederst
 function EquipmentLabelDesignB({ data, isPreview = false, fontScale = 1 }: { data: EquipmentFormValues; isPreview?: boolean; fontScale?: number }) {
   const { width, height } = data;
   const s = fontScale;
@@ -148,68 +148,16 @@ function EquipmentLabelDesignB({ data, isPreview = false, fontScale = 1 }: { dat
   const isNarrow = width < 20;
   const isTiny = isSmall || isNarrow;
   const showQr = data.id && !isTiny;
-
   const contentH = isSmall ? height * 0.78 : height * 0.82;
-  const namePx = (isSmall ? Math.max(8, Math.min(width * 0.22, contentH * 0.45)) : Math.max(8, Math.min(width, height) * 0.24)) * s;
-  const idPx = (isSmall ? Math.max(6, Math.min(width * 0.16, contentH * 0.35)) : Math.max(8, Math.min(width, height) * 0.17)) * s;
-  const groupPx = (isSmall ? Math.max(5, Math.min(width * 0.1, contentH * 0.22)) : Math.max(6, Math.min(width, height) * 0.11)) * s;
+  const namePx = (isSmall ? Math.max(8, Math.min(width * 0.22, contentH * 0.45)) : Math.max(8, Math.min(width, height) * 0.22)) * s;
+  const idPx = (isSmall ? Math.max(6, Math.min(width * 0.16, contentH * 0.35)) : Math.max(8, Math.min(width, height) * 0.19)) * s;
+  const groupPx = (isSmall ? Math.max(5, Math.min(width * 0.1, contentH * 0.22)) : Math.max(6, Math.min(width, height) * 0.12)) * s;
   const infoFs = `${Math.max(4, Math.min(width * 0.08, height * 0.14))}px`;
   const barH = isSmall ? `${Math.max(height * 0.2, 2.5)}mm` : `${Math.max(height * 0.18, 5)}mm`;
   const isLarge = width >= 40 && height >= 40;
-  const qrSize = Math.min(width * 0.25, height * 0.4);
+  const qrSize = Math.min(width * 0.3, height * 0.5);
   const logoH = `${Math.max(5, height * 0.12)}px`;
-  const pad = isTiny ? '1mm 1mm' : isLarge ? `${height * 0.06}mm ${width * 0.05}mm` : '0.5rem';
-
-  return (
-    <div data-label-root className="bg-black text-white relative flex flex-col border-0" style={{ width: `${width}mm`, height: `${height}mm`, boxSizing: "border-box", pageBreakInside: "avoid", border: isPreview ? '1px solid #e5e7eb' : 'none', overflow: 'hidden' }}>
-      <div className="bg-white text-black flex items-center justify-center px-0.5 w-full flex-shrink-0 gap-0.5" style={{ height: barH, minHeight: 0 }}>
-        <img src="/logo.png" alt="Logo" className="object-contain flex-shrink-0" style={{ height: logoH, maxHeight: '90%' }} />
-        <span className="font-bold uppercase flex-shrink truncate" style={{ fontSize: infoFs, lineHeight: 1.1 }}>Filmværksted København</span>
-        <span className="font-bold tracking-wider flex-shrink-0" style={{ fontSize: infoFs, lineHeight: 1.1 }}>+45 71 99 33 66</span>
-      </div>
-      <div data-label-content className="flex-1 flex flex-col justify-center min-h-0" style={{ padding: pad }}>
-        <div className="font-bold uppercase leading-none text-center" data-label-name style={{ fontSize: `${namePx}px`, wordBreak: 'break-word', overflowWrap: 'break-word', lineHeight: 1.1, marginBottom: isTiny ? '2px' : '4px' }}>{data.name}</div>
-        <div className="flex flex-row items-center justify-center w-full" style={{ gap: isTiny ? '3px' : '8px' }}>
-          {showQr && (
-            <div className="flex items-center justify-center flex-shrink-0 bg-white p-0.5 rounded" style={{ width: `${qrSize}mm`, height: `${qrSize}mm` }}>
-              <QRCode value={data.id} style={{ height: "100%", width: "100%", maxWidth: "100%", objectFit: "contain" }} viewBox="0 0 256 256" />
-            </div>
-          )}
-          <div className="flex flex-col items-center justify-center text-center min-w-0">
-            {data.id && (
-              <div className="font-mono tracking-wider" data-label-id style={{ fontSize: `${idPx}px`, wordBreak: 'break-all', lineHeight: 1.1 }}>#{data.id}</div>
-            )}
-            {data.group && (
-              <div style={{ marginTop: isTiny ? '1px' : '3px' }}>
-                <span className="bg-white text-black font-bold uppercase tracking-wider rounded inline-block" data-label-group style={{ fontSize: `${groupPx}px`, padding: isTiny ? '0px 2px' : '1px 6px', lineHeight: 1.15 }}>{data.group}</span>
-              </div>
-            )}
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-// Design C: QR left, Name+ID stacked right, Group as bottom bar
-function EquipmentLabelDesignC({ data, isPreview = false, fontScale = 1 }: { data: EquipmentFormValues; isPreview?: boolean; fontScale?: number }) {
-  const { width, height } = data;
-  const s = fontScale;
-  const isSmall = height < 20;
-  const isNarrow = width < 20;
-  const isTiny = isSmall || isNarrow;
-  const showQr = data.id && !isTiny;
-
-  const contentH = isSmall ? height * 0.78 : height * 0.82;
-  const namePx = (isSmall ? Math.max(8, Math.min(width * 0.2, contentH * 0.4)) : Math.max(8, Math.min(width, height) * 0.2)) * s;
-  const idPx = (isSmall ? Math.max(6, Math.min(width * 0.16, contentH * 0.35)) : Math.max(8, Math.min(width, height) * 0.18)) * s;
-  const groupPx = (isSmall ? Math.max(5, Math.min(width * 0.1, contentH * 0.22)) : Math.max(6, Math.min(width, height) * 0.11)) * s;
-  const infoFs = `${Math.max(4, Math.min(width * 0.08, height * 0.14))}px`;
-  const barH = isSmall ? `${Math.max(height * 0.2, 2.5)}mm` : `${Math.max(height * 0.16, 4.5)}mm`;
-  const isLarge = width >= 40 && height >= 40;
-  const qrSize = Math.min(width * 0.3, height * 0.45);
-  const logoH = `${Math.max(5, height * 0.12)}px`;
-  const pad = isTiny ? '1mm 1mm' : isLarge ? `${height * 0.06}mm ${width * 0.05}mm` : '0.5rem';
+  const pad = isTiny ? '1mm 1mm' : isLarge ? `${height * 0.08}mm ${width * 0.06}mm` : '0.5rem';
   const contentGap = isTiny ? '2px' : isLarge ? `${width * 0.04}mm` : '0.75rem';
 
   return (
@@ -219,8 +167,8 @@ function EquipmentLabelDesignC({ data, isPreview = false, fontScale = 1 }: { dat
         <span className="font-bold uppercase flex-shrink truncate" style={{ fontSize: infoFs, lineHeight: 1.1 }}>Filmværksted København</span>
         <span className="font-bold tracking-wider flex-shrink-0" style={{ fontSize: infoFs, lineHeight: 1.1 }}>+45 71 99 33 66</span>
       </div>
-      <div data-label-content className="flex-1 flex items-center min-h-0" style={{ padding: pad }}>
-        <div className="flex flex-row items-center h-full max-w-full w-full" style={{ gap: contentGap }}>
+      <div data-label-content className="flex-1 flex items-center justify-center min-h-0" style={{ padding: pad, paddingTop: isTiny ? '1.5mm' : undefined }}>
+        <div className="flex flex-row items-center h-full max-w-full" style={{ gap: contentGap }}>
           {showQr && (
             <>
               <div className="flex items-center justify-center flex-shrink-0 bg-white p-0.5 rounded" style={{ width: `${qrSize}mm`, height: `${qrSize}mm` }}>
@@ -229,42 +177,42 @@ function EquipmentLabelDesignC({ data, isPreview = false, fontScale = 1 }: { dat
               <div className="h-[70%] w-[2px] bg-white rounded-full flex-shrink-0"></div>
             </>
           )}
-          <div className="flex flex-col justify-center items-center min-w-0 w-full text-center flex-1" style={{ overflow: 'hidden' }}>
+          <div className="flex flex-col items-center min-w-0 w-full text-center" style={{ overflow: 'hidden', justifyContent: (data.id || data.group) ? 'space-evenly' : 'center', height: '100%' }}>
             <div className="font-bold uppercase leading-none" data-label-name style={{ fontSize: `${namePx}px`, wordBreak: 'break-word', overflowWrap: 'break-word', lineHeight: 1.1 }}>{data.name}</div>
+            {data.group && (
+              <div>
+                <span className="bg-white text-black font-bold uppercase tracking-wider rounded inline-block" data-label-group style={{ fontSize: `${groupPx}px`, padding: isTiny ? '0px 2px' : '2px 8px', lineHeight: 1.15 }}>{data.group}</span>
+              </div>
+            )}
             {data.id && (
-              <div className="font-mono tracking-wider" data-label-id style={{ fontSize: `${idPx}px`, wordBreak: 'break-all', lineHeight: 1.1, marginTop: isTiny ? '2px' : '4px' }}>#{data.id}</div>
+              <div className="font-mono tracking-wider" data-label-id style={{ fontSize: `${idPx}px`, wordBreak: 'break-all', overflowWrap: 'break-word', lineHeight: 1.1 }}>#{data.id}</div>
             )}
           </div>
         </div>
       </div>
-      {data.group && (
-        <div className="bg-white text-black flex items-center justify-center w-full flex-shrink-0" style={{ height: barH, minHeight: 0 }}>
-          <span className="font-bold uppercase tracking-wider" data-label-group style={{ fontSize: `${groupPx}px`, lineHeight: 1.15 }}>{data.group}</span>
-        </div>
-      )}
     </div>
   );
 }
 
-// Design D: Clean centered layout with all text stacked vertically, QR at bottom
-function EquipmentLabelDesignD({ data, isPreview = false, fontScale = 1 }: { data: EquipmentFormValues; isPreview?: boolean; fontScale?: number }) {
+// Design C: QR left, Navn og ID tæt sammen øverst, Gruppe nederst med afstand
+function EquipmentLabelDesignC({ data, isPreview = false, fontScale = 1 }: { data: EquipmentFormValues; isPreview?: boolean; fontScale?: number }) {
   const { width, height } = data;
   const s = fontScale;
   const isSmall = height < 20;
   const isNarrow = width < 20;
   const isTiny = isSmall || isNarrow;
   const showQr = data.id && !isTiny;
-
   const contentH = isSmall ? height * 0.78 : height * 0.82;
   const namePx = (isSmall ? Math.max(8, Math.min(width * 0.22, contentH * 0.45)) : Math.max(8, Math.min(width, height) * 0.22)) * s;
   const idPx = (isSmall ? Math.max(6, Math.min(width * 0.16, contentH * 0.35)) : Math.max(8, Math.min(width, height) * 0.19)) * s;
   const groupPx = (isSmall ? Math.max(5, Math.min(width * 0.1, contentH * 0.22)) : Math.max(6, Math.min(width, height) * 0.12)) * s;
   const infoFs = `${Math.max(4, Math.min(width * 0.08, height * 0.14))}px`;
-  const barH = isSmall ? `${Math.max(height * 0.2, 2.5)}mm` : `${Math.max(height * 0.16, 4.5)}mm`;
+  const barH = isSmall ? `${Math.max(height * 0.2, 2.5)}mm` : `${Math.max(height * 0.18, 5)}mm`;
   const isLarge = width >= 40 && height >= 40;
-  const qrSize = Math.min(width * 0.22, height * 0.3);
+  const qrSize = Math.min(width * 0.3, height * 0.5);
   const logoH = `${Math.max(5, height * 0.12)}px`;
-  const pad = isTiny ? '1mm 1mm' : isLarge ? `${height * 0.05}mm ${width * 0.05}mm` : '0.4rem';
+  const pad = isTiny ? '1mm 1mm' : isLarge ? `${height * 0.08}mm ${width * 0.06}mm` : '0.5rem';
+  const contentGap = isTiny ? '2px' : isLarge ? `${width * 0.04}mm` : '0.75rem';
 
   return (
     <div data-label-root className="bg-black text-white relative flex flex-col border-0" style={{ width: `${width}mm`, height: `${height}mm`, boxSizing: "border-box", pageBreakInside: "avoid", border: isPreview ? '1px solid #e5e7eb' : 'none', overflow: 'hidden' }}>
@@ -273,21 +221,84 @@ function EquipmentLabelDesignD({ data, isPreview = false, fontScale = 1 }: { dat
         <span className="font-bold uppercase flex-shrink truncate" style={{ fontSize: infoFs, lineHeight: 1.1 }}>Filmværksted København</span>
         <span className="font-bold tracking-wider flex-shrink-0" style={{ fontSize: infoFs, lineHeight: 1.1 }}>+45 71 99 33 66</span>
       </div>
-      <div data-label-content className="flex-1 flex flex-col items-center justify-center min-h-0" style={{ padding: pad, gap: isTiny ? '2px' : '4px' }}>
-        <div className="font-bold uppercase leading-none text-center" data-label-name style={{ fontSize: `${namePx}px`, wordBreak: 'break-word', overflowWrap: 'break-word', lineHeight: 1.1 }}>{data.name}</div>
-        {data.id && (
-          <div className="font-mono tracking-wider text-center" data-label-id style={{ fontSize: `${idPx}px`, wordBreak: 'break-all', lineHeight: 1.1 }}>#{data.id}</div>
-        )}
-        {data.group && (
-          <div>
-            <span className="bg-white text-black font-bold uppercase tracking-wider rounded inline-block" data-label-group style={{ fontSize: `${groupPx}px`, padding: isTiny ? '0px 2px' : '2px 8px', lineHeight: 1.15 }}>{data.group}</span>
+      <div data-label-content className="flex-1 flex items-center justify-center min-h-0" style={{ padding: pad, paddingTop: isTiny ? '1.5mm' : undefined }}>
+        <div className="flex flex-row items-center h-full max-w-full" style={{ gap: contentGap }}>
+          {showQr && (
+            <>
+              <div className="flex items-center justify-center flex-shrink-0 bg-white p-0.5 rounded" style={{ width: `${qrSize}mm`, height: `${qrSize}mm` }}>
+                <QRCode value={data.id} style={{ height: "100%", width: "100%", maxWidth: "100%", objectFit: "contain" }} viewBox="0 0 256 256" />
+              </div>
+              <div className="h-[70%] w-[2px] bg-white rounded-full flex-shrink-0"></div>
+            </>
+          )}
+          <div className="flex flex-col items-center min-w-0 w-full text-center" style={{ overflow: 'hidden', justifyContent: 'space-between', height: '100%' }}>
+            <div className="flex flex-col items-center" style={{ marginTop: isTiny ? '1px' : '4px' }}>
+              <div className="font-bold uppercase leading-none" data-label-name style={{ fontSize: `${namePx}px`, wordBreak: 'break-word', overflowWrap: 'break-word', lineHeight: 1.1 }}>{data.name}</div>
+              {data.id && (
+                <div className="font-mono tracking-wider" data-label-id style={{ fontSize: `${idPx}px`, wordBreak: 'break-all', overflowWrap: 'break-word', lineHeight: 1.1, marginTop: isTiny ? '1px' : '3px' }}>#{data.id}</div>
+              )}
+            </div>
+            {data.group && (
+              <div style={{ marginBottom: isTiny ? '1px' : '4px' }}>
+                <span className="bg-white text-black font-bold uppercase tracking-wider rounded inline-block" data-label-group style={{ fontSize: `${groupPx}px`, padding: isTiny ? '0px 2px' : '2px 8px', lineHeight: 1.15 }}>{data.group}</span>
+              </div>
+            )}
           </div>
-        )}
-        {showQr && (
-          <div className="flex items-center justify-center flex-shrink-0 bg-white p-0.5 rounded" style={{ width: `${qrSize}mm`, height: `${qrSize}mm` }}>
-            <QRCode value={data.id} style={{ height: "100%", width: "100%", maxWidth: "100%", objectFit: "contain" }} viewBox="0 0 256 256" />
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// Design D: QR left, ID stort øverst, Navn i midten, Gruppe nederst
+function EquipmentLabelDesignD({ data, isPreview = false, fontScale = 1 }: { data: EquipmentFormValues; isPreview?: boolean; fontScale?: number }) {
+  const { width, height } = data;
+  const s = fontScale;
+  const isSmall = height < 20;
+  const isNarrow = width < 20;
+  const isTiny = isSmall || isNarrow;
+  const showQr = data.id && !isTiny;
+  const contentH = isSmall ? height * 0.78 : height * 0.82;
+  const namePx = (isSmall ? Math.max(8, Math.min(width * 0.18, contentH * 0.38)) : Math.max(8, Math.min(width, height) * 0.18)) * s;
+  const idPx = (isSmall ? Math.max(6, Math.min(width * 0.22, contentH * 0.45)) : Math.max(8, Math.min(width, height) * 0.24)) * s;
+  const groupPx = (isSmall ? Math.max(5, Math.min(width * 0.1, contentH * 0.22)) : Math.max(6, Math.min(width, height) * 0.12)) * s;
+  const infoFs = `${Math.max(4, Math.min(width * 0.08, height * 0.14))}px`;
+  const barH = isSmall ? `${Math.max(height * 0.2, 2.5)}mm` : `${Math.max(height * 0.18, 5)}mm`;
+  const isLarge = width >= 40 && height >= 40;
+  const qrSize = Math.min(width * 0.3, height * 0.5);
+  const logoH = `${Math.max(5, height * 0.12)}px`;
+  const pad = isTiny ? '1mm 1mm' : isLarge ? `${height * 0.08}mm ${width * 0.06}mm` : '0.5rem';
+  const contentGap = isTiny ? '2px' : isLarge ? `${width * 0.04}mm` : '0.75rem';
+
+  return (
+    <div data-label-root className="bg-black text-white relative flex flex-col border-0" style={{ width: `${width}mm`, height: `${height}mm`, boxSizing: "border-box", pageBreakInside: "avoid", border: isPreview ? '1px solid #e5e7eb' : 'none', overflow: 'hidden' }}>
+      <div className="bg-white text-black flex items-center justify-center px-0.5 w-full flex-shrink-0 gap-0.5" style={{ height: barH, minHeight: 0 }}>
+        <img src="/logo.png" alt="Logo" className="object-contain flex-shrink-0" style={{ height: logoH, maxHeight: '90%' }} />
+        <span className="font-bold uppercase flex-shrink truncate" style={{ fontSize: infoFs, lineHeight: 1.1 }}>Filmværksted København</span>
+        <span className="font-bold tracking-wider flex-shrink-0" style={{ fontSize: infoFs, lineHeight: 1.1 }}>+45 71 99 33 66</span>
+      </div>
+      <div data-label-content className="flex-1 flex items-center justify-center min-h-0" style={{ padding: pad, paddingTop: isTiny ? '1.5mm' : undefined }}>
+        <div className="flex flex-row items-center h-full max-w-full" style={{ gap: contentGap }}>
+          {showQr && (
+            <>
+              <div className="flex items-center justify-center flex-shrink-0 bg-white p-0.5 rounded" style={{ width: `${qrSize}mm`, height: `${qrSize}mm` }}>
+                <QRCode value={data.id} style={{ height: "100%", width: "100%", maxWidth: "100%", objectFit: "contain" }} viewBox="0 0 256 256" />
+              </div>
+              <div className="h-[70%] w-[2px] bg-white rounded-full flex-shrink-0"></div>
+            </>
+          )}
+          <div className="flex flex-col items-center min-w-0 w-full text-center" style={{ overflow: 'hidden', justifyContent: (data.id || data.group) ? 'space-evenly' : 'center', height: '100%' }}>
+            {data.id && (
+              <div className="font-mono tracking-wider font-bold" data-label-id style={{ fontSize: `${idPx}px`, wordBreak: 'break-all', overflowWrap: 'break-word', lineHeight: 1.1 }}>#{data.id}</div>
+            )}
+            <div className="uppercase leading-none" data-label-name style={{ fontSize: `${namePx}px`, wordBreak: 'break-word', overflowWrap: 'break-word', lineHeight: 1.1 }}>{data.name}</div>
+            {data.group && (
+              <div>
+                <span className="bg-white text-black font-bold uppercase tracking-wider rounded inline-block" data-label-group style={{ fontSize: `${groupPx}px`, padding: isTiny ? '0px 2px' : '2px 8px', lineHeight: 1.15 }}>{data.group}</span>
+              </div>
+            )}
           </div>
-        )}
+        </div>
       </div>
     </div>
   );
@@ -296,10 +307,10 @@ function EquipmentLabelDesignD({ data, isPreview = false, fontScale = 1 }: { dat
 const equipmentDesigns = ['A', 'B', 'C', 'D'] as const;
 type EquipmentDesign = typeof equipmentDesigns[number];
 const designLabels: Record<EquipmentDesign, string> = {
-  A: 'QR venstre, tekst højre',
-  B: 'Navn stor øverst, QR+ID nedenunder',
-  C: 'QR venstre, gruppe som bundbar',
-  D: 'Alt centreret, QR i bunden',
+  A: 'Navn → ID → Gruppe',
+  B: 'Navn → Gruppe → ID',
+  C: 'Navn+ID samlet øverst, Gruppe nederst',
+  D: 'ID øverst → Navn → Gruppe',
 };
 
 function EquipmentLabelByDesign({ design, data, isPreview = false, fontScale = 1 }: { design: EquipmentDesign; data: EquipmentFormValues; isPreview?: boolean; fontScale?: number }) {
