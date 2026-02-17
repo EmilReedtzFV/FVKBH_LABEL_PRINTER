@@ -387,7 +387,7 @@ export default function LabelGenerator() {
   const [cableData, setCableData] = useState<CableFormValues>({
     name: "SDI Kabel",
     id: "CBL-001",
-    group: "Kit 1",
+    group: "",
     codeType: "qr",
     width: 70,
     height: 10,
@@ -900,9 +900,9 @@ export default function LabelGenerator() {
                       name="group"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>Gruppe / Kit</FormLabel>
+                          <FormLabel>Gruppe / Kit (valgfri)</FormLabel>
                           <FormControl>
-                            <Input placeholder="F.eks. Kit 1, Lyd Kit 2" {...field} data-testid="input-cable-group" />
+                            <Input placeholder="Lad stå tom for ingen gruppe" {...field} data-testid="input-cable-group" />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
