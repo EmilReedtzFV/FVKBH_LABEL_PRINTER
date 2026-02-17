@@ -122,14 +122,14 @@ function EquipmentLabelDesignA({ data, isPreview = false, fontScale = 1 }: { dat
               <div className="h-[70%] w-[2px] bg-white rounded-full flex-shrink-0"></div>
             </>
           )}
-          <div className="flex flex-col justify-center items-center min-w-0 w-full text-center" style={{ overflow: 'visible' }}>
+          <div className="flex flex-col justify-center items-center min-w-0 w-full text-center" style={{ overflow: 'hidden' }}>
             <div className="font-bold uppercase leading-none" data-label-name style={{ fontSize: nameFs, wordBreak: 'break-word', overflowWrap: 'break-word', lineHeight: 1.05 }}>{data.name}</div>
             {data.id && (
-              <div className="font-mono tracking-wider" style={{ fontSize: idFs, wordBreak: 'break-all', overflowWrap: 'break-word', lineHeight: 1.05, marginTop: isTiny ? '1px' : '2px' }}>#{data.id}</div>
+              <div className="font-mono tracking-wider" data-label-id style={{ fontSize: idFs, wordBreak: 'break-all', overflowWrap: 'break-word', lineHeight: 1.05, marginTop: isTiny ? '1px' : '2px' }}>#{data.id}</div>
             )}
             {data.group && (
               <div style={{ marginTop: isTiny ? '1px' : '2px' }}>
-                <span className="bg-white text-black font-bold uppercase tracking-wider rounded inline-block" style={{ fontSize: groupFs, padding: isTiny ? '0px 2px' : '1px 6px', lineHeight: 1.15 }}>{data.group}</span>
+                <span className="bg-white text-black font-bold uppercase tracking-wider rounded inline-block" data-label-group style={{ fontSize: groupFs, padding: isTiny ? '0px 2px' : '1px 6px', lineHeight: 1.15 }}>{data.group}</span>
               </div>
             )}
           </div>
@@ -298,12 +298,18 @@ export default function LabelGenerator() {
     const allLabels = el.querySelectorAll('[data-label-root]');
     const labelEl = allLabels[idx] as HTMLElement;
     if (!labelEl) return false;
+    if (labelEl.scrollHeight > labelEl.clientHeight + 1 ||
+        labelEl.scrollWidth > labelEl.clientWidth + 1) return true;
     const contentEl = labelEl.querySelector('[data-label-content]') as HTMLElement;
-    if (!contentEl) return false;
-    if (contentEl.scrollHeight > contentEl.clientHeight + 1 ||
-        contentEl.scrollWidth > contentEl.clientWidth + 1) return true;
-    const nameEl = labelEl.querySelector('[data-label-name]') as HTMLElement;
-    if (nameEl && nameEl.scrollWidth > nameEl.clientWidth + 1) return true;
+    if (contentEl) {
+      if (contentEl.scrollHeight > contentEl.clientHeight + 1 ||
+          contentEl.scrollWidth > contentEl.clientWidth + 1) return true;
+    }
+    const textEls = labelEl.querySelectorAll('[data-label-name], [data-label-id], [data-label-group]');
+    for (const te of textEls) {
+      const t = te as HTMLElement;
+      if (t.scrollWidth > t.clientWidth + 1 || t.scrollHeight > t.clientHeight + 1) return true;
+    }
     return false;
   }, []);
 
@@ -324,7 +330,8 @@ export default function LabelGenerator() {
 
       const runStep = (lo: number, hi: number, step: number, currentScales: Record<number, number>) => {
         if (step > 15 || hi - lo < 0.05) {
-          const final = { ...currentScales, [idx]: lo };
+          const safeScale = Math.max(0.5, lo * 0.95);
+          const final = { ...currentScales, [idx]: safeScale };
           setFontScales(final);
           requestAnimationFrame(() => {
             optimizeOne(idx + 1, final);
@@ -357,7 +364,7 @@ export default function LabelGenerator() {
           if (overflows) {
             runStep(0.5, 1.0, 0, scales);
           } else {
-            runStep(1.0, 3.0, 0, initial);
+            runStep(1.0, 2.5, 0, initial);
           }
         });
       });
