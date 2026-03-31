@@ -472,15 +472,23 @@ function BoxLabelContent({ data, items, isPreview = false }: { data: BoxFormValu
 }
 
 // Round Label Component - circular label
-function RoundLabelContent({ data, isPreview = false, fontScale = 1 }: { data: RoundFormValues; isPreview?: boolean; fontScale?: number }) {
+function RoundLabelContent({ data, isPreview = false, nameFontSize = 0, idFontSize = 0, groupFontSize = 0, contentOffset = 0 }: {
+  data: RoundFormValues;
+  isPreview?: boolean;
+  nameFontSize?: number;  // 0 means auto
+  idFontSize?: number;    // 0 means auto
+  groupFontSize?: number; // 0 means auto
+  contentOffset?: number; // -20 to 20 (mm), shifts content up/down
+}) {
   const d = data.diameter;
-  const s = fontScale;
-  const namePx = Math.max(8, d * 0.14) * s;
-  const idPx = Math.max(6, d * 0.1) * s;
-  const groupPx = Math.max(5, d * 0.08) * s;
+  const autoNamePx = Math.max(8, d * 0.14);
+  const autoIdPx = Math.max(6, d * 0.1);
+  const autoGroupPx = Math.max(5, d * 0.08);
+  const namePx = nameFontSize > 0 ? nameFontSize : autoNamePx;
+  const idPx = idFontSize > 0 ? idFontSize : autoIdPx;
+  const groupPx = groupFontSize > 0 ? groupFontSize : autoGroupPx;
   const infoFs = `${Math.max(6, d * 0.09)}px`;
   const phoneFs = `${Math.max(5, d * 0.07)}px`;
-  const logoH = `${Math.max(8, d * 0.12)}px`;
   const showQr = data.codeType === 'qr' && data.id;
   const qrSize = d * 0.32;
   const pad = `${d * 0.17}mm`;
@@ -511,15 +519,24 @@ function RoundLabelContent({ data, isPreview = false, fontScale = 1 }: { data: R
       {/* Divider */}
       <div className="bg-white flex-shrink-0" style={{ width: '60%', height: '1.5px', marginBottom: `${d * 0.025}mm` }}></div>
 
-      {/* QR Code */}
-      {showQr && (
-        <div className="flex items-center justify-center bg-white rounded flex-shrink-0" style={{ width: `${qrSize}mm`, height: `${qrSize}mm`, padding: `${qrSize * 0.04}mm`, marginBottom: `${d * 0.025}mm` }}>
-          <QRCode value={data.id} style={{ height: '100%', width: '100%' }} viewBox="0 0 256 256" />
-        </div>
-      )}
+      {/* Main content area with optional vertical offset */}
+      <div
+        data-label-content
+        className="flex flex-col items-center justify-center text-center"
+        style={{
+          overflow: 'hidden',
+          width: '100%',
+          flex: '0 1 auto',
+          transform: contentOffset !== 0 ? `translateY(${contentOffset}mm)` : undefined,
+        }}
+      >
+        {/* QR Code */}
+        {showQr && (
+          <div className="flex items-center justify-center bg-white rounded flex-shrink-0" style={{ width: `${qrSize}mm`, height: `${qrSize}mm`, padding: `${qrSize * 0.04}mm`, marginBottom: `${d * 0.025}mm` }}>
+            <QRCode value={data.id} style={{ height: '100%', width: '100%' }} viewBox="0 0 256 256" />
+          </div>
+        )}
 
-      {/* Content: Name, ID, Group */}
-      <div data-label-content className="flex flex-col items-center justify-center text-center" style={{ overflow: 'hidden', width: '100%', flex: '0 1 auto' }}>
         <div
           data-label-name
           className="font-bold uppercase text-center leading-tight"
@@ -697,6 +714,10 @@ export default function LabelGenerator() {
     diameter: 60,
     codeType: "qr",
   });
+  const [roundNameSize, setRoundNameSize] = useState<number>(0);
+  const [roundIdSize, setRoundIdSize] = useState<number>(0);
+  const [roundGroupSize, setRoundGroupSize] = useState<number>(0);
+  const [roundContentOffset, setRoundContentOffset] = useState<number>(0);
 
   const equipmentForm = useForm<EquipmentFormValues>({
     resolver: zodResolver(equipmentSchema),
@@ -1087,6 +1108,43 @@ export default function LabelGenerator() {
                         </FormItem>
                       )}
                     />
+                    {/* Font size controls */}
+                    <div className="space-y-3">
+                      <label className="text-sm font-medium">Skriftstørrelser</label>
+                      <div className="space-y-2">
+                        <div className="flex items-center gap-3">
+                          <span className="text-xs w-16 text-muted-foreground">Navn</span>
+                          <input type="range" min={0} max={30} step={0.5} value={roundNameSize} onChange={e => setRoundNameSize(Number(e.target.value))} className="flex-1" />
+                          <span className="text-xs w-8 text-right">{roundNameSize === 0 ? 'Auto' : `${roundNameSize}px`}</span>
+                          {roundNameSize > 0 && <button type="button" className="text-xs text-muted-foreground hover:text-black" onClick={() => setRoundNameSize(0)}>↺</button>}
+                        </div>
+                        <div className="flex items-center gap-3">
+                          <span className="text-xs w-16 text-muted-foreground">ID</span>
+                          <input type="range" min={0} max={24} step={0.5} value={roundIdSize} onChange={e => setRoundIdSize(Number(e.target.value))} className="flex-1" />
+                          <span className="text-xs w-8 text-right">{roundIdSize === 0 ? 'Auto' : `${roundIdSize}px`}</span>
+                          {roundIdSize > 0 && <button type="button" className="text-xs text-muted-foreground hover:text-black" onClick={() => setRoundIdSize(0)}>↺</button>}
+                        </div>
+                        <div className="flex items-center gap-3">
+                          <span className="text-xs w-16 text-muted-foreground">Gruppe</span>
+                          <input type="range" min={0} max={20} step={0.5} value={roundGroupSize} onChange={e => setRoundGroupSize(Number(e.target.value))} className="flex-1" />
+                          <span className="text-xs w-8 text-right">{roundGroupSize === 0 ? 'Auto' : `${roundGroupSize}px`}</span>
+                          {roundGroupSize > 0 && <button type="button" className="text-xs text-muted-foreground hover:text-black" onClick={() => setRoundGroupSize(0)}>↺</button>}
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Content position */}
+                    <div className="space-y-2">
+                      <label className="text-sm font-medium">Tekstplacering (op/ned)</label>
+                      <div className="flex items-center gap-3">
+                        <span className="text-xs text-muted-foreground">Op</span>
+                        <input type="range" min={-15} max={15} step={0.5} value={roundContentOffset} onChange={e => setRoundContentOffset(Number(e.target.value))} className="flex-1" />
+                        <span className="text-xs text-muted-foreground">Ned</span>
+                        <span className="text-xs w-12 text-right">{roundContentOffset === 0 ? 'Midt' : `${roundContentOffset > 0 ? '+' : ''}${roundContentOffset}mm`}</span>
+                        {roundContentOffset !== 0 && <button type="button" className="text-xs text-muted-foreground hover:text-black" onClick={() => setRoundContentOffset(0)}>↺</button>}
+                      </div>
+                    </div>
+
                     <Button type="submit" className="w-full" data-testid="button-update-round">Opdater Visning</Button>
                   </form>
                 </Form>
@@ -1568,11 +1626,14 @@ export default function LabelGenerator() {
                         key={idx}
                         data={{ ...roundData, name: item.name, id: item.id, group: item.group }}
                         isPreview={true}
-                        fontScale={getFontScale(idx)}
+                        nameFontSize={roundNameSize}
+                        idFontSize={roundIdSize}
+                        groupFontSize={roundGroupSize}
+                        contentOffset={roundContentOffset}
                       />
                     ))
                   ) : (
-                    <RoundLabelContent data={roundData} isPreview={true} fontScale={getFontScale(0)} />
+                    <RoundLabelContent data={roundData} isPreview={true} nameFontSize={roundNameSize} idFontSize={roundIdSize} groupFontSize={roundGroupSize} contentOffset={roundContentOffset} />
                   )
                 ) : batchItems.length > 0 ? (
                   batchItems.map((item, idx) => (
@@ -1629,7 +1690,10 @@ export default function LabelGenerator() {
             <div key={idx} style={{ display: 'flex', flexDirection: 'row', ...(idx < items.length - 1 ? { pageBreakAfter: 'always', breakAfter: 'page' } : {}) }}>
               <RoundLabelContent
                 data={{ ...roundData, name: item.name, id: item.id, group: item.group ?? '' }}
-                fontScale={getFontScale(idx)}
+                nameFontSize={roundNameSize}
+                idFontSize={roundIdSize}
+                groupFontSize={roundGroupSize}
+                contentOffset={roundContentOffset}
               />
               <div style={{ width: '5mm', background: 'white', flexShrink: 0 }} />
             </div>
