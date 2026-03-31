@@ -49,7 +49,7 @@ const boxSchema = z.object({
 });
 
 const roundSchema = z.object({
-  name: z.string().min(1, "Navn er påkrævet"),
+  name: z.string().optional().default(""),
   id: z.string().optional().default(""),
   group: z.string().optional(),
   diameter: z.number().min(20).max(150).optional(),
@@ -474,13 +474,16 @@ function BoxLabelContent({ data, items, isPreview = false }: { data: BoxFormValu
 }
 
 // Square/Custom Label Component
-function RoundLabelContent({ data, isPreview = false, nameFontSize = 0, idFontSize = 0, groupFontSize = 0, contentOffset = 0 }: {
+function RoundLabelContent({ data, isPreview = false, nameFontSize = 0, idFontSize = 0, groupFontSize = 0, contentOffset = 0, showName = true, showId = true, showGroup = true }: {
   data: RoundFormValues;
   isPreview?: boolean;
   nameFontSize?: number;
   idFontSize?: number;
   groupFontSize?: number;
   contentOffset?: number;
+  showName?: boolean;
+  showId?: boolean;
+  showGroup?: boolean;
 }) {
   const width = data.width ?? 96;
   const height = data.height ?? 40;
@@ -523,11 +526,11 @@ function RoundLabelContent({ data, isPreview = false, nameFontSize = 0, idFontSi
             </>
           )}
           <div className="flex flex-col justify-start self-stretch min-w-0 flex-1 text-left" style={{ overflow: 'hidden', gap: contentGap }}>
-            <div className="font-bold uppercase leading-tight" data-label-name
-              style={{ fontSize: `${namePx}px`, wordBreak: 'break-word', overflowWrap: 'break-word', lineHeight: 1.15 }}>{data.name}</div>
-            {data.id && <div className="font-mono tracking-wider font-bold" data-label-id
+            {showName && <div className="font-bold uppercase leading-tight" data-label-name
+              style={{ fontSize: `${namePx}px`, wordBreak: 'break-word', overflowWrap: 'break-word', lineHeight: 1.15 }}>{data.name}</div>}
+            {showId && data.id && <div className="font-mono tracking-wider font-bold" data-label-id
               style={{ fontSize: `${idPx}px`, wordBreak: 'break-all', lineHeight: 1.1 }}>#{data.id}</div>}
-            {data.group && <div><span className="bg-white text-black font-bold uppercase tracking-wider rounded inline-block" data-label-group
+            {showGroup && data.group && <div><span className="bg-white text-black font-bold uppercase tracking-wider rounded inline-block" data-label-group
               style={{ fontSize: `${groupPx}px`, padding: isSmall ? '0px 2px' : '2px 8px', lineHeight: 1.15 }}>{data.group}</span></div>}
           </div>
         </div>
@@ -688,6 +691,10 @@ export default function LabelGenerator() {
   const [roundIdSize, setRoundIdSize] = useState<number>(0);
   const [roundGroupSize, setRoundGroupSize] = useState<number>(0);
   const [roundContentOffset, setRoundContentOffset] = useState<number>(0);
+  const [roundShowQr, setRoundShowQr] = useState<boolean>(true);
+  const [roundShowName, setRoundShowName] = useState<boolean>(true);
+  const [roundShowId, setRoundShowId] = useState<boolean>(true);
+  const [roundShowGroup, setRoundShowGroup] = useState<boolean>(true);
 
   const equipmentForm = useForm<EquipmentFormValues>({
     resolver: zodResolver(equipmentSchema),
@@ -751,7 +758,7 @@ export default function LabelGenerator() {
   };
 
   const onRoundSubmit = (data: RoundFormValues) => {
-    setRoundData({ ...data, width: printerWidth });
+    setRoundData({ ...data, width: printerWidth, codeType: roundShowQr ? "qr" : "none" });
     setFontScales({});
     toast({ title: "Custom label opdateret", description: "Visningen er blevet opdateret." });
   };
@@ -986,9 +993,14 @@ export default function LabelGenerator() {
                       name="name"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>Navn på udstyr</FormLabel>
+                          <div className="flex items-center gap-2">
+                            <input type="checkbox" checked={roundShowName}
+                              onChange={e => setRoundShowName(e.target.checked)}
+                              className="h-4 w-4 rounded border-gray-300" />
+                            <FormLabel className="cursor-pointer">Navn på udstyr</FormLabel>
+                          </div>
                           <FormControl>
-                            <Input placeholder="F.eks. Kamera 1" {...field} data-testid="input-round-name" />
+                            <Input placeholder="F.eks. Kamera 1" {...field} value={field.value ?? ''} data-testid="input-round-name" disabled={!roundShowName} className={!roundShowName ? 'opacity-40' : ''} />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
@@ -1000,9 +1012,14 @@ export default function LabelGenerator() {
                         name="id"
                         render={({ field }) => (
                           <FormItem className="flex-1">
-                            <FormLabel>ID Nummer</FormLabel>
+                            <div className="flex items-center gap-2">
+                              <input type="checkbox" checked={roundShowId}
+                                onChange={e => setRoundShowId(e.target.checked)}
+                                className="h-4 w-4 rounded border-gray-300" />
+                              <FormLabel className="cursor-pointer">ID Nummer</FormLabel>
+                            </div>
                             <FormControl>
-                              <Input placeholder="F.eks. CAM-001" {...field} data-testid="input-round-id" />
+                              <Input placeholder="F.eks. CAM-001" {...field} value={field.value ?? ''} data-testid="input-round-id" disabled={!roundShowId} className={!roundShowId ? 'opacity-40' : ''} />
                             </FormControl>
                             <FormMessage />
                           </FormItem>
@@ -1017,9 +1034,14 @@ export default function LabelGenerator() {
                       name="group"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>Gruppe / Kit (valgfri)</FormLabel>
+                          <div className="flex items-center gap-2">
+                            <input type="checkbox" checked={roundShowGroup}
+                              onChange={e => setRoundShowGroup(e.target.checked)}
+                              className="h-4 w-4 rounded border-gray-300" />
+                            <FormLabel className="cursor-pointer">Gruppe / Kit</FormLabel>
+                          </div>
                           <FormControl>
-                            <Input placeholder="F.eks. Kit 1" {...field} data-testid="input-round-group" />
+                            <Input placeholder="F.eks. Kit 1" {...field} value={field.value ?? ''} data-testid="input-round-group" disabled={!roundShowGroup} className={!roundShowGroup ? 'opacity-40' : ''} />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
@@ -1027,8 +1049,8 @@ export default function LabelGenerator() {
                     />
                     <div className="flex items-center gap-2">
                       <input type="checkbox" id="round-show-qr"
-                        checked={roundForm.watch("codeType") === "qr"}
-                        onChange={e => roundForm.setValue("codeType", e.target.checked ? "qr" : "none")}
+                        checked={roundShowQr}
+                        onChange={e => setRoundShowQr(e.target.checked)}
                         className="h-4 w-4 rounded border-gray-300" />
                       <label htmlFor="round-show-qr" className="text-sm font-medium cursor-pointer">Vis QR Kode</label>
                     </div>
@@ -1568,10 +1590,13 @@ export default function LabelGenerator() {
                         idFontSize={roundIdSize}
                         groupFontSize={roundGroupSize}
                         contentOffset={roundContentOffset}
+                        showName={roundShowName}
+                        showId={roundShowId}
+                        showGroup={roundShowGroup}
                       />
                     ))
                   ) : (
-                    <RoundLabelContent data={roundData} isPreview={true} nameFontSize={roundNameSize} idFontSize={roundIdSize} groupFontSize={roundGroupSize} contentOffset={roundContentOffset} />
+                    <RoundLabelContent data={roundData} isPreview={true} nameFontSize={roundNameSize} idFontSize={roundIdSize} groupFontSize={roundGroupSize} contentOffset={roundContentOffset} showName={roundShowName} showId={roundShowId} showGroup={roundShowGroup} />
                   )
                 ) : batchItems.length > 0 ? (
                   batchItems.map((item, idx) => (
@@ -1633,6 +1658,9 @@ export default function LabelGenerator() {
                 idFontSize={roundIdSize}
                 groupFontSize={roundGroupSize}
                 contentOffset={roundContentOffset}
+                showName={roundShowName}
+                showId={roundShowId}
+                showGroup={roundShowGroup}
               />
               <div style={{ width: '5mm', background: 'white', flexShrink: 0 }} />
             </div>
