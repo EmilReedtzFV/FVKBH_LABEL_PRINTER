@@ -1619,8 +1619,8 @@ export default function LabelGenerator() {
         {mode === "box" ? (
           Array.from({ length: boxCopies }).map((_, i) => (
             <div key={i} style={{ display: 'flex', flexDirection: 'row', ...(i < boxCopies - 1 ? { pageBreakAfter: 'always', breakAfter: 'page' } : {}) }}>
-              <BoxLabelContent data={boxData} items={boxItems} />
-              <div style={{ width: '5mm', background: 'white', flexShrink: 0 }} />
+              <BoxLabelContent data={{ ...boxData, width: boxData.width + 3 }} items={boxItems} />
+              <div style={{ width: '2mm', background: 'white', flexShrink: 0 }} />
             </div>
           ))
         ) : mode === "round" ? (() => {
@@ -1630,7 +1630,7 @@ export default function LabelGenerator() {
           return items.map((item, idx) => (
             <div key={idx} style={{ display: 'flex', flexDirection: 'row', ...(idx < items.length - 1 ? { pageBreakAfter: 'always', breakAfter: 'page' } : {}) }}>
               <RoundLabelContent
-                data={{ ...roundData, name: item.name, id: item.id, group: item.group ?? '' }}
+                data={{ ...roundData, width: (roundData.width ?? printerWidth) + 3, name: item.name, id: item.id, group: item.group ?? '' }}
                 nameFontSize={roundNameSize}
                 idFontSize={roundIdSize}
                 groupFontSize={roundGroupSize}
@@ -1640,7 +1640,7 @@ export default function LabelGenerator() {
                 showGroup={roundShowGroup}
                 lineGap={roundLineGap}
               />
-              <div style={{ width: '5mm', background: 'white', flexShrink: 0 }} />
+              <div style={{ width: '2mm', background: 'white', flexShrink: 0 }} />
             </div>
           ));
         })() : (() => {
@@ -1653,13 +1653,13 @@ export default function LabelGenerator() {
             rows.push(items.slice(i, i + labelsPerRow));
           }
           return rows.map((row, rowIdx) => (
-            <div key={rowIdx} style={{ pageBreakAfter: rowIdx < rows.length - 1 ? 'always' : 'auto', breakAfter: rowIdx < rows.length - 1 ? 'page' : 'auto' }}>
-              <div style={{ display: 'flex', flexDirection: 'row' }}>
-              {row.map((item, itemIdx) => (
-                mode === "equipment" ? (
+            <div key={rowIdx} style={{ display: 'flex', flexDirection: 'row', pageBreakAfter: rowIdx < rows.length - 1 ? 'always' : 'auto', breakAfter: rowIdx < rows.length - 1 ? 'page' : 'auto' }}>
+              {row.map((item, itemIdx) => {
+                const isLast = itemIdx === row.length - 1;
+                return mode === "equipment" ? (
                   <EquipmentLabelContent
                     key={itemIdx}
-                    data={{ ...labelData, width: labelWidth, name: item.name, id: item.id, group: item.group }}
+                    data={{ ...labelData, width: labelWidth + (isLast ? 3 : 0), name: item.name, id: item.id, group: item.group }}
                     fontScale={getFontScale(rowIdx * labelsPerRow + itemIdx)}
                     elementOrder={elementOrder}
                     spacing={labelSpacing}
@@ -1668,13 +1668,12 @@ export default function LabelGenerator() {
                 ) : (
                   <CableLabelContent
                     key={itemIdx}
-                    data={{ ...cableData, width: labelWidth, name: item.name, id: item.id, group: item.group }}
+                    data={{ ...cableData, width: labelWidth + (isLast ? 3 : 0), name: item.name, id: item.id, group: item.group }}
                     fontScale={getFontScale(rowIdx * labelsPerRow + itemIdx)}
                   />
-                )
-              ))}
-              </div>
-              <div style={{ width: '5mm', background: 'white', flexShrink: 0 }} />
+                );
+              })}
+              <div style={{ width: '2mm', background: 'white', flexShrink: 0 }} />
             </div>
           ));
         })()}
