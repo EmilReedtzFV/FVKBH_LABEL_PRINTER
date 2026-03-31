@@ -120,7 +120,7 @@ function EquipmentLabelDesignA({ data, isPreview = false, fontScale = 1, element
 
   return (
     <div data-label-root className="bg-black text-white relative flex flex-col border-0" style={{ width: `${width}mm`, height: `${height}mm`, boxSizing: "border-box", pageBreakInside: "avoid", border: isPreview ? '1px solid #e5e7eb' : 'none', overflow: 'hidden' }}>
-      <div className="bg-white text-black flex items-center justify-center w-full flex-shrink-0 gap-1.5" style={{ height: barH, minHeight: 0, paddingLeft: `${width * 0.04}mm`, paddingRight: `${width * 0.04}mm` }}>
+      <div className="bg-white text-black flex items-center justify-center w-full flex-shrink-0 gap-1.5" style={{ height: barH, maxHeight: barH, minHeight: 0, overflow: 'hidden', paddingLeft: `${width * 0.04}mm`, paddingRight: `${width * 0.04}mm` }}>
         <span className="font-bold uppercase whitespace-nowrap" style={{ fontSize: infoFs, lineHeight: 1.1 }}>Filmværksted København</span>
         <span className="opacity-40 flex-shrink-0" style={{ fontSize: infoFs }}>|</span>
         <span className="font-bold tracking-wider whitespace-nowrap" style={{ fontSize: infoFs, lineHeight: 1.1 }}>+45 71 99 33 66</span>
@@ -172,7 +172,7 @@ function EquipmentLabelDesignB({ data, isPreview = false, fontScale = 1 }: { dat
 
   return (
     <div data-label-root className="bg-black text-white relative flex flex-col border-0" style={{ width: `${width}mm`, height: `${height}mm`, boxSizing: "border-box", pageBreakInside: "avoid", border: isPreview ? '1px solid #e5e7eb' : 'none', overflow: 'hidden' }}>
-      <div className="bg-white text-black flex items-center justify-center w-full flex-shrink-0 gap-1.5" style={{ height: barH, minHeight: 0, paddingLeft: `${width * 0.04}mm`, paddingRight: `${width * 0.04}mm` }}>
+      <div className="bg-white text-black flex items-center justify-center w-full flex-shrink-0 gap-1.5" style={{ height: barH, maxHeight: barH, minHeight: 0, overflow: 'hidden', paddingLeft: `${width * 0.04}mm`, paddingRight: `${width * 0.04}mm` }}>
         <span className="font-bold uppercase whitespace-nowrap" style={{ fontSize: infoFs, lineHeight: 1.1 }}>Filmværksted København</span>
         <span className="opacity-40 flex-shrink-0" style={{ fontSize: infoFs }}>|</span>
         <span className="font-bold tracking-wider whitespace-nowrap" style={{ fontSize: infoFs, lineHeight: 1.1 }}>+45 71 99 33 66</span>
@@ -227,7 +227,7 @@ function EquipmentLabelDesignC({ data, isPreview = false, fontScale = 1 }: { dat
 
   return (
     <div data-label-root className="bg-black text-white relative flex flex-col border-0" style={{ width: `${width}mm`, height: `${height}mm`, boxSizing: "border-box", pageBreakInside: "avoid", border: isPreview ? '1px solid #e5e7eb' : 'none', overflow: 'hidden' }}>
-      <div className="bg-white text-black flex items-center justify-center w-full flex-shrink-0 gap-1.5" style={{ height: barH, minHeight: 0, paddingLeft: `${width * 0.04}mm`, paddingRight: `${width * 0.04}mm` }}>
+      <div className="bg-white text-black flex items-center justify-center w-full flex-shrink-0 gap-1.5" style={{ height: barH, maxHeight: barH, minHeight: 0, overflow: 'hidden', paddingLeft: `${width * 0.04}mm`, paddingRight: `${width * 0.04}mm` }}>
         <span className="font-bold uppercase whitespace-nowrap" style={{ fontSize: infoFs, lineHeight: 1.1 }}>Filmværksted København</span>
         <span className="opacity-40 flex-shrink-0" style={{ fontSize: infoFs }}>|</span>
         <span className="font-bold tracking-wider whitespace-nowrap" style={{ fontSize: infoFs, lineHeight: 1.1 }}>+45 71 99 33 66</span>
@@ -284,7 +284,7 @@ function EquipmentLabelDesignD({ data, isPreview = false, fontScale = 1 }: { dat
 
   return (
     <div data-label-root className="bg-black text-white relative flex flex-col border-0" style={{ width: `${width}mm`, height: `${height}mm`, boxSizing: "border-box", pageBreakInside: "avoid", border: isPreview ? '1px solid #e5e7eb' : 'none', overflow: 'hidden' }}>
-      <div className="bg-white text-black flex items-center justify-center w-full flex-shrink-0 gap-1.5" style={{ height: barH, minHeight: 0, paddingLeft: `${width * 0.04}mm`, paddingRight: `${width * 0.04}mm` }}>
+      <div className="bg-white text-black flex items-center justify-center w-full flex-shrink-0 gap-1.5" style={{ height: barH, maxHeight: barH, minHeight: 0, overflow: 'hidden', paddingLeft: `${width * 0.04}mm`, paddingRight: `${width * 0.04}mm` }}>
         <span className="font-bold uppercase whitespace-nowrap" style={{ fontSize: infoFs, lineHeight: 1.1 }}>Filmværksted København</span>
         <span className="opacity-40 flex-shrink-0" style={{ fontSize: infoFs }}>|</span>
         <span className="font-bold tracking-wider whitespace-nowrap" style={{ fontSize: infoFs, lineHeight: 1.1 }}>+45 71 99 33 66</span>
@@ -1307,7 +1307,7 @@ export default function LabelGenerator() {
                             <FormLabel>Højde (mm)</FormLabel>
                             <p className="text-xs text-muted-foreground mb-1">Dots inkluderer +5mm peel-kant (sæt denne værdi i printeren)</p>
                             <div className="flex flex-wrap gap-2 mb-2">
-                              {[10, 20, 40, 50, 70, 100].map(h => {
+                              {[10, 20, 30, 40, 50, 70, 100].map(h => {
                                 const dots = Math.round((h + 5) * 11.811);
                                 return (
                                 <button
@@ -1479,7 +1479,7 @@ export default function LabelGenerator() {
                             <FormItem className="flex-1">
                               <FormLabel>Højde (mm)</FormLabel>
                               <div className="flex flex-wrap gap-2 mb-2">
-                                {[10, 20, 40, 50, 70, 100].map(h => {
+                                {[10, 20, 30, 40, 50, 70, 100].map(h => {
                                   const dots = Math.round((h + 5) * 11.811);
                                   return (
                                   <button
