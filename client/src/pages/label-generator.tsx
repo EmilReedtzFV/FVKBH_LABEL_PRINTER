@@ -9,10 +9,10 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { RefreshCw, Printer, Tag, Cable, ArrowRightLeft, Upload, Trash2, Box, Plus, Wand2, ChevronUp, ChevronDown } from "lucide-react";
+import { RefreshCw, Printer, Tag, Cable, ArrowRightLeft, Upload, Trash2, Box, Plus, Wand2, ChevronUp, ChevronDown, Circle } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
-type LabelMode = "equipment" | "cable" | "box";
+type LabelMode = "equipment" | "cable" | "box" | "round";
 
 interface ParsedItem {
   id: string;
@@ -48,9 +48,18 @@ const boxSchema = z.object({
   autoHeight: z.boolean().optional(),
 });
 
+const roundSchema = z.object({
+  name: z.string().min(1, "Navn er påkrævet"),
+  id: z.string().min(1, "ID nummer er påkrævet"),
+  group: z.string().optional(),
+  diameter: z.number().min(20, "Minimum diameter er 20mm").max(150, "Maksimum diameter er 150mm"),
+  codeType: z.enum(["qr", "none"]),
+});
+
 type EquipmentFormValues = z.infer<typeof equipmentSchema>;
 type CableFormValues = z.infer<typeof cableSchema>;
 type BoxFormValues = z.infer<typeof boxSchema>;
+type RoundFormValues = z.infer<typeof roundSchema>;
 
 interface BoxItem {
   name: string;
@@ -82,7 +91,7 @@ type LabelElement = 'name' | 'id' | 'group';
 function EquipmentLabelDesignA({ data, isPreview = false, fontScale = 1, elementOrder = ['name', 'id', 'group'], spacing = 50 }: { data: EquipmentFormValues; isPreview?: boolean; fontScale?: number; elementOrder?: LabelElement[]; spacing?: number }) {
   const { width, height } = data;
   const s = fontScale;
-  const isSmall = height < 20;
+  const isSmall = height <= 20;
   const isNarrow = width < 20;
   const isTiny = isSmall || isNarrow;
   const showQr = data.id && !isTiny;
@@ -100,22 +109,23 @@ function EquipmentLabelDesignA({ data, isPreview = false, fontScale = 1, element
   const groupFs = `${groupPx}px`;
   const nameFs = `${namePx}px`;
   const idFs = `${idPx}px`;
-  const infoFs = `${Math.max(4, Math.min(width * 0.08, height * 0.14))}px`;
-  const barH = isSmall ? `${Math.max(height * 0.2, 2.5)}mm` : `${Math.max(height * 0.18, 5)}mm`;
+  const infoFs = `${Math.max(6, Math.min(width * 0.12, height * 0.22))}px`;
+  const barH = isSmall ? `${Math.max(height * 0.25, 3)}mm` : `${Math.max(height * 0.24, 7)}mm`;
   const isLarge = width >= 40 && height >= 40;
   const qrSize = Math.min(width * 0.42, height * 0.65);
-  const logoH = `${Math.max(5, height * 0.12)}px`;
-  const pad = isTiny ? '1mm 1mm' : isLarge ? `${height * 0.08}mm ${width * 0.06}mm` : '0.5rem';
+  const logoH = `${Math.max(7, height * 0.17)}px`;
+  const padV = isTiny ? '1.5mm' : isLarge ? `${height * 0.08}mm` : '0.5rem';
+  const padH = isTiny ? '1mm' : isLarge ? `${width * 0.06}mm` : '0.5rem';
   const contentGap = isTiny ? '2px' : isLarge ? `${width * 0.03}mm` : '0.5rem';
 
   return (
     <div data-label-root className="bg-black text-white relative flex flex-col border-0" style={{ width: `${width}mm`, height: `${height}mm`, boxSizing: "border-box", pageBreakInside: "avoid", border: isPreview ? '1px solid #e5e7eb' : 'none', overflow: 'hidden' }}>
-      <div className="bg-white text-black flex items-center justify-center px-0.5 w-full flex-shrink-0 gap-0.5" style={{ height: barH, minHeight: 0 }}>
-        <img src="/logo.png" alt="Logo" className="object-contain flex-shrink-0" style={{ height: logoH, maxHeight: '90%' }} />
-        <span className="font-bold uppercase flex-shrink truncate" style={{ fontSize: infoFs, lineHeight: 1.1 }}>Filmværksted København</span>
-        <span className="font-bold tracking-wider flex-shrink-0" style={{ fontSize: infoFs, lineHeight: 1.1 }}>+45 71 99 33 66</span>
+      <div className="bg-white text-black flex items-center justify-center w-full flex-shrink-0 gap-1.5" style={{ height: barH, minHeight: 0, paddingLeft: `${width * 0.04}mm`, paddingRight: `${width * 0.04}mm` }}>
+        <span className="font-bold uppercase whitespace-nowrap" style={{ fontSize: infoFs, lineHeight: 1.1 }}>Filmværksted København</span>
+        <span className="opacity-40 flex-shrink-0" style={{ fontSize: infoFs }}>|</span>
+        <span className="font-bold tracking-wider whitespace-nowrap" style={{ fontSize: infoFs, lineHeight: 1.1 }}>+45 71 99 33 66</span>
       </div>
-      <div data-label-content className="flex-1 flex items-stretch min-h-0" style={{ padding: pad, paddingTop: isTiny ? '1.5mm' : undefined }}>
+      <div data-label-content className="flex-1 flex items-stretch min-h-0" style={{ paddingTop: padV, paddingBottom: padV, paddingLeft: padH, paddingRight: padH }}>
         <div className="flex flex-row items-center h-full w-full" style={{ gap: contentGap }}>
           {showQr && (
             <>
@@ -125,7 +135,7 @@ function EquipmentLabelDesignA({ data, isPreview = false, fontScale = 1, element
               <div className="w-[2.5px] bg-white flex-shrink-0" style={{ height: `${qrSize}mm` }}></div>
             </>
           )}
-          <div className="flex flex-col justify-center min-w-0 flex-1 text-left" style={{ overflow: 'hidden', gap: isTiny ? '1px' : `${Math.max(1, spacing * 0.15)}px` }}>
+          <div className="flex flex-col justify-center self-stretch min-w-0 flex-1 text-left" style={{ overflow: 'hidden', gap: isTiny ? '1px' : `${Math.max(1, spacing * 0.15)}px` }}>
             {elementOrder.map((el) => {
               if (el === 'name') return <div key="name" className="font-bold uppercase leading-tight" data-label-name style={{ fontSize: nameFs, wordBreak: 'break-word', overflowWrap: 'break-word', lineHeight: 1.15 }}>{data.name}</div>;
               if (el === 'id' && data.id) return <div key="id" className="font-mono tracking-wider font-bold" data-label-id style={{ fontSize: idFs, wordBreak: 'break-all', overflowWrap: 'break-word', lineHeight: 1.1 }}>#{data.id}</div>;
@@ -143,7 +153,7 @@ function EquipmentLabelDesignA({ data, isPreview = false, fontScale = 1, element
 function EquipmentLabelDesignB({ data, isPreview = false, fontScale = 1 }: { data: EquipmentFormValues; isPreview?: boolean; fontScale?: number }) {
   const { width, height } = data;
   const s = fontScale;
-  const isSmall = height < 20;
+  const isSmall = height <= 20;
   const isNarrow = width < 20;
   const isTiny = isSmall || isNarrow;
   const showQr = data.id && !isTiny;
@@ -151,22 +161,23 @@ function EquipmentLabelDesignB({ data, isPreview = false, fontScale = 1 }: { dat
   const namePx = (isSmall ? Math.max(8, Math.min(width * 0.22, contentH * 0.45)) : Math.max(8, Math.min(width, height) * 0.22)) * s;
   const idPx = (isSmall ? Math.max(6, Math.min(width * 0.16, contentH * 0.35)) : Math.max(8, Math.min(width, height) * 0.19)) * s;
   const groupPx = (isSmall ? Math.max(5, Math.min(width * 0.1, contentH * 0.22)) : Math.max(6, Math.min(width, height) * 0.12)) * s;
-  const infoFs = `${Math.max(4, Math.min(width * 0.08, height * 0.14))}px`;
-  const barH = isSmall ? `${Math.max(height * 0.2, 2.5)}mm` : `${Math.max(height * 0.18, 5)}mm`;
+  const infoFs = `${Math.max(6, Math.min(width * 0.12, height * 0.22))}px`;
+  const barH = isSmall ? `${Math.max(height * 0.25, 3)}mm` : `${Math.max(height * 0.24, 7)}mm`;
   const isLarge = width >= 40 && height >= 40;
   const qrSize = Math.min(width * 0.3, height * 0.5);
-  const logoH = `${Math.max(5, height * 0.12)}px`;
-  const pad = isTiny ? '1mm 1mm' : isLarge ? `${height * 0.08}mm ${width * 0.06}mm` : '0.5rem';
+  const logoH = `${Math.max(7, height * 0.17)}px`;
+  const padV = isTiny ? '1.5mm' : isLarge ? `${height * 0.08}mm` : '0.5rem';
+  const padH = isTiny ? '1mm' : isLarge ? `${width * 0.06}mm` : '0.5rem';
   const contentGap = isTiny ? '2px' : isLarge ? `${width * 0.04}mm` : '0.75rem';
 
   return (
     <div data-label-root className="bg-black text-white relative flex flex-col border-0" style={{ width: `${width}mm`, height: `${height}mm`, boxSizing: "border-box", pageBreakInside: "avoid", border: isPreview ? '1px solid #e5e7eb' : 'none', overflow: 'hidden' }}>
-      <div className="bg-white text-black flex items-center justify-center px-0.5 w-full flex-shrink-0 gap-0.5" style={{ height: barH, minHeight: 0 }}>
-        <img src="/logo.png" alt="Logo" className="object-contain flex-shrink-0" style={{ height: logoH, maxHeight: '90%' }} />
-        <span className="font-bold uppercase flex-shrink truncate" style={{ fontSize: infoFs, lineHeight: 1.1 }}>Filmværksted København</span>
-        <span className="font-bold tracking-wider flex-shrink-0" style={{ fontSize: infoFs, lineHeight: 1.1 }}>+45 71 99 33 66</span>
+      <div className="bg-white text-black flex items-center justify-center w-full flex-shrink-0 gap-1.5" style={{ height: barH, minHeight: 0, paddingLeft: `${width * 0.04}mm`, paddingRight: `${width * 0.04}mm` }}>
+        <span className="font-bold uppercase whitespace-nowrap" style={{ fontSize: infoFs, lineHeight: 1.1 }}>Filmværksted København</span>
+        <span className="opacity-40 flex-shrink-0" style={{ fontSize: infoFs }}>|</span>
+        <span className="font-bold tracking-wider whitespace-nowrap" style={{ fontSize: infoFs, lineHeight: 1.1 }}>+45 71 99 33 66</span>
       </div>
-      <div data-label-content className="flex-1 flex items-center justify-center min-h-0" style={{ padding: pad, paddingTop: isTiny ? '1.5mm' : undefined }}>
+      <div data-label-content className="flex-1 flex items-center justify-center min-h-0" style={{ paddingTop: padV, paddingBottom: padV, paddingLeft: padH, paddingRight: padH }}>
         <div className="flex flex-row items-center h-full max-w-full" style={{ gap: contentGap }}>
           {showQr && (
             <>
@@ -197,7 +208,7 @@ function EquipmentLabelDesignB({ data, isPreview = false, fontScale = 1 }: { dat
 function EquipmentLabelDesignC({ data, isPreview = false, fontScale = 1 }: { data: EquipmentFormValues; isPreview?: boolean; fontScale?: number }) {
   const { width, height } = data;
   const s = fontScale;
-  const isSmall = height < 20;
+  const isSmall = height <= 20;
   const isNarrow = width < 20;
   const isTiny = isSmall || isNarrow;
   const showQr = data.id && !isTiny;
@@ -205,22 +216,23 @@ function EquipmentLabelDesignC({ data, isPreview = false, fontScale = 1 }: { dat
   const namePx = (isSmall ? Math.max(8, Math.min(width * 0.22, contentH * 0.45)) : Math.max(8, Math.min(width, height) * 0.22)) * s;
   const idPx = (isSmall ? Math.max(6, Math.min(width * 0.16, contentH * 0.35)) : Math.max(8, Math.min(width, height) * 0.19)) * s;
   const groupPx = (isSmall ? Math.max(5, Math.min(width * 0.1, contentH * 0.22)) : Math.max(6, Math.min(width, height) * 0.12)) * s;
-  const infoFs = `${Math.max(4, Math.min(width * 0.08, height * 0.14))}px`;
-  const barH = isSmall ? `${Math.max(height * 0.2, 2.5)}mm` : `${Math.max(height * 0.18, 5)}mm`;
+  const infoFs = `${Math.max(6, Math.min(width * 0.12, height * 0.22))}px`;
+  const barH = isSmall ? `${Math.max(height * 0.25, 3)}mm` : `${Math.max(height * 0.24, 7)}mm`;
   const isLarge = width >= 40 && height >= 40;
   const qrSize = Math.min(width * 0.3, height * 0.5);
-  const logoH = `${Math.max(5, height * 0.12)}px`;
-  const pad = isTiny ? '1mm 1mm' : isLarge ? `${height * 0.08}mm ${width * 0.06}mm` : '0.5rem';
+  const logoH = `${Math.max(7, height * 0.17)}px`;
+  const padV = isTiny ? '1.5mm' : isLarge ? `${height * 0.08}mm` : '0.5rem';
+  const padH = isTiny ? '1mm' : isLarge ? `${width * 0.06}mm` : '0.5rem';
   const contentGap = isTiny ? '2px' : isLarge ? `${width * 0.04}mm` : '0.75rem';
 
   return (
     <div data-label-root className="bg-black text-white relative flex flex-col border-0" style={{ width: `${width}mm`, height: `${height}mm`, boxSizing: "border-box", pageBreakInside: "avoid", border: isPreview ? '1px solid #e5e7eb' : 'none', overflow: 'hidden' }}>
-      <div className="bg-white text-black flex items-center justify-center px-0.5 w-full flex-shrink-0 gap-0.5" style={{ height: barH, minHeight: 0 }}>
-        <img src="/logo.png" alt="Logo" className="object-contain flex-shrink-0" style={{ height: logoH, maxHeight: '90%' }} />
-        <span className="font-bold uppercase flex-shrink truncate" style={{ fontSize: infoFs, lineHeight: 1.1 }}>Filmværksted København</span>
-        <span className="font-bold tracking-wider flex-shrink-0" style={{ fontSize: infoFs, lineHeight: 1.1 }}>+45 71 99 33 66</span>
+      <div className="bg-white text-black flex items-center justify-center w-full flex-shrink-0 gap-1.5" style={{ height: barH, minHeight: 0, paddingLeft: `${width * 0.04}mm`, paddingRight: `${width * 0.04}mm` }}>
+        <span className="font-bold uppercase whitespace-nowrap" style={{ fontSize: infoFs, lineHeight: 1.1 }}>Filmværksted København</span>
+        <span className="opacity-40 flex-shrink-0" style={{ fontSize: infoFs }}>|</span>
+        <span className="font-bold tracking-wider whitespace-nowrap" style={{ fontSize: infoFs, lineHeight: 1.1 }}>+45 71 99 33 66</span>
       </div>
-      <div data-label-content className="flex-1 flex items-center justify-center min-h-0" style={{ padding: pad, paddingTop: isTiny ? '1.5mm' : undefined }}>
+      <div data-label-content className="flex-1 flex items-center justify-center min-h-0" style={{ paddingTop: padV, paddingBottom: padV, paddingLeft: padH, paddingRight: padH }}>
         <div className="flex flex-row items-center h-full max-w-full" style={{ gap: contentGap }}>
           {showQr && (
             <>
@@ -253,7 +265,7 @@ function EquipmentLabelDesignC({ data, isPreview = false, fontScale = 1 }: { dat
 function EquipmentLabelDesignD({ data, isPreview = false, fontScale = 1 }: { data: EquipmentFormValues; isPreview?: boolean; fontScale?: number }) {
   const { width, height } = data;
   const s = fontScale;
-  const isSmall = height < 20;
+  const isSmall = height <= 20;
   const isNarrow = width < 20;
   const isTiny = isSmall || isNarrow;
   const showQr = data.id && !isTiny;
@@ -261,22 +273,23 @@ function EquipmentLabelDesignD({ data, isPreview = false, fontScale = 1 }: { dat
   const namePx = (isSmall ? Math.max(8, Math.min(width * 0.18, contentH * 0.38)) : Math.max(8, Math.min(width, height) * 0.18)) * s;
   const idPx = (isSmall ? Math.max(6, Math.min(width * 0.22, contentH * 0.45)) : Math.max(8, Math.min(width, height) * 0.24)) * s;
   const groupPx = (isSmall ? Math.max(5, Math.min(width * 0.1, contentH * 0.22)) : Math.max(6, Math.min(width, height) * 0.12)) * s;
-  const infoFs = `${Math.max(4, Math.min(width * 0.08, height * 0.14))}px`;
-  const barH = isSmall ? `${Math.max(height * 0.2, 2.5)}mm` : `${Math.max(height * 0.18, 5)}mm`;
+  const infoFs = `${Math.max(6, Math.min(width * 0.12, height * 0.22))}px`;
+  const barH = isSmall ? `${Math.max(height * 0.25, 3)}mm` : `${Math.max(height * 0.24, 7)}mm`;
   const isLarge = width >= 40 && height >= 40;
   const qrSize = Math.min(width * 0.3, height * 0.5);
-  const logoH = `${Math.max(5, height * 0.12)}px`;
-  const pad = isTiny ? '1mm 1mm' : isLarge ? `${height * 0.08}mm ${width * 0.06}mm` : '0.5rem';
+  const logoH = `${Math.max(7, height * 0.17)}px`;
+  const padV = isTiny ? '1.5mm' : isLarge ? `${height * 0.08}mm` : '0.5rem';
+  const padH = isTiny ? '1mm' : isLarge ? `${width * 0.06}mm` : '0.5rem';
   const contentGap = isTiny ? '2px' : isLarge ? `${width * 0.04}mm` : '0.75rem';
 
   return (
     <div data-label-root className="bg-black text-white relative flex flex-col border-0" style={{ width: `${width}mm`, height: `${height}mm`, boxSizing: "border-box", pageBreakInside: "avoid", border: isPreview ? '1px solid #e5e7eb' : 'none', overflow: 'hidden' }}>
-      <div className="bg-white text-black flex items-center justify-center px-0.5 w-full flex-shrink-0 gap-0.5" style={{ height: barH, minHeight: 0 }}>
-        <img src="/logo.png" alt="Logo" className="object-contain flex-shrink-0" style={{ height: logoH, maxHeight: '90%' }} />
-        <span className="font-bold uppercase flex-shrink truncate" style={{ fontSize: infoFs, lineHeight: 1.1 }}>Filmværksted København</span>
-        <span className="font-bold tracking-wider flex-shrink-0" style={{ fontSize: infoFs, lineHeight: 1.1 }}>+45 71 99 33 66</span>
+      <div className="bg-white text-black flex items-center justify-center w-full flex-shrink-0 gap-1.5" style={{ height: barH, minHeight: 0, paddingLeft: `${width * 0.04}mm`, paddingRight: `${width * 0.04}mm` }}>
+        <span className="font-bold uppercase whitespace-nowrap" style={{ fontSize: infoFs, lineHeight: 1.1 }}>Filmværksted København</span>
+        <span className="opacity-40 flex-shrink-0" style={{ fontSize: infoFs }}>|</span>
+        <span className="font-bold tracking-wider whitespace-nowrap" style={{ fontSize: infoFs, lineHeight: 1.1 }}>+45 71 99 33 66</span>
       </div>
-      <div data-label-content className="flex-1 flex items-center justify-center min-h-0" style={{ padding: pad, paddingTop: isTiny ? '1.5mm' : undefined }}>
+      <div data-label-content className="flex-1 flex items-center justify-center min-h-0" style={{ paddingTop: padV, paddingBottom: padV, paddingLeft: padH, paddingRight: padH }}>
         <div className="flex flex-row items-center h-full max-w-full" style={{ gap: contentGap }}>
           {showQr && (
             <>
@@ -355,18 +368,12 @@ function CableLabelContent({ data, isPreview = false, fontScale = 1 }: { data: C
         className="bg-black text-white flex items-center justify-center gap-1 flex-shrink-0 px-2"
         style={{ width: `${Math.max(20, width * 0.3)}mm` }}
       >
-        <img
-          src="/logo.png"
-          alt="Logo"
-          className="object-contain filter invert brightness-0 saturate-100 invert-[1]"
-          style={{ height: logoH, maxWidth: '30%' }}
-        />
         <div className="flex flex-col items-center leading-none">
-          <span className="font-bold whitespace-nowrap" style={{ fontSize: smallFontSize }}>
-            +45 71 99 33 66
-          </span>
-          <span className="whitespace-nowrap" style={{ fontSize: `${Math.max(3, height * 0.22)}px` }}>
+          <span className="font-bold whitespace-nowrap" style={{ fontSize: `${Math.max(5, height * 0.28)}px` }}>
             Filmværksted København
+          </span>
+          <span className="font-bold whitespace-nowrap" style={{ fontSize: `${Math.max(4, height * 0.24)}px` }}>
+            +45 71 99 33 66
           </span>
         </div>
       </div>
@@ -464,6 +471,87 @@ function BoxLabelContent({ data, items, isPreview = false }: { data: BoxFormValu
   );
 }
 
+// Round Label Component - circular label
+function RoundLabelContent({ data, isPreview = false, fontScale = 1 }: { data: RoundFormValues; isPreview?: boolean; fontScale?: number }) {
+  const d = data.diameter;
+  const s = fontScale;
+  const namePx = Math.max(8, d * 0.14) * s;
+  const idPx = Math.max(6, d * 0.1) * s;
+  const groupPx = Math.max(5, d * 0.08) * s;
+  const infoFs = `${Math.max(6, d * 0.09)}px`;
+  const phoneFs = `${Math.max(5, d * 0.07)}px`;
+  const logoH = `${Math.max(8, d * 0.12)}px`;
+  const showQr = data.codeType === 'qr' && data.id;
+  const qrSize = d * 0.32;
+  const pad = `${d * 0.17}mm`;
+
+  return (
+    <div
+      data-label-root
+      className="bg-black text-white relative flex flex-col items-center justify-center"
+      style={{
+        width: `${d}mm`,
+        height: `${d}mm`,
+        borderRadius: '50%',
+        boxSizing: 'border-box',
+        pageBreakInside: 'avoid',
+        border: isPreview ? '2px solid #e5e7eb' : 'none',
+        overflow: 'hidden',
+        padding: pad,
+      }}
+    >
+      {/* Company info top */}
+      <div className="flex flex-col items-center justify-center flex-shrink-0" style={{ marginBottom: `${d * 0.025}mm` }}>
+        <div className="flex items-center justify-center gap-0.5">
+          <span className="font-bold uppercase" style={{ fontSize: infoFs, lineHeight: 1 }}>Filmværksted KBH</span>
+        </div>
+        <span style={{ fontSize: phoneFs, lineHeight: 1.2, opacity: 0.85 }}>+45 71 99 33 66</span>
+      </div>
+
+      {/* Divider */}
+      <div className="bg-white flex-shrink-0" style={{ width: '60%', height: '1.5px', marginBottom: `${d * 0.025}mm` }}></div>
+
+      {/* QR Code */}
+      {showQr && (
+        <div className="flex items-center justify-center bg-white rounded flex-shrink-0" style={{ width: `${qrSize}mm`, height: `${qrSize}mm`, padding: `${qrSize * 0.04}mm`, marginBottom: `${d * 0.025}mm` }}>
+          <QRCode value={data.id} style={{ height: '100%', width: '100%' }} viewBox="0 0 256 256" />
+        </div>
+      )}
+
+      {/* Content: Name, ID, Group */}
+      <div data-label-content className="flex flex-col items-center justify-center text-center" style={{ overflow: 'hidden', width: '100%', flex: '0 1 auto' }}>
+        <div
+          data-label-name
+          className="font-bold uppercase text-center leading-tight"
+          style={{ fontSize: `${namePx}px`, wordBreak: 'break-word', overflowWrap: 'break-word', lineHeight: 1.15 }}
+        >
+          {data.name}
+        </div>
+        {data.id && (
+          <div
+            data-label-id
+            className="font-mono tracking-wider text-center"
+            style={{ fontSize: `${idPx}px`, marginTop: `${d * 0.015}mm`, lineHeight: 1.1 }}
+          >
+            #{data.id}
+          </div>
+        )}
+        {data.group && (
+          <div style={{ marginTop: `${d * 0.02}mm` }}>
+            <span
+              data-label-group
+              className="bg-white text-black font-bold uppercase tracking-wider rounded inline-block"
+              style={{ fontSize: `${groupPx}px`, padding: '1px 5px', lineHeight: 1.15 }}
+            >
+              {data.group}
+            </span>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
 async function parsePdfFile(file: File): Promise<ParsedItem[]> {
   const formData = new FormData();
   formData.append("pdf", file);
@@ -475,6 +563,11 @@ async function parsePdfFile(file: File): Promise<ParsedItem[]> {
 
 export default function LabelGenerator() {
   const { toast } = useToast();
+  const [printerWidth] = useState<number>(96);
+  const [labelsPerRow, setLabelsPerRow] = useState<number>(() => {
+    return Number(localStorage.getItem("labelsPerRow")) || 1;
+  });
+  const labelWidth = Math.floor(printerWidth / labelsPerRow); // 105, 52, or 35
   const [mode, setMode] = useState<LabelMode>("equipment");
   const [batchItems, setBatchItems] = useState<ParsedItem[]>([]);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -597,6 +690,14 @@ export default function LabelGenerator() {
   const [newBoxItemName, setNewBoxItemName] = useState("");
   const [boxCopies, setBoxCopies] = useState(1);
 
+  const [roundData, setRoundData] = useState<RoundFormValues>({
+    name: "Kamera 1",
+    id: "CAM-001",
+    group: "Kit 1",
+    diameter: 60,
+    codeType: "qr",
+  });
+
   const equipmentForm = useForm<EquipmentFormValues>({
     resolver: zodResolver(equipmentSchema),
     defaultValues: labelData,
@@ -610,6 +711,11 @@ export default function LabelGenerator() {
   const boxForm = useForm<BoxFormValues>({
     resolver: zodResolver(boxSchema),
     defaultValues: boxData,
+  });
+
+  const roundForm = useForm<RoundFormValues>({
+    resolver: zodResolver(roundSchema),
+    defaultValues: roundData,
   });
 
   const watchEquipmentPreset = equipmentForm.watch("preset");
@@ -653,6 +759,12 @@ export default function LabelGenerator() {
     toast({ title: "Kasse label opdateret", description: "Visningen er blevet opdateret." });
   };
 
+  const onRoundSubmit = (data: RoundFormValues) => {
+    setRoundData(data);
+    setFontScales({});
+    toast({ title: "Rund label opdateret", description: "Visningen er blevet opdateret." });
+  };
+
   const addBoxItem = () => {
     if (newBoxItemName.trim()) {
       setBoxItems(prev => [...prev, { name: newBoxItemName.trim() }]);
@@ -665,10 +777,36 @@ export default function LabelGenerator() {
     const randomId = `${prefix}-${Math.floor(1000 + Math.random() * 9000)}`;
     if (mode === "equipment") {
       equipmentForm.setValue("id", randomId);
-    } else {
+    } else if (mode === "cable") {
       cableForm.setValue("id", randomId);
+    } else if (mode === "round") {
+      roundForm.setValue("id", randomId);
     }
   };
+
+  useEffect(() => {
+    localStorage.setItem("printerWidth", String(printerWidth));
+    let h: number;
+    if (mode === "equipment") {
+      h = labelData.height;
+    } else if (mode === "cable") {
+      h = cableData.height;
+    } else if (mode === "round") {
+      h = roundData.diameter;
+    } else {
+      const itemCount = Math.max(boxItems.length, 1);
+      const w = boxData.width;
+      h = boxData.autoHeight ? calcBoxAutoHeight(w, itemCount) : boxData.height;
+    }
+    const w = mode === "round" ? roundData.diameter : printerWidth;
+    let styleEl = document.getElementById("label-page-size") as HTMLStyleElement | null;
+    if (!styleEl) {
+      styleEl = document.createElement("style");
+      styleEl.id = "label-page-size";
+      document.head.appendChild(styleEl);
+    }
+    styleEl.textContent = `@page { size: ${w + 5}mm ${h}mm; margin: 0mm; }`;
+  }, [mode, printerWidth, labelData.height, cableData.height, roundData.diameter, boxData.width, boxData.height, boxData.autoHeight, boxItems.length]);
 
   const handlePrint = () => {
     window.print();
@@ -705,7 +843,7 @@ export default function LabelGenerator() {
   };
 
   return (
-    <div className="min-h-screen bg-background p-8 font-sans">
+    <div className="min-h-screen bg-background p-8 font-sans print:p-0 print:m-0">
       <div className="mx-auto max-w-6xl space-y-8 print:hidden">
         <div className="flex items-center justify-between">
           <div>
@@ -724,6 +862,28 @@ export default function LabelGenerator() {
               <Printer className="h-5 w-5" />
               {batchItems.length > 0 ? `Print ${batchItems.length} Labels` : "Print Label"}
             </Button>
+          </div>
+        </div>
+
+        {/* Labels per row */}
+        <div className="flex items-start gap-3 p-3 bg-muted rounded-lg flex-wrap">
+          <Printer className="h-4 w-4 text-muted-foreground flex-shrink-0 mt-1" />
+          <div className="flex flex-col gap-2">
+            <span className="text-sm text-muted-foreground font-medium">Labels pr. rad (105mm rulle):</span>
+            <div className="flex flex-wrap gap-2">
+              {[1, 2, 3].map(n => {
+                const w = Math.floor(96 / n);
+                const dots = Math.round(w * 11.811);
+                return (
+                  <button key={n} type="button"
+                    onClick={() => { setLabelsPerRow(n); localStorage.setItem("labelsPerRow", String(n)); }}
+                    className={`px-3 py-1.5 text-sm rounded border transition-colors text-left ${labelsPerRow === n ? 'bg-black text-white border-black' : 'bg-white text-black border-gray-300 hover:border-black'}`}>
+                    <span className="font-medium">{n} label{n > 1 ? 's' : ''}</span>
+                    <span className="ml-1 opacity-75">— {w}mm / {dots} dots bredde</span>
+                  </button>
+                );
+              })}
+            </div>
           </div>
         </div>
 
@@ -755,6 +915,15 @@ export default function LabelGenerator() {
           >
             <Box className="h-4 w-4" />
             Kasse Label
+          </Button>
+          <Button
+            variant={mode === "round" ? "default" : "outline"}
+            onClick={() => setMode("round")}
+            className="gap-2"
+            data-testid="button-mode-round"
+          >
+            <Circle className="h-4 w-4" />
+            Rund Label
           </Button>
         </div>
 
@@ -791,17 +960,122 @@ export default function LabelGenerator() {
           {/* Controls */}
           <Card>
             <CardHeader>
-              <CardTitle>{mode === "equipment" ? "Udstyr Konfiguration" : mode === "cable" ? "Kabel Konfiguration" : "Kasse Konfiguration"}</CardTitle>
+              <CardTitle>{mode === "equipment" ? "Udstyr Konfiguration" : mode === "cable" ? "Kabel Konfiguration" : mode === "round" ? "Rund Label Konfiguration" : "Kasse Konfiguration"}</CardTitle>
               <CardDescription>
                 {mode === "equipment"
                   ? "Indtast oplysninger til udstyr-labelen."
                   : mode === "cable"
                   ? "Indtast oplysninger til kabel-labelen. Denne vikles rundt om kablet."
+                  : mode === "round"
+                  ? "Indtast oplysninger til den runde label. Perfekt til cirkulære klistermærker."
                   : "Indtast kit-navn og tilføj genstande til kasse-labelen."}
               </CardDescription>
             </CardHeader>
             <CardContent>
-              {mode === "box" ? (
+              {mode === "round" ? (
+                <Form {...roundForm}>
+                  <form onSubmit={roundForm.handleSubmit(onRoundSubmit)} className="space-y-6">
+                    <FormField
+                      control={roundForm.control}
+                      name="name"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Navn på udstyr</FormLabel>
+                          <FormControl>
+                            <Input placeholder="F.eks. Kamera 1" {...field} data-testid="input-round-name" />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <div className="flex gap-4 items-end">
+                      <FormField
+                        control={roundForm.control}
+                        name="id"
+                        render={({ field }) => (
+                          <FormItem className="flex-1">
+                            <FormLabel>ID Nummer</FormLabel>
+                            <FormControl>
+                              <Input placeholder="F.eks. CAM-001" {...field} data-testid="input-round-id" />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      <Button type="button" variant="outline" onClick={generateRandomId} title="Generer tilfældigt ID" data-testid="button-round-random-id">
+                        <RefreshCw className="h-4 w-4" />
+                      </Button>
+                    </div>
+                    <FormField
+                      control={roundForm.control}
+                      name="group"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Gruppe / Kit (valgfri)</FormLabel>
+                          <FormControl>
+                            <Input placeholder="F.eks. Kit 1" {...field} data-testid="input-round-group" />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={roundForm.control}
+                      name="codeType"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Kode Type</FormLabel>
+                          <Select onValueChange={field.onChange} defaultValue={field.value}>
+                            <FormControl>
+                              <SelectTrigger data-testid="select-round-codetype">
+                                <SelectValue placeholder="Vælg kode type" />
+                              </SelectTrigger>
+                            </FormControl>
+                            <SelectContent>
+                              <SelectItem value="qr">QR Kode</SelectItem>
+                              <SelectItem value="none">Ingen kode</SelectItem>
+                            </SelectContent>
+                          </Select>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={roundForm.control}
+                      name="diameter"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Diameter (mm)</FormLabel>
+                          <div className="flex gap-2 mt-2">
+                            {[40, 60, 80].map(d => (
+                              <Button
+                                key={d}
+                                type="button"
+                                variant={field.value === d ? "default" : "outline"}
+                                size="sm"
+                                onClick={() => field.onChange(d)}
+                              >
+                                {d}mm
+                              </Button>
+                            ))}
+                          </div>
+                          <FormControl>
+                            <Input
+                              type="number"
+                              className="mt-2"
+                              {...field}
+                              onChange={e => field.onChange(Number(e.target.value))}
+                              data-testid="input-round-diameter"
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <Button type="submit" className="w-full" data-testid="button-update-round">Opdater Visning</Button>
+                  </form>
+                </Form>
+              ) : mode === "box" ? (
                 <Form {...boxForm}>
                   <form onSubmit={boxForm.handleSubmit(onBoxSubmit)} className="space-y-6">
                     <div className="space-y-2">
@@ -1024,102 +1298,47 @@ export default function LabelGenerator() {
                         <span className="text-xs text-muted-foreground">Spredt</span>
                       </div>
                     </div>
-                    <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-4">
                       <FormField
                         control={equipmentForm.control}
-                        name="preset"
+                        name="height"
                         render={({ field }) => (
-                          <FormItem className="col-span-2">
-                            <FormLabel>Formatforhold</FormLabel>
-                            <Select onValueChange={field.onChange} defaultValue={field.value}>
-                              <FormControl>
-                                <SelectTrigger data-testid="select-equipment-preset">
-                                  <SelectValue placeholder="Vælg formatforhold" />
-                                </SelectTrigger>
-                              </FormControl>
-                              <SelectContent>
-                                {Object.entries(ASPECT_RATIOS).map(([key, val]) => (
-                                  <SelectItem key={key} value={key}>{val.label}</SelectItem>
-                                ))}
-                              </SelectContent>
-                            </Select>
+                          <FormItem>
+                            <FormLabel>Højde (mm)</FormLabel>
+                            <p className="text-xs text-muted-foreground mb-1">Dots inkluderer +5mm peel-kant (sæt denne værdi i printeren)</p>
+                            <div className="flex flex-wrap gap-2 mb-2">
+                              {[10, 20, 40, 50, 70, 100].map(h => {
+                                const dots = Math.round((h + 5) * 11.811);
+                                return (
+                                <button
+                                  key={h}
+                                  type="button"
+                                  onClick={() => { field.onChange(h); equipmentForm.setValue("preset", "custom"); }}
+                                  className={`px-3 py-1.5 text-sm rounded border transition-colors text-left ${field.value === h ? 'bg-black text-white border-black' : 'bg-white text-black border-gray-300 hover:border-black'}`}
+                                >
+                                  <span className="font-medium">{h}mm</span>
+                                  <span className="ml-1 text-xs opacity-60">/ {dots}d</span>
+                                </button>
+                                );
+                              })}
+                            </div>
+                            <FormControl>
+                              <Input
+                                type="number"
+                                placeholder="Eller skriv højde..."
+                                {...field}
+                                onChange={e => { field.onChange(Number(e.target.value)); equipmentForm.setValue("preset", "custom"); }}
+                                data-testid="input-equipment-height"
+                              />
+                            </FormControl>
                             <FormMessage />
                           </FormItem>
                         )}
                       />
-                      <div className="flex items-end gap-2">
-                        <FormField
-                          control={equipmentForm.control}
-                          name="width"
-                          render={({ field }) => (
-                            <FormItem className="flex-1">
-                              <FormLabel>Bredde (mm)</FormLabel>
-                              <FormControl>
-                                <Input
-                                  type="number"
-                                  {...field}
-                                  onChange={e => {
-                                    const newW = Number(e.target.value);
-                                    field.onChange(newW);
-                                    const preset = equipmentForm.getValues("preset");
-                                    if (preset && preset !== "custom") {
-                                      const ratio = ASPECT_RATIOS[preset];
-                                      if (ratio) {
-                                        equipmentForm.setValue("height", Math.round(newW / (ratio.w / ratio.h)));
-                                      }
-                                    }
-                                  }}
-                                  data-testid="input-equipment-width"
-                                />
-                              </FormControl>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
-                        <Button
-                          type="button"
-                          variant="outline"
-                          size="icon"
-                          className="flex-shrink-0 mb-0.5"
-                          data-testid="button-swap-equipment-dimensions"
-                          onClick={() => {
-                            const w = equipmentForm.getValues("width");
-                            const h = equipmentForm.getValues("height");
-                            equipmentForm.setValue("width", h);
-                            equipmentForm.setValue("height", w);
-                            equipmentForm.setValue("preset", "custom");
-                          }}
-                        >
-                          <ArrowRightLeft className="h-4 w-4" />
-                        </Button>
-                        <FormField
-                          control={equipmentForm.control}
-                          name="height"
-                          render={({ field }) => (
-                            <FormItem className="flex-1">
-                              <FormLabel>Højde (mm)</FormLabel>
-                              <FormControl>
-                                <Input
-                                  type="number"
-                                  {...field}
-                                  onChange={e => {
-                                    const newH = Number(e.target.value);
-                                    field.onChange(newH);
-                                    const preset = equipmentForm.getValues("preset");
-                                    if (preset && preset !== "custom") {
-                                      const ratio = ASPECT_RATIOS[preset];
-                                      if (ratio) {
-                                        equipmentForm.setValue("width", Math.round(newH * (ratio.w / ratio.h)));
-                                      }
-                                    }
-                                  }}
-                                  data-testid="input-equipment-height"
-                                />
-                              </FormControl>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
+                      <div className="hidden">
+                        {/* width kept hidden but in form for internal use */}
+                        <FormField control={equipmentForm.control} name="width" render={({ field }) => <input type="hidden" {...field} />} />
+                        <FormField control={equipmentForm.control} name="preset" render={({ field }) => <input type="hidden" {...field} />} />
                       </div>
                     </div>
                     <Button type="submit" className="w-full" data-testid="button-update-equipment">Opdater Visning</Button>
@@ -1259,6 +1478,22 @@ export default function LabelGenerator() {
                           render={({ field }) => (
                             <FormItem className="flex-1">
                               <FormLabel>Højde (mm)</FormLabel>
+                              <div className="flex flex-wrap gap-2 mb-2">
+                                {[10, 20, 40, 50, 70, 100].map(h => {
+                                  const dots = Math.round((h + 5) * 11.811);
+                                  return (
+                                  <button
+                                    key={h}
+                                    type="button"
+                                    onClick={() => { field.onChange(h); cableForm.setValue("preset", "custom"); }}
+                                    className={`px-3 py-1.5 text-sm rounded border transition-colors text-left ${field.value === h ? 'bg-black text-white border-black' : 'bg-white text-black border-gray-300 hover:border-black'}`}
+                                  >
+                                    <span className="font-medium">{h}mm</span>
+                                    <span className="ml-1 text-xs opacity-60">/ {dots}d</span>
+                                  </button>
+                                  );
+                                })}
+                              </div>
                               <FormControl>
                                 <Input
                                   type="number"
@@ -1289,11 +1524,13 @@ export default function LabelGenerator() {
                   ? "Dette er hvordan labelen ser ud. Brug print-knappen for at udskrive."
                   : mode === "cable"
                   ? "Kabel-labelen vikles rundt om kablet. Brug print-knappen for at udskrive."
+                  : mode === "round"
+                  ? "Den runde label passer til cirkulære klistermærker. Brug print-knappen for at udskrive."
                   : "Kasse-labelen viser alle genstande i kassen. Brug print-knappen for at udskrive."}
               </CardDescription>
             </CardHeader>
             <CardContent className="flex-1 flex flex-col items-center justify-center bg-muted/20 p-8 rounded-lg border-dashed border-2 m-6 overflow-auto gap-4">
-              {mode !== "box" && (
+              {mode !== "box" && mode !== "round" && (
                 <Button
                   type="button"
                   variant="outline"
@@ -1309,12 +1546,25 @@ export default function LabelGenerator() {
               <div ref={previewLabelRef}>
                 {mode === "box" ? (
                   <BoxLabelContent data={boxData} items={boxItems} isPreview={true} />
+                ) : mode === "round" ? (
+                  batchItems.length > 0 ? (
+                    batchItems.map((item, idx) => (
+                      <RoundLabelContent
+                        key={idx}
+                        data={{ ...roundData, name: item.name, id: item.id, group: item.group }}
+                        isPreview={true}
+                        fontScale={getFontScale(idx)}
+                      />
+                    ))
+                  ) : (
+                    <RoundLabelContent data={roundData} isPreview={true} fontScale={getFontScale(0)} />
+                  )
                 ) : batchItems.length > 0 ? (
                   batchItems.map((item, idx) => (
                     mode === "equipment" ? (
                       <EquipmentLabelContent
                         key={idx}
-                        data={{ ...labelData, name: item.name, id: item.id, group: item.group }}
+                        data={{ ...labelData, width: labelWidth, name: item.name, id: item.id, group: item.group }}
                         isPreview={true}
                         fontScale={getFontScale(idx)}
                         elementOrder={elementOrder}
@@ -1323,16 +1573,16 @@ export default function LabelGenerator() {
                     ) : (
                       <CableLabelContent
                         key={idx}
-                        data={{ ...cableData, name: item.name, id: item.id, group: item.group }}
+                        data={{ ...cableData, width: labelWidth, name: item.name, id: item.id, group: item.group }}
                         isPreview={true}
                         fontScale={getFontScale(idx)}
                       />
                     )
                   ))
                 ) : mode === "equipment" ? (
-                  <EquipmentLabelContent data={labelData} isPreview={true} fontScale={getFontScale(0)} elementOrder={elementOrder} spacing={labelSpacing} />
+                  <EquipmentLabelContent data={{ ...labelData, width: labelWidth }} isPreview={true} fontScale={getFontScale(0)} elementOrder={elementOrder} spacing={labelSpacing} />
                 ) : (
-                  <CableLabelContent data={cableData} isPreview={true} fontScale={getFontScale(0)} />
+                  <CableLabelContent data={{ ...cableData, width: labelWidth }} isPreview={true} fontScale={getFontScale(0)} />
                 )}
               </div>
             </CardContent>
@@ -1341,52 +1591,65 @@ export default function LabelGenerator() {
       </div>
 
       {/* Print Area */}
-      <div className="hidden print:block fixed top-0 left-0">
+      <div className="hidden print:block">
         <style type="text/css" media="print">
           {`
-            @page {
-              size: 100mm auto;
-              margin: 0mm;
-            }
-            body {
-              background: white;
-            }
+            @page { margin: 0mm; padding: 0mm; }
+            html, body { margin: 0 !important; padding: 0 !important; background: white; }
+            * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
           `}
         </style>
         {mode === "box" ? (
           Array.from({ length: boxCopies }).map((_, i) => (
-            <BoxLabelContent key={i} data={boxData} items={boxItems} />
+            <div key={i} style={{ display: 'flex', flexDirection: 'row', ...(i < boxCopies - 1 ? { pageBreakAfter: 'always', breakAfter: 'page' } : {}) }}>
+              <BoxLabelContent data={boxData} items={boxItems} />
+              <div style={{ width: '5mm', background: 'white', flexShrink: 0 }} />
+            </div>
           ))
-        ) : (() => {
-          const printWidth = mode === "equipment" ? labelData.width : cableData.width;
-          const cols = Math.max(1, Math.floor(100 / printWidth));
+        ) : mode === "round" ? (() => {
+          const items = batchItems.length > 0
+            ? batchItems.map(item => ({ name: item.name, id: item.id, group: item.group }))
+            : [{ name: roundData.name, id: roundData.id, group: roundData.group }];
+          return items.map((item, idx) => (
+            <div key={idx} style={{ display: 'flex', flexDirection: 'row', ...(idx < items.length - 1 ? { pageBreakAfter: 'always', breakAfter: 'page' } : {}) }}>
+              <RoundLabelContent
+                data={{ ...roundData, name: item.name, id: item.id, group: item.group ?? '' }}
+                fontScale={getFontScale(idx)}
+              />
+              <div style={{ width: '5mm', background: 'white', flexShrink: 0 }} />
+            </div>
+          ));
+        })() : (() => {
           const items = batchItems.length > 0
             ? batchItems.map(item => ({ name: item.name, id: item.id, group: item.group }))
             : [{ name: mode === "equipment" ? labelData.name : cableData.name, id: mode === "equipment" ? labelData.id : cableData.id, group: mode === "equipment" ? labelData.group : cableData.group }];
+          // Group into rows based on labelsPerRow
           const rows: typeof items[] = [];
-          for (let i = 0; i < items.length; i += cols) {
-            rows.push(items.slice(i, i + cols));
+          for (let i = 0; i < items.length; i += labelsPerRow) {
+            rows.push(items.slice(i, i + labelsPerRow));
           }
           return rows.map((row, rowIdx) => (
-            <div key={rowIdx} style={{ display: 'flex', flexDirection: 'row', gap: '0mm' }}>
-              {row.map((item, colIdx) => {
-                const globalIdx = rowIdx * cols + colIdx;
-                return mode === "equipment" ? (
+            <div key={rowIdx} style={{ pageBreakAfter: rowIdx < rows.length - 1 ? 'always' : 'auto', breakAfter: rowIdx < rows.length - 1 ? 'page' : 'auto' }}>
+              <div style={{ display: 'flex', flexDirection: 'row' }}>
+              {row.map((item, itemIdx) => (
+                mode === "equipment" ? (
                   <EquipmentLabelContent
-                    key={`${rowIdx}-${colIdx}`}
-                    data={{ ...labelData, name: item.name, id: item.id, group: item.group }}
-                    fontScale={getFontScale(globalIdx)}
+                    key={itemIdx}
+                    data={{ ...labelData, width: labelWidth, name: item.name, id: item.id, group: item.group }}
+                    fontScale={getFontScale(rowIdx * labelsPerRow + itemIdx)}
                     elementOrder={elementOrder}
                     spacing={labelSpacing}
                   />
                 ) : (
                   <CableLabelContent
-                    key={`${rowIdx}-${colIdx}`}
-                    data={{ ...cableData, name: item.name, id: item.id, group: item.group }}
-                    fontScale={getFontScale(globalIdx)}
+                    key={itemIdx}
+                    data={{ ...cableData, width: labelWidth, name: item.name, id: item.id, group: item.group }}
+                    fontScale={getFontScale(rowIdx * labelsPerRow + itemIdx)}
                   />
-                );
-              })}
+                )
+              ))}
+              </div>
+              <div style={{ width: '5mm', background: 'white', flexShrink: 0 }} />
             </div>
           ));
         })()}
