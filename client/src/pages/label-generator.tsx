@@ -1277,9 +1277,14 @@ export default function LabelGenerator() {
                       name="name"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>Navn på udstyr</FormLabel>
+                          <div className="flex items-center gap-2">
+                            <input type="checkbox" checked={elementOrder.includes('name')}
+                              onChange={e => setElementOrder(prev => e.target.checked ? [...prev.filter(x => x !== 'name'), 'name'] : prev.filter(x => x !== 'name'))}
+                              className="h-4 w-4 rounded border-gray-300" />
+                            <FormLabel className="cursor-pointer">Navn på udstyr</FormLabel>
+                          </div>
                           <FormControl>
-                            <Input placeholder="F.eks. Kamera 1" {...field} data-testid="input-equipment-name" />
+                            <Input placeholder="F.eks. Kamera 1" {...field} data-testid="input-equipment-name" disabled={!elementOrder.includes('name')} className={!elementOrder.includes('name') ? 'opacity-40' : ''} />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
@@ -1291,9 +1296,14 @@ export default function LabelGenerator() {
                         name="id"
                         render={({ field }) => (
                           <FormItem className="flex-1">
-                            <FormLabel>ID Nummer</FormLabel>
+                            <div className="flex items-center gap-2">
+                              <input type="checkbox" checked={elementOrder.includes('id')}
+                                onChange={e => setElementOrder(prev => e.target.checked ? [...prev.filter(x => x !== 'id'), 'id'] : prev.filter(x => x !== 'id'))}
+                                className="h-4 w-4 rounded border-gray-300" />
+                              <FormLabel className="cursor-pointer">ID Nummer</FormLabel>
+                            </div>
                             <FormControl>
-                              <Input placeholder="F.eks. CAM-001" {...field} data-testid="input-equipment-id" />
+                              <Input placeholder="F.eks. CAM-001" {...field} data-testid="input-equipment-id" disabled={!elementOrder.includes('id')} className={!elementOrder.includes('id') ? 'opacity-40' : ''} />
                             </FormControl>
                             <FormMessage />
                           </FormItem>
@@ -1308,9 +1318,14 @@ export default function LabelGenerator() {
                       name="group"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>Gruppe / Kit</FormLabel>
+                          <div className="flex items-center gap-2">
+                            <input type="checkbox" checked={elementOrder.includes('group')}
+                              onChange={e => setElementOrder(prev => e.target.checked ? [...prev.filter(x => x !== 'group'), 'group'] : prev.filter(x => x !== 'group'))}
+                              className="h-4 w-4 rounded border-gray-300" />
+                            <FormLabel className="cursor-pointer">Gruppe / Kit</FormLabel>
+                          </div>
                           <FormControl>
-                            <Input placeholder="F.eks. Kit 1, Lyd Kit 2" {...field} data-testid="input-equipment-group" />
+                            <Input placeholder="F.eks. Kit 1, Lyd Kit 2" {...field} data-testid="input-equipment-group" disabled={!elementOrder.includes('group')} className={!elementOrder.includes('group') ? 'opacity-40' : ''} />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
