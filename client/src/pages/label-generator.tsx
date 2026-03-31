@@ -1555,27 +1555,26 @@ export default function LabelGenerator() {
               <div ref={previewLabelRef}>
                 {mode === "box" ? (
                   <BoxLabelContent data={boxData} items={boxItems} isPreview={true} />
-                ) : mode === "round" ? (
-                  batchItems.length > 0 ? (
-                    batchItems.map((item, idx) => (
-                      <RoundLabelContent
-                        key={idx}
-                        data={{ ...roundData, name: item.name, id: item.id, group: item.group }}
-                        isPreview={true}
-                        nameFontSize={roundNameSize}
-                        idFontSize={roundIdSize}
-                        groupFontSize={roundGroupSize}
-                        contentOffset={roundContentOffset}
-                        showName={roundShowName}
-                        showId={roundShowId}
-                        showGroup={roundShowGroup}
-                        lineGap={roundLineGap}
-                      />
-                    ))
-                  ) : (
-                    <RoundLabelContent data={roundData} isPreview={true} nameFontSize={roundNameSize} idFontSize={roundIdSize} groupFontSize={roundGroupSize} contentOffset={roundContentOffset} showName={roundShowName} showId={roundShowId} showGroup={roundShowGroup} lineGap={roundLineGap} />
-                  )
-                ) : batchItems.length > 0 ? (
+                ) : mode === "round" ? (() => {
+                  const previewW = Math.floor((roundData.width ?? printerWidth) / labelsPerRow);
+                  const previewItems = batchItems.length > 0 ? batchItems : [{ ...roundData, group: roundData.group ?? '' }];
+                  return previewItems.map((item, idx) => (
+                    <RoundLabelContent
+                      key={idx}
+                      data={{ ...roundData, width: previewW, name: item.name, id: item.id, group: item.group ?? '' }}
+                      isPreview={true}
+                      nameFontSize={roundNameSize}
+                      idFontSize={roundIdSize}
+                      groupFontSize={roundGroupSize}
+                      contentOffset={roundContentOffset}
+                      showName={roundShowName}
+                      showId={roundShowId}
+                      showGroup={roundShowGroup}
+                      lineGap={roundLineGap}
+                    />
+                  ));
+                })()
+                : batchItems.length > 0 ? (
                   batchItems.map((item, idx) => (
                     mode === "equipment" ? (
                       <EquipmentLabelContent
@@ -1616,30 +1615,51 @@ export default function LabelGenerator() {
             * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
           `}
         </style>
-        {mode === "box" ? (
-          Array.from({ length: boxCopies }).map((_, i) => (
-            <div key={i} style={{ display: 'flex', flexDirection: 'row', ...(i < boxCopies - 1 ? { pageBreakAfter: 'always', breakAfter: 'page' } : {}) }}>
-              <BoxLabelContent data={{ ...boxData, width: boxData.width + 3 }} items={boxItems} />
+        {mode === "box" ? (() => {
+          const boxW = Math.floor(boxData.width / labelsPerRow);
+          const totalCopies = boxCopies * labelsPerRow;
+          const boxRows: number[][] = [];
+          for (let i = 0; i < boxCopies; i++) {
+            boxRows.push(Array.from({ length: labelsPerRow }, (_, j) => i * labelsPerRow + j));
+          }
+          return boxRows.map((row, rowIdx) => (
+            <div key={rowIdx} style={{ display: 'flex', flexDirection: 'row', pageBreakAfter: rowIdx < boxRows.length - 1 ? 'always' : 'auto', breakAfter: rowIdx < boxRows.length - 1 ? 'page' : 'auto' }}>
+              {row.map((_, itemIdx) => {
+                const isLast = itemIdx === row.length - 1;
+                return <BoxLabelContent key={itemIdx} data={{ ...boxData, width: boxW + (isLast ? 3 : 0) }} items={boxItems} />;
+              })}
               <div style={{ width: '2mm', background: 'white', flexShrink: 0 }} />
             </div>
-          ))
-        ) : mode === "round" ? (() => {
+          ));
+        })()
+        : mode === "round" ? (() => {
           const items = batchItems.length > 0
             ? batchItems.map(item => ({ name: item.name, id: item.id, group: item.group }))
             : [{ name: roundData.name, id: roundData.id, group: roundData.group }];
-          return items.map((item, idx) => (
-            <div key={idx} style={{ display: 'flex', flexDirection: 'row', ...(idx < items.length - 1 ? { pageBreakAfter: 'always', breakAfter: 'page' } : {}) }}>
-              <RoundLabelContent
-                data={{ ...roundData, width: (roundData.width ?? printerWidth) + 3, name: item.name, id: item.id, group: item.group ?? '' }}
-                nameFontSize={roundNameSize}
-                idFontSize={roundIdSize}
-                groupFontSize={roundGroupSize}
-                contentOffset={roundContentOffset}
-                showName={roundShowName}
-                showId={roundShowId}
-                showGroup={roundShowGroup}
-                lineGap={roundLineGap}
-              />
+          const roundRows: typeof items[] = [];
+          for (let i = 0; i < items.length; i += labelsPerRow) {
+            roundRows.push(items.slice(i, i + labelsPerRow));
+          }
+          const roundLabelWidth = Math.floor((roundData.width ?? printerWidth) / labelsPerRow);
+          return roundRows.map((row, rowIdx) => (
+            <div key={rowIdx} style={{ display: 'flex', flexDirection: 'row', pageBreakAfter: rowIdx < roundRows.length - 1 ? 'always' : 'auto', breakAfter: rowIdx < roundRows.length - 1 ? 'page' : 'auto' }}>
+              {row.map((item, itemIdx) => {
+                const isLast = itemIdx === row.length - 1;
+                return (
+                  <RoundLabelContent
+                    key={itemIdx}
+                    data={{ ...roundData, width: roundLabelWidth + (isLast ? 3 : 0), name: item.name, id: item.id, group: item.group ?? '' }}
+                    nameFontSize={roundNameSize}
+                    idFontSize={roundIdSize}
+                    groupFontSize={roundGroupSize}
+                    contentOffset={roundContentOffset}
+                    showName={roundShowName}
+                    showId={roundShowId}
+                    showGroup={roundShowGroup}
+                    lineGap={roundLineGap}
+                  />
+                );
+              })}
               <div style={{ width: '2mm', background: 'white', flexShrink: 0 }} />
             </div>
           ));
