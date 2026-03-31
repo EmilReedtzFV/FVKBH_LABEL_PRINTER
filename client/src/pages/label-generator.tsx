@@ -1052,19 +1052,19 @@ export default function LabelGenerator() {
                     <div className="space-y-2">
                       <div className="flex items-center gap-3">
                         <span className="text-xs w-16 text-muted-foreground">Navn</span>
-                        <input type="range" min={0} max={30} step={0.5} value={roundNameSize} onChange={e => setRoundNameSize(Number(e.target.value))} className="flex-1" />
+                        <input type="range" min={0} max={100} step={0.5} value={roundNameSize} onChange={e => setRoundNameSize(Number(e.target.value))} className="flex-1" />
                         <span className="text-xs w-8 text-right">{roundNameSize === 0 ? 'Auto' : `${roundNameSize}px`}</span>
                         {roundNameSize > 0 && <button type="button" className="text-xs text-muted-foreground hover:text-black" onClick={() => setRoundNameSize(0)}>↺</button>}
                       </div>
                       <div className="flex items-center gap-3">
                         <span className="text-xs w-16 text-muted-foreground">ID</span>
-                        <input type="range" min={0} max={24} step={0.5} value={roundIdSize} onChange={e => setRoundIdSize(Number(e.target.value))} className="flex-1" />
+                        <input type="range" min={0} max={100} step={0.5} value={roundIdSize} onChange={e => setRoundIdSize(Number(e.target.value))} className="flex-1" />
                         <span className="text-xs w-8 text-right">{roundIdSize === 0 ? 'Auto' : `${roundIdSize}px`}</span>
                         {roundIdSize > 0 && <button type="button" className="text-xs text-muted-foreground hover:text-black" onClick={() => setRoundIdSize(0)}>↺</button>}
                       </div>
                       <div className="flex items-center gap-3">
                         <span className="text-xs w-16 text-muted-foreground">Gruppe</span>
-                        <input type="range" min={0} max={20} step={0.5} value={roundGroupSize} onChange={e => setRoundGroupSize(Number(e.target.value))} className="flex-1" />
+                        <input type="range" min={0} max={100} step={0.5} value={roundGroupSize} onChange={e => setRoundGroupSize(Number(e.target.value))} className="flex-1" />
                         <span className="text-xs w-8 text-right">{roundGroupSize === 0 ? 'Auto' : `${roundGroupSize}px`}</span>
                         {roundGroupSize > 0 && <button type="button" className="text-xs text-muted-foreground hover:text-black" onClick={() => setRoundGroupSize(0)}>↺</button>}
                       </div>
