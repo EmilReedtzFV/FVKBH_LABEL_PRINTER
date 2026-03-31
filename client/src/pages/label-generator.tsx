@@ -135,7 +135,7 @@ function EquipmentLabelDesignA({ data, isPreview = false, fontScale = 1, element
               <div className="w-[2.5px] bg-white flex-shrink-0" style={{ height: `${qrSize}mm` }}></div>
             </>
           )}
-          <div className="flex flex-col justify-center self-stretch min-w-0 flex-1 text-left" style={{ overflow: 'hidden', gap: isTiny ? '1px' : `${Math.max(1, spacing * 0.15)}px` }}>
+          <div className="flex flex-col justify-start self-stretch min-w-0 flex-1 text-left" style={{ overflow: 'hidden', gap: isTiny ? '1px' : `${Math.max(1, spacing * 0.15)}px` }}>
             {elementOrder.map((el) => {
               if (el === 'name') return <div key="name" className="font-bold uppercase leading-tight" data-label-name style={{ fontSize: nameFs, wordBreak: 'break-word', overflowWrap: 'break-word', lineHeight: 1.15 }}>{data.name}</div>;
               if (el === 'id' && data.id) return <div key="id" className="font-mono tracking-wider font-bold" data-label-id style={{ fontSize: idFs, wordBreak: 'break-all', overflowWrap: 'break-word', lineHeight: 1.1 }}>#{data.id}</div>;
