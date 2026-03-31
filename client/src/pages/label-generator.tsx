@@ -676,6 +676,7 @@ export default function LabelGenerator() {
   const [boxItems, setBoxItems] = useState<BoxItem[]>([{ name: "Eksempel genstand" }]);
   const [newBoxItemName, setNewBoxItemName] = useState("");
   const [boxCopies, setBoxCopies] = useState(1);
+  const [labelCopies, setLabelCopies] = useState(1);
 
   const [roundData, setRoundData] = useState<RoundFormValues>({
     name: "Kamera 1",
@@ -857,13 +858,16 @@ export default function LabelGenerator() {
             </Button>
             <Button onClick={handlePrint} size="lg" className="gap-2" data-testid="button-print">
               <Printer className="h-5 w-5" />
-              {batchItems.length > 0 ? `Print ${batchItems.length} Labels` : "Print Label"}
+              {(() => {
+                const count = (batchItems.length > 0 ? batchItems.length : 1) * labelCopies;
+                return count > 1 ? `Print ${count} Labels` : "Print Label";
+              })()}
             </Button>
           </div>
         </div>
 
-        {/* Labels per row */}
-        <div className="flex items-start gap-3 p-3 bg-muted rounded-lg flex-wrap">
+        {/* Labels per row + copies */}
+        <div className="flex items-start gap-6 p-3 bg-muted rounded-lg flex-wrap">
           <Printer className="h-4 w-4 text-muted-foreground flex-shrink-0 mt-1" />
           <div className="flex flex-col gap-2">
             <span className="text-sm text-muted-foreground font-medium">Labels pr. rad (105mm rulle):</span>
@@ -880,6 +884,18 @@ export default function LabelGenerator() {
                   </button>
                 );
               })}
+            </div>
+          </div>
+          <div className="flex flex-col gap-2">
+            <span className="text-sm text-muted-foreground font-medium">Antal kopier:</span>
+            <div className="flex items-center gap-2">
+              <button type="button" onClick={() => setLabelCopies(c => Math.max(1, c - 1))}
+                className="w-8 h-8 rounded border border-gray-300 bg-white hover:border-black flex items-center justify-center text-lg font-bold">−</button>
+              <input type="number" min={1} max={999} value={labelCopies}
+                onChange={e => setLabelCopies(Math.max(1, Number(e.target.value)))}
+                className="w-16 h-8 text-center border border-gray-300 rounded text-sm font-medium" />
+              <button type="button" onClick={() => setLabelCopies(c => Math.min(999, c + 1))}
+                className="w-8 h-8 rounded border border-gray-300 bg-white hover:border-black flex items-center justify-center text-lg font-bold">+</button>
             </div>
           </div>
         </div>
@@ -1633,9 +1649,10 @@ export default function LabelGenerator() {
           ));
         })()
         : mode === "round" ? (() => {
-          const items = batchItems.length > 0
+          const baseItems = batchItems.length > 0
             ? batchItems.map(item => ({ name: item.name, id: item.id, group: item.group }))
             : [{ name: roundData.name, id: roundData.id, group: roundData.group }];
+          const items = Array.from({ length: labelCopies }, () => baseItems).flat();
           const roundRows: typeof items[] = [];
           for (let i = 0; i < items.length; i += labelsPerRow) {
             roundRows.push(items.slice(i, i + labelsPerRow));
@@ -1664,9 +1681,10 @@ export default function LabelGenerator() {
             </div>
           ));
         })() : (() => {
-          const items = batchItems.length > 0
+          const baseItems = batchItems.length > 0
             ? batchItems.map(item => ({ name: item.name, id: item.id, group: item.group }))
             : [{ name: mode === "equipment" ? labelData.name : cableData.name, id: mode === "equipment" ? labelData.id : cableData.id, group: mode === "equipment" ? labelData.group : cableData.group }];
+          const items = Array.from({ length: labelCopies }, () => baseItems).flat();
           // Group into rows based on labelsPerRow
           const rows: typeof items[] = [];
           for (let i = 0; i < items.length; i += labelsPerRow) {
