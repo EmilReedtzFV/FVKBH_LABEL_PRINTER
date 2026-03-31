@@ -50,7 +50,7 @@ const boxSchema = z.object({
 
 const roundSchema = z.object({
   name: z.string().min(1, "Navn er påkrævet"),
-  id: z.string().min(1, "ID nummer er påkrævet"),
+  id: z.string().optional().default(""),
   group: z.string().optional(),
   diameter: z.number().min(20).max(150).optional(),
   width: z.number().min(20).max(200).optional(),
@@ -752,7 +752,7 @@ export default function LabelGenerator() {
   const onRoundSubmit = (data: RoundFormValues) => {
     setRoundData({ ...data, width: printerWidth });
     setFontScales({});
-    toast({ title: "Firkantet label opdateret", description: "Visningen er blevet opdateret." });
+    toast({ title: "Custom label opdateret", description: "Visningen er blevet opdateret." });
   };
 
   const addBoxItem = () => {
@@ -913,7 +913,7 @@ export default function LabelGenerator() {
             data-testid="button-mode-round"
           >
             <Square className="h-4 w-4" />
-            Firkantet Label
+            Custom Label
           </Button>
         </div>
 
@@ -965,14 +965,14 @@ export default function LabelGenerator() {
           {/* Controls */}
           <Card>
             <CardHeader>
-              <CardTitle>{mode === "equipment" ? "Udstyr Konfiguration" : mode === "cable" ? "Kabel Konfiguration" : mode === "round" ? "Firkantet Label Konfiguration" : "Kasse Konfiguration"}</CardTitle>
+              <CardTitle>{mode === "equipment" ? "Udstyr Konfiguration" : mode === "cable" ? "Kabel Konfiguration" : mode === "round" ? "Custom Label Konfiguration" : "Kasse Konfiguration"}</CardTitle>
               <CardDescription>
                 {mode === "equipment"
                   ? "Indtast oplysninger til udstyr-labelen."
                   : mode === "cable"
                   ? "Indtast oplysninger til kabel-labelen. Denne vikles rundt om kablet."
                   : mode === "round"
-                  ? "Indtast oplysninger til den firkantede label."
+                  ? "Lav din egen custom label med valgfri størrelse og skriftstørrelser."
                   : "Indtast kit-navn og tilføj genstande til kasse-labelen."}
               </CardDescription>
             </CardHeader>
@@ -1045,24 +1045,30 @@ export default function LabelGenerator() {
                         </FormItem>
                       )}
                     />
-                    <div className="space-y-2">
-                      <label className="text-sm font-medium leading-none">Højde (mm)</label>
-                      <div className="flex flex-wrap gap-2">
-                        {[10, 20, 30, 40, 50, 70, 100].map(h => {
-                          const curH = roundForm.watch("height") ?? 40;
-                          return (
-                            <button key={h} type="button"
-                              onClick={() => { roundForm.setValue("height", h); }}
-                              className={`px-3 py-1.5 text-sm rounded border transition-colors ${curH === h ? 'bg-black text-white border-black' : 'bg-white text-black border-gray-300 hover:border-black'}`}>
-                              {h}mm
-                            </button>
-                          );
-                        })}
-                      </div>
-                      <Input type="number" placeholder="Eller skriv højde..."
-                        value={roundForm.watch("height") ?? 40}
-                        onChange={e => roundForm.setValue("height", Number(e.target.value))} />
-                    </div>
+                    <FormField
+                      control={roundForm.control}
+                      name="height"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Højde (mm)</FormLabel>
+                          <div className="flex flex-wrap gap-2 mb-2">
+                            {[10, 20, 30, 40, 50, 70, 100].map(h => (
+                              <button key={h} type="button"
+                                onClick={() => field.onChange(h)}
+                                className={`px-3 py-1.5 text-sm rounded border transition-colors ${field.value === h ? 'bg-black text-white border-black' : 'bg-white text-black border-gray-300 hover:border-black'}`}>
+                                {h}mm
+                              </button>
+                            ))}
+                          </div>
+                          <FormControl>
+                            <Input type="number" placeholder="Eller skriv højde..."
+                              {...field}
+                              onChange={e => field.onChange(Number(e.target.value))} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
                     {/* Font size controls */}
                     <div className="space-y-3">
                       <label className="text-sm font-medium">Skriftstørrelser</label>
