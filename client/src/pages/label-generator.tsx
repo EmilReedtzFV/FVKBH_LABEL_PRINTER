@@ -472,7 +472,7 @@ function BoxLabelContent({ data, items, isPreview = false }: { data: BoxFormValu
 }
 
 // Square/Custom Label Component
-function RoundLabelContent({ data, isPreview = false, nameFontSize = 0, idFontSize = 0, groupFontSize = 0, contentOffset = 0, showName = true, showId = true, showGroup = true }: {
+function RoundLabelContent({ data, isPreview = false, nameFontSize = 0, idFontSize = 0, groupFontSize = 0, contentOffset = 0, showName = true, showId = true, showGroup = true, lineGap = 0 }: {
   data: RoundFormValues;
   isPreview?: boolean;
   nameFontSize?: number;
@@ -482,6 +482,7 @@ function RoundLabelContent({ data, isPreview = false, nameFontSize = 0, idFontSi
   showName?: boolean;
   showId?: boolean;
   showGroup?: boolean;
+  lineGap?: number;
 }) {
   const width = data.width ?? 96;
   const height = data.height ?? 40;
@@ -523,7 +524,7 @@ function RoundLabelContent({ data, isPreview = false, nameFontSize = 0, idFontSi
               <div className="w-[2.5px] bg-white flex-shrink-0" style={{ height: `${qrSize}mm` }}></div>
             </>
           )}
-          <div className="flex flex-col justify-start self-stretch min-w-0 flex-1 text-left" style={{ overflow: 'hidden', gap: contentGap }}>
+          <div className="flex flex-col justify-start self-stretch min-w-0 flex-1 text-left" style={{ overflow: 'hidden', gap: lineGap > 0 ? `${lineGap}mm` : contentGap }}>
             {showName && <div className="font-bold uppercase leading-tight" data-label-name
               style={{ fontSize: `${namePx}px`, wordBreak: 'break-word', overflowWrap: 'break-word', lineHeight: 1.15 }}>{data.name}</div>}
             {showId && data.id && <div className="font-mono tracking-wider font-bold" data-label-id
@@ -688,6 +689,7 @@ export default function LabelGenerator() {
   const [roundIdSize, setRoundIdSize] = useState<number>(0);
   const [roundGroupSize, setRoundGroupSize] = useState<number>(0);
   const [roundContentOffset, setRoundContentOffset] = useState<number>(0);
+  const [roundLineGap, setRoundLineGap] = useState<number>(0);
   const [roundShowQr, setRoundShowQr] = useState<boolean>(true);
   const [roundShowName, setRoundShowName] = useState<boolean>(true);
   const [roundShowId, setRoundShowId] = useState<boolean>(true);
@@ -1068,6 +1070,15 @@ export default function LabelGenerator() {
                         <span className="text-xs w-8 text-right">{roundGroupSize === 0 ? 'Auto' : `${roundGroupSize}px`}</span>
                         {roundGroupSize > 0 && <button type="button" className="text-xs text-muted-foreground hover:text-black" onClick={() => setRoundGroupSize(0)}>↺</button>}
                       </div>
+                    </div>
+                  </div>
+                  {/* Line gap */}
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium">Mellemrum mellem linjer</label>
+                    <div className="flex items-center gap-3">
+                      <input type="range" min={0} max={20} step={0.5} value={roundLineGap} onChange={e => setRoundLineGap(Number(e.target.value))} className="flex-1" />
+                      <span className="text-xs w-12 text-right">{roundLineGap === 0 ? 'Auto' : `${roundLineGap}mm`}</span>
+                      {roundLineGap > 0 && <button type="button" className="text-xs text-muted-foreground hover:text-black" onClick={() => setRoundLineGap(0)}>↺</button>}
                     </div>
                   </div>
                   {/* Content position */}
@@ -1558,10 +1569,11 @@ export default function LabelGenerator() {
                         showName={roundShowName}
                         showId={roundShowId}
                         showGroup={roundShowGroup}
+                        lineGap={roundLineGap}
                       />
                     ))
                   ) : (
-                    <RoundLabelContent data={roundData} isPreview={true} nameFontSize={roundNameSize} idFontSize={roundIdSize} groupFontSize={roundGroupSize} contentOffset={roundContentOffset} showName={roundShowName} showId={roundShowId} showGroup={roundShowGroup} />
+                    <RoundLabelContent data={roundData} isPreview={true} nameFontSize={roundNameSize} idFontSize={roundIdSize} groupFontSize={roundGroupSize} contentOffset={roundContentOffset} showName={roundShowName} showId={roundShowId} showGroup={roundShowGroup} lineGap={roundLineGap} />
                   )
                 ) : batchItems.length > 0 ? (
                   batchItems.map((item, idx) => (
@@ -1626,6 +1638,7 @@ export default function LabelGenerator() {
                 showName={roundShowName}
                 showId={roundShowId}
                 showGroup={roundShowGroup}
+                lineGap={roundLineGap}
               />
               <div style={{ width: '5mm', background: 'white', flexShrink: 0 }} />
             </div>
