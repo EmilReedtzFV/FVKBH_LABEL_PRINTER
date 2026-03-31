@@ -942,11 +942,26 @@ export default function LabelGenerator() {
             <CardContent>
               <div className="grid gap-2 max-h-60 overflow-y-auto">
                 {batchItems.map((item, idx) => (
-                  <div key={idx} className="flex items-center gap-3 p-2 bg-muted/50 rounded text-sm" data-testid={`batch-item-${idx}`}>
-                    {item.id ? <span className="font-mono text-muted-foreground">#{item.id}</span> : <span className="text-muted-foreground text-xs italic">Intet nr.</span>}
-                    <span className="font-bold flex-1">{item.name}</span>
-                    {item.group && <span className="text-xs bg-primary/10 px-2 py-0.5 rounded">{item.group}</span>}
-                    <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => setBatchItems(prev => prev.filter((_, i) => i !== idx))} data-testid={`button-remove-batch-${idx}`}>
+                  <div key={idx} className="flex items-center gap-2 p-2 bg-muted/50 rounded text-sm" data-testid={`batch-item-${idx}`}>
+                    <input
+                      className="font-mono text-muted-foreground bg-transparent border-b border-transparent hover:border-gray-300 focus:border-black outline-none w-20 text-xs"
+                      value={item.id}
+                      placeholder="ID"
+                      onChange={e => setBatchItems(prev => prev.map((it, i) => i === idx ? { ...it, id: e.target.value } : it))}
+                    />
+                    <input
+                      className="font-bold flex-1 bg-transparent border-b border-transparent hover:border-gray-300 focus:border-black outline-none min-w-0"
+                      value={item.name}
+                      placeholder="Navn"
+                      onChange={e => setBatchItems(prev => prev.map((it, i) => i === idx ? { ...it, name: e.target.value } : it))}
+                    />
+                    <input
+                      className="text-xs bg-primary/10 px-2 py-0.5 rounded border border-transparent hover:border-gray-300 focus:border-black outline-none w-20"
+                      value={item.group}
+                      placeholder="Gruppe"
+                      onChange={e => setBatchItems(prev => prev.map((it, i) => i === idx ? { ...it, group: e.target.value } : it))}
+                    />
+                    <Button variant="ghost" size="icon" className="h-6 w-6 flex-shrink-0" onClick={() => setBatchItems(prev => prev.filter((_, i) => i !== idx))} data-testid={`button-remove-batch-${idx}`}>
                       <Trash2 className="h-3 w-3" />
                     </Button>
                   </div>
