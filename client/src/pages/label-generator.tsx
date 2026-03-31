@@ -90,13 +90,13 @@ const CABLE_PRESETS: Record<string, { width: number; height: number; label: stri
 type LabelElement = 'name' | 'id' | 'group';
 
 // Design A: Top bar with company info, QR left, text right (horizontal)
-function EquipmentLabelDesignA({ data, isPreview = false, fontScale = 1, elementOrder = ['name', 'id', 'group'], spacing = 50 }: { data: EquipmentFormValues; isPreview?: boolean; fontScale?: number; elementOrder?: LabelElement[]; spacing?: number }) {
+function EquipmentLabelDesignA({ data, isPreview = false, fontScale = 1, elementOrder = ['name', 'id', 'group'], spacing = 50, showQrOverride }: { data: EquipmentFormValues; isPreview?: boolean; fontScale?: number; elementOrder?: LabelElement[]; spacing?: number; showQrOverride?: boolean }) {
   const { width, height } = data;
   const s = fontScale;
   const isSmall = height <= 20;
   const isNarrow = width < 20;
   const isTiny = isSmall || isNarrow;
-  const showQr = data.id && !isTiny;
+  const showQr = showQrOverride !== undefined ? (showQrOverride && data.id && !isTiny) : (data.id && !isTiny);
 
   const contentH = isSmall ? height * 0.78 : height * 0.82;
   const namePx = (isSmall
@@ -336,8 +336,8 @@ function EquipmentLabelByDesign({ design, data, isPreview = false, fontScale = 1
   }
 }
 
-function EquipmentLabelContent({ data, isPreview = false, fontScale = 1, elementOrder = ['name', 'id', 'group'], spacing = 50 }: { data: EquipmentFormValues; isPreview?: boolean; fontScale?: number; elementOrder?: LabelElement[]; spacing?: number }) {
-  return <EquipmentLabelDesignA data={data} isPreview={isPreview} fontScale={fontScale} elementOrder={elementOrder} spacing={spacing} />;
+function EquipmentLabelContent({ data, isPreview = false, fontScale = 1, elementOrder = ['name', 'id', 'group'], spacing = 50, showQrOverride }: { data: EquipmentFormValues; isPreview?: boolean; fontScale?: number; elementOrder?: LabelElement[]; spacing?: number; showQrOverride?: boolean }) {
+  return <EquipmentLabelDesignA data={data} isPreview={isPreview} fontScale={fontScale} elementOrder={elementOrder} spacing={spacing} showQrOverride={showQrOverride} />;
 }
 
 // Cable Label Component - narrow strip that wraps around a cable
@@ -558,6 +558,7 @@ export default function LabelGenerator() {
   const previewLabelRef = useRef<HTMLDivElement>(null);
   const [fontScales, setFontScales] = useState<Record<number, number>>({});
   const [elementOrder, setElementOrder] = useState<LabelElement[]>(['name', 'id', 'group']);
+  const [showQrCode, setShowQrCode] = useState<boolean>(true);
   const [labelSpacing, setLabelSpacing] = useState(50);
 
   const getFontScale = (idx: number) => fontScales[idx] ?? 1;
@@ -1024,27 +1025,13 @@ export default function LabelGenerator() {
                         </FormItem>
                       )}
                     />
-                    <FormField
-                      control={roundForm.control}
-                      name="codeType"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Kode Type</FormLabel>
-                          <Select onValueChange={field.onChange} defaultValue={field.value}>
-                            <FormControl>
-                              <SelectTrigger data-testid="select-round-codetype">
-                                <SelectValue placeholder="Vælg kode type" />
-                              </SelectTrigger>
-                            </FormControl>
-                            <SelectContent>
-                              <SelectItem value="qr">QR Kode</SelectItem>
-                              <SelectItem value="none">Ingen kode</SelectItem>
-                            </SelectContent>
-                          </Select>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
+                    <div className="flex items-center gap-2">
+                      <input type="checkbox" id="round-show-qr"
+                        checked={roundForm.watch("codeType") === "qr"}
+                        onChange={e => roundForm.setValue("codeType", e.target.checked ? "qr" : "none")}
+                        className="h-4 w-4 rounded border-gray-300" />
+                      <label htmlFor="round-show-qr" className="text-sm font-medium cursor-pointer">Vis QR Kode</label>
+                    </div>
                     <FormField
                       control={roundForm.control}
                       name="height"
@@ -1331,6 +1318,10 @@ export default function LabelGenerator() {
                         </FormItem>
                       )}
                     />
+                    <div className="flex items-center gap-2">
+                      <input type="checkbox" id="show-qr" checked={showQrCode} onChange={e => setShowQrCode(e.target.checked)} className="h-4 w-4 rounded border-gray-300" />
+                      <label htmlFor="show-qr" className="text-sm font-medium cursor-pointer">Vis QR Kode</label>
+                    </div>
                     <div className="space-y-4">
                       <FormField
                         control={equipmentForm.control}
@@ -1592,6 +1583,7 @@ export default function LabelGenerator() {
                         fontScale={getFontScale(idx)}
                         elementOrder={elementOrder}
                         spacing={labelSpacing}
+                        showQrOverride={showQrCode}
                       />
                     ) : (
                       <CableLabelContent
@@ -1603,7 +1595,7 @@ export default function LabelGenerator() {
                     )
                   ))
                 ) : mode === "equipment" ? (
-                  <EquipmentLabelContent data={{ ...labelData, width: labelWidth }} isPreview={true} fontScale={getFontScale(0)} elementOrder={elementOrder} spacing={labelSpacing} />
+                  <EquipmentLabelContent data={{ ...labelData, width: labelWidth }} isPreview={true} fontScale={getFontScale(0)} elementOrder={elementOrder} spacing={labelSpacing} showQrOverride={showQrCode} />
                 ) : (
                   <CableLabelContent data={{ ...cableData, width: labelWidth }} isPreview={true} fontScale={getFontScale(0)} />
                 )}
@@ -1665,6 +1657,7 @@ export default function LabelGenerator() {
                     fontScale={getFontScale(rowIdx * labelsPerRow + itemIdx)}
                     elementOrder={elementOrder}
                     spacing={labelSpacing}
+                    showQrOverride={showQrCode}
                   />
                 ) : (
                   <CableLabelContent
