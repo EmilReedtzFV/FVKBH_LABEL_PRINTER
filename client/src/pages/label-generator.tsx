@@ -48,20 +48,18 @@ const boxSchema = z.object({
   autoHeight: z.boolean().optional(),
 });
 
-const roundSchema = z.object({
-  name: z.string().optional().default(""),
-  id: z.string().optional().default(""),
-  group: z.string().optional(),
-  diameter: z.number().min(20).max(150).optional(),
-  width: z.number().min(20).max(200).optional(),
-  height: z.number().min(10).max(300).optional(),
-  codeType: z.enum(["qr", "none"]),
-});
 
 type EquipmentFormValues = z.infer<typeof equipmentSchema>;
 type CableFormValues = z.infer<typeof cableSchema>;
 type BoxFormValues = z.infer<typeof boxSchema>;
-type RoundFormValues = z.infer<typeof roundSchema>;
+type RoundFormValues = {
+  name: string;
+  id: string;
+  group: string;
+  width?: number;
+  height?: number;
+  codeType: "qr" | "none";
+};
 
 interface BoxItem {
   name: string;
@@ -682,7 +680,6 @@ export default function LabelGenerator() {
     name: "Kamera 1",
     id: "CAM-001",
     group: "Kit 1",
-    diameter: 60,
     width: 96,
     height: 40,
     codeType: "qr",
@@ -711,10 +708,10 @@ export default function LabelGenerator() {
     defaultValues: boxData,
   });
 
-  const roundForm = useForm<RoundFormValues>({
-    resolver: zodResolver(roundSchema),
-    defaultValues: roundData,
-  });
+  const [roundName, setRoundName] = useState(roundData.name);
+  const [roundId, setRoundId] = useState(roundData.id);
+  const [roundGroup, setRoundGroup] = useState(roundData.group ?? "");
+  const [roundHeight, setRoundHeight] = useState(roundData.height ?? 40);
 
   const watchEquipmentPreset = equipmentForm.watch("preset");
   const watchCablePreset = cableForm.watch("preset");
@@ -757,8 +754,8 @@ export default function LabelGenerator() {
     toast({ title: "Kasse label opdateret", description: "Visningen er blevet opdateret." });
   };
 
-  const onRoundSubmit = (data: RoundFormValues) => {
-    setRoundData({ ...data, width: printerWidth, codeType: roundShowQr ? "qr" : "none" });
+  const onRoundSubmit = () => {
+    setRoundData(prev => ({ ...prev, name: roundName, id: roundId, group: roundGroup, height: roundHeight, width: printerWidth, codeType: roundShowQr ? "qr" : "none" }));
     setFontScales({});
     toast({ title: "Custom label opdateret", description: "Visningen er blevet opdateret." });
   };
@@ -778,7 +775,7 @@ export default function LabelGenerator() {
     } else if (mode === "cable") {
       cableForm.setValue("id", randomId);
     } else if (mode === "round") {
-      roundForm.setValue("id", randomId);
+      setRoundId(randomId);
     }
   };
 
@@ -986,138 +983,106 @@ export default function LabelGenerator() {
             </CardHeader>
             <CardContent>
               {mode === "round" ? (
-                <Form {...roundForm}>
-                  <form onSubmit={roundForm.handleSubmit(onRoundSubmit)} className="space-y-6">
-                    <FormField
-                      control={roundForm.control}
-                      name="name"
-                      render={({ field }) => (
-                        <FormItem>
-                          <div className="flex items-center gap-2">
-                            <input type="checkbox" checked={roundShowName}
-                              onChange={e => setRoundShowName(e.target.checked)}
-                              className="h-4 w-4 rounded border-gray-300" />
-                            <FormLabel className="cursor-pointer">Navn på udstyr</FormLabel>
-                          </div>
-                          <FormControl>
-                            <Input placeholder="F.eks. Kamera 1" {...field} value={field.value ?? ''} data-testid="input-round-name" disabled={!roundShowName} className={!roundShowName ? 'opacity-40' : ''} />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    <div className="flex gap-4 items-end">
-                      <FormField
-                        control={roundForm.control}
-                        name="id"
-                        render={({ field }) => (
-                          <FormItem className="flex-1">
-                            <div className="flex items-center gap-2">
-                              <input type="checkbox" checked={roundShowId}
-                                onChange={e => setRoundShowId(e.target.checked)}
-                                className="h-4 w-4 rounded border-gray-300" />
-                              <FormLabel className="cursor-pointer">ID Nummer</FormLabel>
-                            </div>
-                            <FormControl>
-                              <Input placeholder="F.eks. CAM-001" {...field} value={field.value ?? ''} data-testid="input-round-id" disabled={!roundShowId} className={!roundShowId ? 'opacity-40' : ''} />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
+                <div className="space-y-6">
+                  {/* Navn */}
+                  <div className="space-y-2">
+                    <div className="flex items-center gap-2">
+                      <input type="checkbox" id="round-show-name" checked={roundShowName}
+                        onChange={e => setRoundShowName(e.target.checked)}
+                        className="h-4 w-4 rounded border-gray-300" />
+                      <label htmlFor="round-show-name" className="text-sm font-medium cursor-pointer">Navn på udstyr</label>
+                    </div>
+                    <Input placeholder="F.eks. Kamera 1" value={roundName} onChange={e => setRoundName(e.target.value)}
+                      data-testid="input-round-name" disabled={!roundShowName} className={!roundShowName ? 'opacity-40' : ''} />
+                  </div>
+                  {/* ID */}
+                  <div className="space-y-2">
+                    <div className="flex items-center gap-2">
+                      <input type="checkbox" id="round-show-id" checked={roundShowId}
+                        onChange={e => setRoundShowId(e.target.checked)}
+                        className="h-4 w-4 rounded border-gray-300" />
+                      <label htmlFor="round-show-id" className="text-sm font-medium cursor-pointer">ID Nummer</label>
+                    </div>
+                    <div className="flex gap-2">
+                      <Input placeholder="F.eks. CAM-001" value={roundId} onChange={e => setRoundId(e.target.value)}
+                        data-testid="input-round-id" disabled={!roundShowId} className={!roundShowId ? 'opacity-40 flex-1' : 'flex-1'} />
                       <Button type="button" variant="outline" onClick={generateRandomId} title="Generer tilfældigt ID" data-testid="button-round-random-id">
                         <RefreshCw className="h-4 w-4" />
                       </Button>
                     </div>
-                    <FormField
-                      control={roundForm.control}
-                      name="group"
-                      render={({ field }) => (
-                        <FormItem>
-                          <div className="flex items-center gap-2">
-                            <input type="checkbox" checked={roundShowGroup}
-                              onChange={e => setRoundShowGroup(e.target.checked)}
-                              className="h-4 w-4 rounded border-gray-300" />
-                            <FormLabel className="cursor-pointer">Gruppe / Kit</FormLabel>
-                          </div>
-                          <FormControl>
-                            <Input placeholder="F.eks. Kit 1" {...field} value={field.value ?? ''} data-testid="input-round-group" disabled={!roundShowGroup} className={!roundShowGroup ? 'opacity-40' : ''} />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
+                  </div>
+                  {/* Gruppe */}
+                  <div className="space-y-2">
                     <div className="flex items-center gap-2">
-                      <input type="checkbox" id="round-show-qr"
-                        checked={roundShowQr}
-                        onChange={e => setRoundShowQr(e.target.checked)}
+                      <input type="checkbox" id="round-show-group" checked={roundShowGroup}
+                        onChange={e => setRoundShowGroup(e.target.checked)}
                         className="h-4 w-4 rounded border-gray-300" />
-                      <label htmlFor="round-show-qr" className="text-sm font-medium cursor-pointer">Vis QR Kode</label>
+                      <label htmlFor="round-show-group" className="text-sm font-medium cursor-pointer">Gruppe / Kit</label>
                     </div>
-                    <FormField
-                      control={roundForm.control}
-                      name="height"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Højde (mm)</FormLabel>
-                          <div className="flex flex-wrap gap-2 mb-2">
-                            {[10, 20, 30, 40, 50, 70, 100].map(h => (
-                              <button key={h} type="button"
-                                onClick={() => field.onChange(h)}
-                                className={`px-3 py-1.5 text-sm rounded border transition-colors ${field.value === h ? 'bg-black text-white border-black' : 'bg-white text-black border-gray-300 hover:border-black'}`}>
-                                {h}mm
-                              </button>
-                            ))}
-                          </div>
-                          <FormControl>
-                            <Input type="number" placeholder="Eller skriv højde..."
-                              {...field}
-                              onChange={e => field.onChange(Number(e.target.value))} />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    {/* Font size controls */}
-                    <div className="space-y-3">
-                      <label className="text-sm font-medium">Skriftstørrelser</label>
-                      <div className="space-y-2">
-                        <div className="flex items-center gap-3">
-                          <span className="text-xs w-16 text-muted-foreground">Navn</span>
-                          <input type="range" min={0} max={30} step={0.5} value={roundNameSize} onChange={e => setRoundNameSize(Number(e.target.value))} className="flex-1" />
-                          <span className="text-xs w-8 text-right">{roundNameSize === 0 ? 'Auto' : `${roundNameSize}px`}</span>
-                          {roundNameSize > 0 && <button type="button" className="text-xs text-muted-foreground hover:text-black" onClick={() => setRoundNameSize(0)}>↺</button>}
-                        </div>
-                        <div className="flex items-center gap-3">
-                          <span className="text-xs w-16 text-muted-foreground">ID</span>
-                          <input type="range" min={0} max={24} step={0.5} value={roundIdSize} onChange={e => setRoundIdSize(Number(e.target.value))} className="flex-1" />
-                          <span className="text-xs w-8 text-right">{roundIdSize === 0 ? 'Auto' : `${roundIdSize}px`}</span>
-                          {roundIdSize > 0 && <button type="button" className="text-xs text-muted-foreground hover:text-black" onClick={() => setRoundIdSize(0)}>↺</button>}
-                        </div>
-                        <div className="flex items-center gap-3">
-                          <span className="text-xs w-16 text-muted-foreground">Gruppe</span>
-                          <input type="range" min={0} max={20} step={0.5} value={roundGroupSize} onChange={e => setRoundGroupSize(Number(e.target.value))} className="flex-1" />
-                          <span className="text-xs w-8 text-right">{roundGroupSize === 0 ? 'Auto' : `${roundGroupSize}px`}</span>
-                          {roundGroupSize > 0 && <button type="button" className="text-xs text-muted-foreground hover:text-black" onClick={() => setRoundGroupSize(0)}>↺</button>}
-                        </div>
-                      </div>
+                    <Input placeholder="F.eks. Kit 1" value={roundGroup} onChange={e => setRoundGroup(e.target.value)}
+                      data-testid="input-round-group" disabled={!roundShowGroup} className={!roundShowGroup ? 'opacity-40' : ''} />
+                  </div>
+                  {/* QR */}
+                  <div className="flex items-center gap-2">
+                    <input type="checkbox" id="round-show-qr"
+                      checked={roundShowQr}
+                      onChange={e => setRoundShowQr(e.target.checked)}
+                      className="h-4 w-4 rounded border-gray-300" />
+                    <label htmlFor="round-show-qr" className="text-sm font-medium cursor-pointer">Vis QR Kode</label>
+                  </div>
+                  {/* Højde */}
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium">Højde (mm)</label>
+                    <div className="flex flex-wrap gap-2 mb-2">
+                      {[10, 20, 30, 40, 50, 70, 100].map(h => (
+                        <button key={h} type="button"
+                          onClick={() => setRoundHeight(h)}
+                          className={`px-3 py-1.5 text-sm rounded border transition-colors ${roundHeight === h ? 'bg-black text-white border-black' : 'bg-white text-black border-gray-300 hover:border-black'}`}>
+                          {h}mm
+                        </button>
+                      ))}
                     </div>
-
-                    {/* Content position */}
+                    <Input type="number" placeholder="Eller skriv højde..."
+                      value={roundHeight}
+                      onChange={e => setRoundHeight(Number(e.target.value))} />
+                  </div>
+                  {/* Font size controls */}
+                  <div className="space-y-3">
+                    <label className="text-sm font-medium">Skriftstørrelser</label>
                     <div className="space-y-2">
-                      <label className="text-sm font-medium">Tekstplacering (op/ned)</label>
                       <div className="flex items-center gap-3">
-                        <span className="text-xs text-muted-foreground">Op</span>
-                        <input type="range" min={-15} max={15} step={0.5} value={roundContentOffset} onChange={e => setRoundContentOffset(Number(e.target.value))} className="flex-1" />
-                        <span className="text-xs text-muted-foreground">Ned</span>
-                        <span className="text-xs w-12 text-right">{roundContentOffset === 0 ? 'Midt' : `${roundContentOffset > 0 ? '+' : ''}${roundContentOffset}mm`}</span>
-                        {roundContentOffset !== 0 && <button type="button" className="text-xs text-muted-foreground hover:text-black" onClick={() => setRoundContentOffset(0)}>↺</button>}
+                        <span className="text-xs w-16 text-muted-foreground">Navn</span>
+                        <input type="range" min={0} max={30} step={0.5} value={roundNameSize} onChange={e => setRoundNameSize(Number(e.target.value))} className="flex-1" />
+                        <span className="text-xs w-8 text-right">{roundNameSize === 0 ? 'Auto' : `${roundNameSize}px`}</span>
+                        {roundNameSize > 0 && <button type="button" className="text-xs text-muted-foreground hover:text-black" onClick={() => setRoundNameSize(0)}>↺</button>}
+                      </div>
+                      <div className="flex items-center gap-3">
+                        <span className="text-xs w-16 text-muted-foreground">ID</span>
+                        <input type="range" min={0} max={24} step={0.5} value={roundIdSize} onChange={e => setRoundIdSize(Number(e.target.value))} className="flex-1" />
+                        <span className="text-xs w-8 text-right">{roundIdSize === 0 ? 'Auto' : `${roundIdSize}px`}</span>
+                        {roundIdSize > 0 && <button type="button" className="text-xs text-muted-foreground hover:text-black" onClick={() => setRoundIdSize(0)}>↺</button>}
+                      </div>
+                      <div className="flex items-center gap-3">
+                        <span className="text-xs w-16 text-muted-foreground">Gruppe</span>
+                        <input type="range" min={0} max={20} step={0.5} value={roundGroupSize} onChange={e => setRoundGroupSize(Number(e.target.value))} className="flex-1" />
+                        <span className="text-xs w-8 text-right">{roundGroupSize === 0 ? 'Auto' : `${roundGroupSize}px`}</span>
+                        {roundGroupSize > 0 && <button type="button" className="text-xs text-muted-foreground hover:text-black" onClick={() => setRoundGroupSize(0)}>↺</button>}
                       </div>
                     </div>
-
-                    <Button type="submit" className="w-full" data-testid="button-update-round">Opdater Visning</Button>
-                  </form>
-                </Form>
+                  </div>
+                  {/* Content position */}
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium">Tekstplacering (op/ned)</label>
+                    <div className="flex items-center gap-3">
+                      <span className="text-xs text-muted-foreground">Op</span>
+                      <input type="range" min={-15} max={15} step={0.5} value={roundContentOffset} onChange={e => setRoundContentOffset(Number(e.target.value))} className="flex-1" />
+                      <span className="text-xs text-muted-foreground">Ned</span>
+                      <span className="text-xs w-12 text-right">{roundContentOffset === 0 ? 'Midt' : `${roundContentOffset > 0 ? '+' : ''}${roundContentOffset}mm`}</span>
+                      {roundContentOffset !== 0 && <button type="button" className="text-xs text-muted-foreground hover:text-black" onClick={() => setRoundContentOffset(0)}>↺</button>}
+                    </div>
+                  </div>
+                  <Button type="button" className="w-full" onClick={onRoundSubmit} data-testid="button-update-round">Opdater Visning</Button>
+                </div>
               ) : mode === "box" ? (
                 <Form {...boxForm}>
                   <form onSubmit={boxForm.handleSubmit(onBoxSubmit)} className="space-y-6">
