@@ -677,6 +677,7 @@ export default function LabelGenerator() {
   const [newBoxItemName, setNewBoxItemName] = useState("");
   const [boxCopies, setBoxCopies] = useState(1);
   const [labelCopies, setLabelCopies] = useState(1);
+  const [selectedBatchIdx, setSelectedBatchIdx] = useState<number | null>(null);
 
   const [roundData, setRoundData] = useState<RoundFormValues>({
     name: "Kamera 1",
@@ -740,16 +741,44 @@ export default function LabelGenerator() {
     }
   }, [watchCablePreset, cableForm]);
 
+  const selectBatchItem = (idx: number) => {
+    const item = batchItems[idx];
+    setSelectedBatchIdx(idx);
+    if (mode === "equipment") {
+      equipmentForm.setValue("name", item.name);
+      equipmentForm.setValue("id", item.id);
+      equipmentForm.setValue("group", item.group ?? "");
+    } else if (mode === "cable") {
+      cableForm.setValue("name", item.name);
+      cableForm.setValue("id", item.id);
+      cableForm.setValue("group", item.group ?? "");
+    } else if (mode === "round") {
+      setRoundName(item.name);
+      setRoundId(item.id);
+      setRoundGroup(item.group ?? "");
+    }
+  };
+
   const onEquipmentSubmit = (data: EquipmentFormValues) => {
     setLabelData(data);
     setFontScales({});
-    toast({ title: "Label opdateret", description: "Visningen er blevet opdateret." });
+    if (selectedBatchIdx !== null) {
+      setBatchItems(prev => prev.map((it, i) => i === selectedBatchIdx ? { ...it, name: data.name, id: data.id, group: data.group ?? '' } : it));
+      toast({ title: "Label opdateret", description: `Label ${selectedBatchIdx + 1} i listen er opdateret.` });
+    } else {
+      toast({ title: "Label opdateret", description: "Visningen er blevet opdateret." });
+    }
   };
 
   const onCableSubmit = (data: CableFormValues) => {
     setCableData(data);
     setFontScales({});
-    toast({ title: "Kabel label opdateret", description: "Visningen er blevet opdateret." });
+    if (selectedBatchIdx !== null) {
+      setBatchItems(prev => prev.map((it, i) => i === selectedBatchIdx ? { ...it, name: data.name, id: data.id, group: data.group ?? '' } : it));
+      toast({ title: "Kabel label opdateret", description: `Label ${selectedBatchIdx + 1} i listen er opdateret.` });
+    } else {
+      toast({ title: "Kabel label opdateret", description: "Visningen er blevet opdateret." });
+    }
   };
 
   const onBoxSubmit = (data: BoxFormValues) => {
@@ -760,7 +789,12 @@ export default function LabelGenerator() {
   const onRoundSubmit = () => {
     setRoundData(prev => ({ ...prev, name: roundName, id: roundId, group: roundGroup, height: roundHeight, width: printerWidth, codeType: roundShowQr ? "qr" : "none" }));
     setFontScales({});
-    toast({ title: "Custom label opdateret", description: "Visningen er blevet opdateret." });
+    if (selectedBatchIdx !== null) {
+      setBatchItems(prev => prev.map((it, i) => i === selectedBatchIdx ? { ...it, name: roundName, id: roundId, group: roundGroup } : it));
+      toast({ title: "Custom label opdateret", description: `Label ${selectedBatchIdx + 1} i listen er opdateret.` });
+    } else {
+      toast({ title: "Custom label opdateret", description: "Visningen er blevet opdateret." });
+    }
   };
 
   const addBoxItem = () => {
@@ -963,27 +997,35 @@ export default function LabelGenerator() {
             <CardContent>
               <div className="grid gap-2 max-h-60 overflow-y-auto">
                 {batchItems.map((item, idx) => (
-                  <div key={idx} className="flex items-center gap-2 p-2 bg-muted/50 rounded text-sm" data-testid={`batch-item-${idx}`}>
+                  <div key={idx}
+                    className={`flex items-center gap-2 p-2 rounded text-sm cursor-pointer transition-colors ${selectedBatchIdx === idx ? 'bg-black text-white' : 'bg-muted/50 hover:bg-muted'}`}
+                    onClick={() => selectBatchItem(idx)}
+                    data-testid={`batch-item-${idx}`}>
                     <input
-                      className="font-mono text-muted-foreground bg-transparent border-b border-transparent hover:border-gray-300 focus:border-black outline-none w-20 text-xs"
+                      className={`font-mono bg-transparent border-b border-transparent hover:border-gray-300 focus:border-white outline-none w-20 text-xs ${selectedBatchIdx === idx ? 'text-white placeholder:text-gray-400' : 'text-muted-foreground'}`}
                       value={item.id}
                       placeholder="ID"
+                      onClick={e => e.stopPropagation()}
                       onChange={e => setBatchItems(prev => prev.map((it, i) => i === idx ? { ...it, id: e.target.value } : it))}
                     />
                     <input
-                      className="font-bold flex-1 bg-transparent border-b border-transparent hover:border-gray-300 focus:border-black outline-none min-w-0"
+                      className={`font-bold flex-1 bg-transparent border-b border-transparent hover:border-gray-300 focus:border-white outline-none min-w-0 ${selectedBatchIdx === idx ? 'text-white placeholder:text-gray-400' : ''}`}
                       value={item.name}
                       placeholder="Navn"
+                      onClick={e => e.stopPropagation()}
                       onChange={e => setBatchItems(prev => prev.map((it, i) => i === idx ? { ...it, name: e.target.value } : it))}
                       autoFocus={idx === batchItems.length - 1 && item.name === ''}
                     />
                     <input
-                      className="text-xs bg-primary/10 px-2 py-0.5 rounded border border-transparent hover:border-gray-300 focus:border-black outline-none w-20"
+                      className={`text-xs px-2 py-0.5 rounded border border-transparent hover:border-gray-300 focus:border-white outline-none w-20 ${selectedBatchIdx === idx ? 'bg-white/20 text-white placeholder:text-gray-400' : 'bg-primary/10'}`}
                       value={item.group}
                       placeholder="Gruppe"
+                      onClick={e => e.stopPropagation()}
                       onChange={e => setBatchItems(prev => prev.map((it, i) => i === idx ? { ...it, group: e.target.value } : it))}
                     />
-                    <Button variant="ghost" size="icon" className="h-6 w-6 flex-shrink-0" onClick={() => setBatchItems(prev => prev.filter((_, i) => i !== idx))} data-testid={`button-remove-batch-${idx}`}>
+                    <Button variant="ghost" size="icon" className={`h-6 w-6 flex-shrink-0 ${selectedBatchIdx === idx ? 'text-white hover:bg-white/20' : ''}`}
+                      onClick={e => { e.stopPropagation(); setBatchItems(prev => prev.filter((_, i) => i !== idx)); if (selectedBatchIdx === idx) setSelectedBatchIdx(null); }}
+                      data-testid={`button-remove-batch-${idx}`}>
                       <Trash2 className="h-3 w-3" />
                     </Button>
                   </div>
