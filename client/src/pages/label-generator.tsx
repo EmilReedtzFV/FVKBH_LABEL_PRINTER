@@ -940,18 +940,26 @@ export default function LabelGenerator() {
           </Button>
         </div>
 
-        {batchItems.length > 0 && (
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between">
-              <div>
-                <CardTitle>Importerede Labels ({batchItems.length})</CardTitle>
-                <CardDescription>Labels indlæst fra PDF-fil</CardDescription>
-              </div>
-              <Button variant="destructive" size="sm" className="gap-2" onClick={() => setBatchItems([])} data-testid="button-clear-batch">
-                <Trash2 className="h-4 w-4" />
-                Ryd alle
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between">
+            <div>
+              <CardTitle>Labels {batchItems.length > 0 ? `(${batchItems.length})` : ''}</CardTitle>
+              <CardDescription>Tilføj manuelt eller importér fra PDF</CardDescription>
+            </div>
+            <div className="flex gap-2">
+              <Button variant="outline" size="sm" className="gap-2" onClick={() => setBatchItems(prev => [...prev, { id: '', name: '', group: '' }])}>
+                <Plus className="h-4 w-4" />
+                Tilføj nyt label
               </Button>
-            </CardHeader>
+              {batchItems.length > 0 && (
+                <Button variant="destructive" size="sm" className="gap-2" onClick={() => setBatchItems([])} data-testid="button-clear-batch">
+                  <Trash2 className="h-4 w-4" />
+                  Ryd alle
+                </Button>
+              )}
+            </div>
+          </CardHeader>
+          {batchItems.length > 0 && (
             <CardContent>
               <div className="grid gap-2 max-h-60 overflow-y-auto">
                 {batchItems.map((item, idx) => (
@@ -967,6 +975,7 @@ export default function LabelGenerator() {
                       value={item.name}
                       placeholder="Navn"
                       onChange={e => setBatchItems(prev => prev.map((it, i) => i === idx ? { ...it, name: e.target.value } : it))}
+                      autoFocus={idx === batchItems.length - 1 && item.name === ''}
                     />
                     <input
                       className="text-xs bg-primary/10 px-2 py-0.5 rounded border border-transparent hover:border-gray-300 focus:border-black outline-none w-20"
@@ -981,8 +990,8 @@ export default function LabelGenerator() {
                 ))}
               </div>
             </CardContent>
-          </Card>
-        )}
+          )}
+        </Card>
 
         <div className="grid gap-8 md:grid-cols-2">
           {/* Controls */}
