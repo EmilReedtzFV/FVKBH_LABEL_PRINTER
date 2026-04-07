@@ -719,6 +719,12 @@ export default function LabelGenerator() {
 
   const watchEquipmentPreset = equipmentForm.watch("preset");
   const watchCablePreset = cableForm.watch("preset");
+  const watchEqName = equipmentForm.watch("name");
+  const watchEqId = equipmentForm.watch("id");
+  const watchEqGroup = equipmentForm.watch("group");
+  const watchCableName = cableForm.watch("name");
+  const watchCableId = cableForm.watch("id");
+  const watchCableGroup = cableForm.watch("group");
 
   useEffect(() => {
     if (watchEquipmentPreset && watchEquipmentPreset !== "custom") {
@@ -740,6 +746,33 @@ export default function LabelGenerator() {
       }
     }
   }, [watchCablePreset, cableForm]);
+
+  // Form → list: sync equipment form to selected batch item in real-time
+  useEffect(() => {
+    if (selectedBatchIdx !== null && mode === "equipment") {
+      setBatchItems(prev => prev.map((it, i) => i === selectedBatchIdx
+        ? { ...it, name: watchEqName ?? '', id: watchEqId ?? '', group: watchEqGroup ?? '' }
+        : it));
+    }
+  }, [watchEqName, watchEqId, watchEqGroup]);
+
+  // Form → list: sync cable form to selected batch item in real-time
+  useEffect(() => {
+    if (selectedBatchIdx !== null && mode === "cable") {
+      setBatchItems(prev => prev.map((it, i) => i === selectedBatchIdx
+        ? { ...it, name: watchCableName ?? '', id: watchCableId ?? '', group: watchCableGroup ?? '' }
+        : it));
+    }
+  }, [watchCableName, watchCableId, watchCableGroup]);
+
+  // Form → list: sync round state to selected batch item in real-time
+  useEffect(() => {
+    if (selectedBatchIdx !== null && mode === "round") {
+      setBatchItems(prev => prev.map((it, i) => i === selectedBatchIdx
+        ? { ...it, name: roundName, id: roundId, group: roundGroup }
+        : it));
+    }
+  }, [roundName, roundId, roundGroup]);
 
   const selectBatchItem = (idx: number) => {
     const item = batchItems[idx];
@@ -1006,14 +1039,28 @@ export default function LabelGenerator() {
                       value={item.id}
                       placeholder="ID"
                       onClick={e => e.stopPropagation()}
-                      onChange={e => setBatchItems(prev => prev.map((it, i) => i === idx ? { ...it, id: e.target.value } : it))}
+                      onChange={e => {
+                        setBatchItems(prev => prev.map((it, i) => i === idx ? { ...it, id: e.target.value } : it));
+                        if (idx === selectedBatchIdx) {
+                          if (mode === "equipment") equipmentForm.setValue("id", e.target.value);
+                          else if (mode === "cable") cableForm.setValue("id", e.target.value);
+                          else if (mode === "round") setRoundId(e.target.value);
+                        }
+                      }}
                     />
                     <input
                       className={`font-bold flex-1 bg-transparent border-b border-transparent hover:border-gray-300 focus:border-white outline-none min-w-0 ${selectedBatchIdx === idx ? 'text-white placeholder:text-gray-400' : ''}`}
                       value={item.name}
                       placeholder="Navn"
                       onClick={e => e.stopPropagation()}
-                      onChange={e => setBatchItems(prev => prev.map((it, i) => i === idx ? { ...it, name: e.target.value } : it))}
+                      onChange={e => {
+                        setBatchItems(prev => prev.map((it, i) => i === idx ? { ...it, name: e.target.value } : it));
+                        if (idx === selectedBatchIdx) {
+                          if (mode === "equipment") equipmentForm.setValue("name", e.target.value);
+                          else if (mode === "cable") cableForm.setValue("name", e.target.value);
+                          else if (mode === "round") setRoundName(e.target.value);
+                        }
+                      }}
                       autoFocus={idx === batchItems.length - 1 && item.name === ''}
                     />
                     <input
@@ -1021,7 +1068,14 @@ export default function LabelGenerator() {
                       value={item.group}
                       placeholder="Gruppe"
                       onClick={e => e.stopPropagation()}
-                      onChange={e => setBatchItems(prev => prev.map((it, i) => i === idx ? { ...it, group: e.target.value } : it))}
+                      onChange={e => {
+                        setBatchItems(prev => prev.map((it, i) => i === idx ? { ...it, group: e.target.value } : it));
+                        if (idx === selectedBatchIdx) {
+                          if (mode === "equipment") equipmentForm.setValue("group", e.target.value);
+                          else if (mode === "cable") cableForm.setValue("group", e.target.value);
+                          else if (mode === "round") setRoundGroup(e.target.value);
+                        }
+                      }}
                     />
                     <Button variant="ghost" size="icon" className={`h-6 w-6 flex-shrink-0 ${selectedBatchIdx === idx ? 'text-white hover:bg-white/20' : ''}`}
                       onClick={e => { e.stopPropagation(); setBatchItems(prev => prev.filter((_, i) => i !== idx)); if (selectedBatchIdx === idx) setSelectedBatchIdx(null); }}
