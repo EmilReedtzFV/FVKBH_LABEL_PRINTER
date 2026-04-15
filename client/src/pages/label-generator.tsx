@@ -560,7 +560,7 @@ export default function LabelGenerator() {
   const previewLabelRef = useRef<HTMLDivElement>(null);
   const [fontScales, setFontScales] = useState<Record<number, number>>({});
   const [elementOrder, setElementOrder] = useState<LabelElement[]>(['name', 'id', 'group']);
-  const [showQrCode, setShowQrCode] = useState<boolean>(true);
+  const showQrCode = true;
   const [labelSpacing, setLabelSpacing] = useState(50);
 
   const getFontScale = (idx: number) => fontScales[idx] ?? 1;
@@ -1437,10 +1437,7 @@ export default function LabelGenerator() {
                         </FormItem>
                       )}
                     />
-                    <div className="flex items-center gap-2">
-                      <input type="checkbox" id="show-qr" checked={showQrCode} onChange={e => setShowQrCode(e.target.checked)} className="h-4 w-4 rounded border-gray-300" />
-                      <label htmlFor="show-qr" className="text-sm font-medium cursor-pointer">Vis QR Kode</label>
-                    </div>
+
                     <div className="space-y-4">
                       <FormField
                         control={equipmentForm.control}
