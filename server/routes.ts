@@ -38,8 +38,13 @@ export async function registerRoutes(
         }
 
         if (/^\d{3,}$/.test(line) || /^[A-Z]{2,}-\d+$/i.test(line)) {
-          currentId = line;
-        } else if (/^(KIT|SET|GRP|GRUPPE)\s/i.test(line)) {
+          // If the last item has no ID yet, attach this ID to it (ID-after-name format)
+          if (items.length > 0 && !items[items.length - 1].id) {
+            items[items.length - 1].id = line;
+          } else {
+            currentId = line;
+          }
+        } else if (/^(KIT|SET|GRP|GRUPPE)\s/i.test(line) || /^Kit\s/i.test(line)) {
           currentGroup = line;
         } else if (line.length > 2 && !skipPattern.test(line) && !/^\d+$/.test(line)) {
           items.push({ id: currentId, name: line, group: currentGroup });
