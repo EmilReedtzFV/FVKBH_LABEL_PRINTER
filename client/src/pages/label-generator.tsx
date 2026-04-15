@@ -119,11 +119,12 @@ function EquipmentLabelDesignA({ data, isPreview = false, fontScale = 1, element
   const padH = isTiny ? '1mm' : isCompact ? '1mm' : isLarge ? `${width * 0.06}mm` : '0.5rem';
   const contentGap = isTiny ? '2px' : isCompact ? '1.5mm' : isLarge ? `${width * 0.03}mm` : '0.5rem';
 
-  // At 10mm and below: strip layout — QR + ID + name inline, no header bar
+  // At 10mm and below: strip layout — QR + ID + name inline, company info at right end
   if (isSmall) {
     const stripQrSize = height * 0.82;
     const stripIdPx = Math.max(7, Math.min(width * 0.22, height * 0.45)) * s;
     const stripNamePx = Math.max(6, Math.min(width * 0.14, height * 0.32)) * s;
+    const infoFs = Math.max(5, height * 0.22);
     return (
       <div data-label-root className="bg-black text-white relative flex flex-col border-0" style={{ width: `${width}mm`, height: `${height}mm`, boxSizing: "border-box", pageBreakInside: "avoid", border: isPreview ? '1px solid #e5e7eb' : 'none', overflow: 'hidden' }}>
         <div className="flex flex-row items-center w-full h-full" style={{ padding: '0.4mm 1mm', gap: '1.5mm' }}>
@@ -135,7 +136,12 @@ function EquipmentLabelDesignA({ data, isPreview = false, fontScale = 1, element
           {data.id && <span className="w-px bg-white flex-shrink-0" style={{ height: '60%', alignSelf: 'center' }} />}
           {data.id && <span className="font-mono font-bold tracking-wider flex-shrink-0" data-label-id style={{ fontSize: `${stripIdPx}px`, lineHeight: 1.05 }}>#{data.id}</span>}
           {data.id && data.name && <span className="w-px bg-white flex-shrink-0" style={{ height: '60%', alignSelf: 'center' }} />}
-          {data.name && <span className="font-bold uppercase truncate" data-label-name style={{ fontSize: `${stripNamePx}px`, lineHeight: 1.05 }}>{data.name}</span>}
+          {data.name && <span className="font-bold uppercase truncate flex-1 min-w-0" data-label-name style={{ fontSize: `${stripNamePx}px`, lineHeight: 1.05 }}>{data.name}</span>}
+          <span className="w-px bg-white opacity-40 flex-shrink-0" style={{ height: '80%', alignSelf: 'center' }} />
+          <div className="flex flex-col items-end flex-shrink-0 justify-center" style={{ gap: '0.5px' }}>
+            <span className="font-bold uppercase whitespace-nowrap" style={{ fontSize: `${infoFs}px`, lineHeight: 1.1 }}>Filmværksted København</span>
+            <span className="font-bold whitespace-nowrap" style={{ fontSize: `${infoFs}px`, lineHeight: 1.1 }}>+45 71 99 33 66</span>
+          </div>
         </div>
       </div>
     );
