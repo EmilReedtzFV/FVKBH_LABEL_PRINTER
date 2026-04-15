@@ -119,6 +119,21 @@ function EquipmentLabelDesignA({ data, isPreview = false, fontScale = 1, element
   const padH = isTiny ? '1mm' : isCompact ? '1mm' : isLarge ? `${width * 0.06}mm` : '0.5rem';
   const contentGap = isTiny ? '2px' : isCompact ? '1.5mm' : isLarge ? `${width * 0.03}mm` : '0.5rem';
 
+  // At 10mm and below: strip layout — no header bar, just ID + name side by side
+  if (isSmall) {
+    const stripIdPx = Math.max(7, Math.min(width * 0.22, height * 0.45)) * s;
+    const stripNamePx = Math.max(6, Math.min(width * 0.14, height * 0.32)) * s;
+    return (
+      <div data-label-root className="bg-black text-white relative flex flex-col border-0" style={{ width: `${width}mm`, height: `${height}mm`, boxSizing: "border-box", pageBreakInside: "avoid", border: isPreview ? '1px solid #e5e7eb' : 'none', overflow: 'hidden' }}>
+        <div className="flex flex-row items-center w-full h-full" style={{ padding: '0.4mm 1mm', gap: '1.5mm' }}>
+          {data.id && <span className="font-mono font-bold tracking-wider flex-shrink-0" data-label-id style={{ fontSize: `${stripIdPx}px`, lineHeight: 1.05 }}>#{data.id}</span>}
+          {data.id && data.name && <span className="w-px bg-white flex-shrink-0" style={{ height: '60%', alignSelf: 'center' }} />}
+          {data.name && <span className="font-bold uppercase truncate" data-label-name style={{ fontSize: `${stripNamePx}px`, lineHeight: 1.05 }}>{data.name}</span>}
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div data-label-root className="bg-black text-white relative flex flex-col border-0" style={{ width: `${width}mm`, height: `${height}mm`, boxSizing: "border-box", pageBreakInside: "avoid", border: isPreview ? '1px solid #e5e7eb' : 'none', overflow: 'hidden' }}>
       <div className="bg-white text-black flex items-center justify-center w-full flex-shrink-0" style={{ height: barH, maxHeight: barH, minHeight: 0, overflow: 'hidden', paddingLeft: `${width * 0.04}mm`, paddingRight: `${width * 0.04}mm`, flexDirection: width < 40 ? 'column' : 'row', gap: width < 40 ? '0' : '6px' }}>
@@ -136,11 +151,11 @@ function EquipmentLabelDesignA({ data, isPreview = false, fontScale = 1, element
               <div className="w-[2px] bg-white flex-shrink-0" style={{ height: `${qrSize * 0.8}mm`, alignSelf: 'center' }}></div>
             </>
           )}
-          <div className="flex flex-col justify-center self-stretch min-w-0 flex-1 text-left" style={{ overflow: 'hidden', gap: isCompact ? '1px' : isTiny ? '1px' : `${Math.max(1, spacing * 0.15)}px` }}>
+          <div className="flex flex-col justify-center self-stretch min-w-0 flex-1 text-left" style={{ overflow: 'hidden', gap: isCompact ? '1px' : `${Math.max(1, spacing * 0.15)}px` }}>
             {elementOrder.map((el) => {
               if (el === 'name') return <div key="name" className="font-bold uppercase leading-tight" data-label-name style={{ fontSize: nameFs, wordBreak: 'break-word', overflowWrap: 'break-word', lineHeight: 1.1 }}>{data.name}</div>;
               if (el === 'id' && data.id) return <div key="id" className="font-mono tracking-wider font-bold" data-label-id style={{ fontSize: idFs, wordBreak: 'break-all', overflowWrap: 'break-word', lineHeight: 1.05 }}>#{data.id}</div>;
-              if (el === 'group' && data.group) return <div key="group"><span className="bg-white text-black font-bold uppercase tracking-wider rounded inline-block" data-label-group style={{ fontSize: groupFs, padding: isTiny ? '0px 2px' : isCompact ? '1px 4px' : '2px 8px', lineHeight: 1.1 }}>{data.group}</span></div>;
+              if (el === 'group' && data.group) return <div key="group"><span className="bg-white text-black font-bold uppercase tracking-wider rounded inline-block" data-label-group style={{ fontSize: groupFs, padding: isCompact ? '1px 4px' : '2px 8px', lineHeight: 1.1 }}>{data.group}</span></div>;
               return null;
             })}
           </div>
