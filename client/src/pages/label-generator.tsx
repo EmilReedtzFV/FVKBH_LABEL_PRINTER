@@ -119,13 +119,20 @@ function EquipmentLabelDesignA({ data, isPreview = false, fontScale = 1, element
   const padH = isTiny ? '1mm' : isCompact ? '1mm' : isLarge ? `${width * 0.06}mm` : '0.5rem';
   const contentGap = isTiny ? '2px' : isCompact ? '1.5mm' : isLarge ? `${width * 0.03}mm` : '0.5rem';
 
-  // At 10mm and below: strip layout — no header bar, just ID + name side by side
+  // At 10mm and below: strip layout — QR + ID + name inline, no header bar
   if (isSmall) {
+    const stripQrSize = height * 0.82;
     const stripIdPx = Math.max(7, Math.min(width * 0.22, height * 0.45)) * s;
     const stripNamePx = Math.max(6, Math.min(width * 0.14, height * 0.32)) * s;
     return (
       <div data-label-root className="bg-black text-white relative flex flex-col border-0" style={{ width: `${width}mm`, height: `${height}mm`, boxSizing: "border-box", pageBreakInside: "avoid", border: isPreview ? '1px solid #e5e7eb' : 'none', overflow: 'hidden' }}>
         <div className="flex flex-row items-center w-full h-full" style={{ padding: '0.4mm 1mm', gap: '1.5mm' }}>
+          {data.id && (
+            <div className="flex-shrink-0 bg-white" style={{ width: `${stripQrSize}mm`, height: `${stripQrSize}mm`, padding: `${stripQrSize * 0.03}mm` }}>
+              <QRCode value={data.id} style={{ height: "100%", width: "100%", display: "block" }} viewBox="0 0 256 256" />
+            </div>
+          )}
+          {data.id && <span className="w-px bg-white flex-shrink-0" style={{ height: '60%', alignSelf: 'center' }} />}
           {data.id && <span className="font-mono font-bold tracking-wider flex-shrink-0" data-label-id style={{ fontSize: `${stripIdPx}px`, lineHeight: 1.05 }}>#{data.id}</span>}
           {data.id && data.name && <span className="w-px bg-white flex-shrink-0" style={{ height: '60%', alignSelf: 'center' }} />}
           {data.name && <span className="font-bold uppercase truncate" data-label-name style={{ fontSize: `${stripNamePx}px`, lineHeight: 1.05 }}>{data.name}</span>}
