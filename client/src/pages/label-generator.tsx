@@ -137,8 +137,7 @@ function EquipmentLabelDesignA({ data, isPreview = false, fontScale = 1, element
           {data.id && <span className="font-mono font-bold tracking-wider flex-shrink-0" data-label-id style={{ fontSize: `${stripIdPx}px`, lineHeight: 1.05 }}>#{data.id}</span>}
           {data.id && data.name && <span className="w-px bg-white flex-shrink-0" style={{ height: '60%', alignSelf: 'center' }} />}
           {data.name && <span className="font-bold uppercase truncate flex-1 min-w-0" data-label-name style={{ fontSize: `${stripNamePx}px`, lineHeight: 1.05 }}>{data.name}</span>}
-          <span className="w-px bg-white opacity-40 flex-shrink-0" style={{ height: '80%', alignSelf: 'center' }} />
-          <div className="flex flex-col items-end flex-shrink-0 justify-center" style={{ gap: '0.5px' }}>
+          <div className="bg-white text-black flex flex-col items-end flex-shrink-0 justify-center self-stretch" style={{ padding: '0 1.5mm', gap: '0.5px' }}>
             <span className="font-bold uppercase whitespace-nowrap" style={{ fontSize: `${infoFs}px`, lineHeight: 1.1 }}>Filmværksted København</span>
             <span className="font-bold whitespace-nowrap" style={{ fontSize: `${infoFs}px`, lineHeight: 1.1 }}>+45 71 99 33 66</span>
           </div>
