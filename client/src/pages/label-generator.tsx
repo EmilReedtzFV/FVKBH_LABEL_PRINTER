@@ -91,7 +91,7 @@ type LabelElement = 'name' | 'id' | 'group';
 function EquipmentLabelDesignA({ data, isPreview = false, fontScale = 1, elementOrder = ['name', 'id', 'group'], spacing = 50, showQrOverride }: { data: EquipmentFormValues; isPreview?: boolean; fontScale?: number; elementOrder?: LabelElement[]; spacing?: number; showQrOverride?: boolean }) {
   const { width, height } = data;
   const s = fontScale;
-  const isSmall = height <= 20;
+  const isSmall = height < 15;
   const isNarrow = width < 20;
   const isTiny = isSmall || isNarrow;
   const showQr = showQrOverride !== undefined ? (showQrOverride && data.id && !isTiny) : (data.id && !isTiny);
@@ -153,7 +153,7 @@ function EquipmentLabelDesignA({ data, isPreview = false, fontScale = 1, element
 function EquipmentLabelDesignB({ data, isPreview = false, fontScale = 1 }: { data: EquipmentFormValues; isPreview?: boolean; fontScale?: number }) {
   const { width, height } = data;
   const s = fontScale;
-  const isSmall = height <= 20;
+  const isSmall = height < 15;
   const isNarrow = width < 20;
   const isTiny = isSmall || isNarrow;
   const showQr = data.id && !isTiny;
@@ -208,7 +208,7 @@ function EquipmentLabelDesignB({ data, isPreview = false, fontScale = 1 }: { dat
 function EquipmentLabelDesignC({ data, isPreview = false, fontScale = 1 }: { data: EquipmentFormValues; isPreview?: boolean; fontScale?: number }) {
   const { width, height } = data;
   const s = fontScale;
-  const isSmall = height <= 20;
+  const isSmall = height < 15;
   const isNarrow = width < 20;
   const isTiny = isSmall || isNarrow;
   const showQr = data.id && !isTiny;
@@ -265,7 +265,7 @@ function EquipmentLabelDesignC({ data, isPreview = false, fontScale = 1 }: { dat
 function EquipmentLabelDesignD({ data, isPreview = false, fontScale = 1 }: { data: EquipmentFormValues; isPreview?: boolean; fontScale?: number }) {
   const { width, height } = data;
   const s = fontScale;
-  const isSmall = height <= 20;
+  const isSmall = height < 15;
   const isNarrow = width < 20;
   const isTiny = isSmall || isNarrow;
   const showQr = data.id && !isTiny;
@@ -486,7 +486,7 @@ function RoundLabelContent({ data, isPreview = false, nameFontSize = 0, idFontSi
 }) {
   const width = data.width ?? 96;
   const height = data.height ?? 40;
-  const isSmall = height <= 20;
+  const isSmall = height < 15;
   const showQr = data.codeType === 'qr' && data.id;
   const qrSize = Math.min(width * 0.42, height * 0.65);
   const barH = isSmall ? `${Math.max(height * 0.25, 3)}mm` : `${Math.max(height * 0.24, 7)}mm`;
