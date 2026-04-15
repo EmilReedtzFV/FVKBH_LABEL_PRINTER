@@ -44,8 +44,13 @@ export async function registerRoutes(
           } else {
             currentId = line;
           }
-        } else if (/^(KIT|SET|GRP|GRUPPE)\s/i.test(line) || /^Kit\s/i.test(line)) {
-          currentGroup = line;
+        } else if (/^(KIT|SET|GRP|GRUPPE)\s/i.test(line) || /^Kit\s*\d/i.test(line)) {
+          // If last item has no group yet, attach retroactively (group line after tab-item)
+          if (items.length > 0 && !items[items.length - 1].group && !currentId) {
+            items[items.length - 1].group = line;
+          } else {
+            currentGroup = line;
+          }
         } else if (line.length > 2 && !skipPattern.test(line) && !/^\d+$/.test(line)) {
           items.push({ id: currentId, name: line, group: currentGroup });
           currentId = "";
