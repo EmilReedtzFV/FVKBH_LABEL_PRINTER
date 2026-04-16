@@ -1717,7 +1717,7 @@ export default function LabelGenerator() {
                             <FormItem className="flex-1">
                               <FormLabel>Højde (mm)</FormLabel>
                               <div className="flex flex-wrap gap-2 mb-2">
-                                {[10, 20, 30, 40, 50, 70, 100].map(h => {
+                                {[10, 20, 30].map(h => {
                                   const dots = Math.round((h + 5) * 11.811);
                                   return (
                                   <button
