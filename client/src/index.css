@@ -277,6 +277,12 @@
   }
 }
 
+@media print {
+  [data-label-root] {
+    margin-bottom: 1mm !important;
+  }
+}
+
 /**
  * Using the elevate system.
  * Automatic contrast adjustment.
