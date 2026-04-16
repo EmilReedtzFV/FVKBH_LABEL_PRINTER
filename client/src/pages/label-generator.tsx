@@ -1395,22 +1395,24 @@ export default function LabelGenerator() {
                       <label className="text-sm font-medium leading-none">Label Type</label>
                       <div className="mt-2 grid grid-cols-3 gap-2">
                         {[
-                          { label: "CRDBAG Half", w: 110 },
-                          { label: "CRDBAG Full", w: 210 },
-                          { label: "Peli Air 1555", w: 250 },
+                          { label: "CRDBAG Half", h: 110 },
+                          { label: "CRDBAG Full", h: 210 },
+                          { label: "Peli Air 1555", h: 250 },
                         ].map(preset => (
                           <Button
                             key={preset.label}
                             type="button"
-                            variant={boxData.width === preset.w ? "outline" : "outline"}
+                            variant={boxData.height === preset.h && !boxData.autoHeight ? "default" : "outline"}
                             className="text-xs"
                             onClick={() => {
-                              boxForm.setValue("width", preset.w);
-                              setBoxData(prev => ({ ...prev, width: preset.w }));
+                              boxForm.setValue("width", 100);
+                              boxForm.setValue("height", preset.h);
+                              boxForm.setValue("autoHeight", false);
+                              setBoxData(prev => ({ ...prev, width: 100, height: preset.h, autoHeight: false }));
                             }}
                             data-testid={`button-box-preset-${preset.label.toLowerCase().replace(/\s/g, '-')}`}
                           >
-                            {preset.label}<br />{preset.w}mm bred
+                            {preset.label}<br />{preset.h}mm lang
                           </Button>
                         ))}
                       </div>
