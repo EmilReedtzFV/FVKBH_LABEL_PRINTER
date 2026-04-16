@@ -471,17 +471,18 @@ function calcBoxAutoHeight(_width: number, itemCount: number): number {
 function BoxLabelContent({ data, items, isPreview = false }: { data: BoxFormValues; items: BoxItem[]; isPreview?: boolean }) {
   const { width } = data;
   const hasNumber = !!(data.kitNumber && data.kitNumber.trim());
-  // Extra height for the QR+number section when kitNumber is set
-  const QR_H = hasNumber ? 28 : 0;
+  // Taller white bar when number is present to fit QR
+  const KIT_BAR_H = hasNumber ? 22 : BOX_KIT_H;
   const itemCount = Math.max(items.length, 1);
-  const height = data.autoHeight ? calcBoxAutoHeight(width, itemCount) + QR_H : data.height;
-  const itemRowH = data.autoHeight ? BOX_ITEM_ROW_H : Math.min((height - BOX_LOGO_H - BOX_KIT_H - BOX_PADDING - QR_H) / itemCount, 10);
+  const height = data.autoHeight ? calcBoxAutoHeight(width, itemCount) + (hasNumber ? KIT_BAR_H - BOX_KIT_H : 0) : data.height;
+  const itemRowH = data.autoHeight ? BOX_ITEM_ROW_H : Math.min((height - BOX_LOGO_H - KIT_BAR_H - BOX_PADDING) / itemCount, 10);
   const itemFs = `${Math.max(9, Math.min(itemRowH * 0.85, width * 0.1))}px`;
-  const kitFs = `${Math.max(16, width * 0.25)}px`;
+  const kitFs = `${Math.max(14, width * 0.2)}px`;
   const phoneFs = `${Math.max(8, width * 0.09)}px`;
   const logoW = `${width * 0.55}mm`;
-  const qrSize = Math.min(width * 0.18, QR_H * 0.55);
-  const kitNumFs = `${Math.max(20, width * 0.3)}px`;
+  const qrSize = KIT_BAR_H * 0.72;
+  const kitNumFs = `${Math.max(18, width * 0.22)}px`;
+  const kitNrLabelFs = `${Math.max(6, width * 0.065)}px`;
 
   const heightStyle = data.autoHeight ? { minHeight: `${height}mm` } : { height: `${height}mm` };
 
@@ -491,15 +492,24 @@ function BoxLabelContent({ data, items, isPreview = false }: { data: BoxFormValu
         <img src="/logo-black.png" alt="Filmværksted København" className="object-contain" style={{ maxWidth: logoW, maxHeight: '90%', filter: 'invert(1)' }} />
         <span className="font-bold tracking-wider whitespace-nowrap" style={{ fontSize: phoneFs }}>+45 71 99 33 66</span>
       </div>
-      <div className="bg-white text-black flex-shrink-0 px-3" style={{ height: `${BOX_KIT_H}mm`, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-        <div className="font-bold uppercase tracking-wider leading-tight" style={{ fontSize: kitFs }}>{data.kitName}</div>
+      {/* White bar: kit name left, QR + number right */}
+      <div className="bg-white text-black flex-shrink-0 flex flex-row items-center" style={{ height: `${KIT_BAR_H}mm`, padding: '1.5mm 3mm', gap: '3mm' }}>
+        <div className="font-bold uppercase tracking-wider leading-tight flex-1 min-w-0" style={{ fontSize: kitFs }}>{data.kitName}</div>
+        {hasNumber && (
+          <>
+            <div className="w-px bg-gray-300 self-stretch flex-shrink-0" />
+            <div className="flex flex-row items-center flex-shrink-0" style={{ gap: '2mm' }}>
+              <div className="bg-black flex-shrink-0" style={{ width: `${qrSize}mm`, height: `${qrSize}mm`, padding: `${qrSize * 0.04}mm` }}>
+                <QRCode value={data.kitNumber!} style={{ height: '100%', width: '100%', display: 'block' }} viewBox="0 0 256 256" bgColor="#000000" fgColor="#ffffff" />
+              </div>
+              <div className="flex flex-col items-start justify-center flex-shrink-0" style={{ gap: '0.5mm' }}>
+                <span className="font-bold uppercase tracking-widest text-gray-500" style={{ fontSize: kitNrLabelFs }}>Kit nr.</span>
+                <span className="font-mono font-bold leading-none" style={{ fontSize: kitNumFs }}>{data.kitNumber}</span>
+              </div>
+            </div>
+          </>
+        )}
       </div>
-      {hasNumber && (
-        <div className="bg-white text-black flex-shrink-0 flex flex-row items-center justify-center gap-4 border-t border-gray-200" style={{ height: `${QR_H}mm`, padding: '2mm 3mm' }}>
-          <QRCode value={data.kitNumber!} style={{ height: `${qrSize}mm`, width: `${qrSize}mm`, display: 'block', flexShrink: 0 }} viewBox="0 0 256 256" />
-          <div className="font-mono font-bold leading-none" style={{ fontSize: kitNumFs }}>#{data.kitNumber}</div>
-        </div>
-      )}
       <div className="p-2">
         <div className="flex flex-col gap-0.5">
           {items.map((item, idx) => (
