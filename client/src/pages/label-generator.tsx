@@ -37,7 +37,7 @@ const cableSchema = z.object({
   group: z.string().optional(),
   codeType: z.enum(["qr", "barcode", "none"]),
   width: z.number().min(30, "Minimum bredde er 30mm").max(300, "Maksimum bredde er 300mm"),
-  height: z.number().min(5, "Minimum højde er 5mm").max(20, "Maksimum højde er 20mm"),
+  height: z.number().min(5, "Minimum højde er 5mm").max(100, "Maksimum højde er 100mm"),
   preset: z.string().optional(),
 });
 
