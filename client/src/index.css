@@ -279,7 +279,8 @@
 
 @media print {
   [data-label-root] {
-    margin-bottom: 1mm !important;
+    border-bottom: 1mm solid white !important;
+    box-sizing: border-box !important;
   }
 }
 
