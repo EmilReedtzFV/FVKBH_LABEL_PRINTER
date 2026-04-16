@@ -43,6 +43,7 @@ const cableSchema = z.object({
 
 const boxSchema = z.object({
   kitName: z.string().min(1, "Kit navn er påkrævet"),
+  kitNumber: z.string().optional(),
   width: z.number().min(50, "Minimum bredde er 50mm").max(200, "Maksimum bredde er 200mm"),
   height: z.number().min(20, "Minimum højde er 20mm").max(600, "Maksimum højde er 600mm"),
   autoHeight: z.boolean().optional(),
@@ -469,13 +470,18 @@ function calcBoxAutoHeight(_width: number, itemCount: number): number {
 
 function BoxLabelContent({ data, items, isPreview = false }: { data: BoxFormValues; items: BoxItem[]; isPreview?: boolean }) {
   const { width } = data;
+  const hasNumber = !!(data.kitNumber && data.kitNumber.trim());
+  // Extra height for the QR+number section when kitNumber is set
+  const QR_H = hasNumber ? 28 : 0;
   const itemCount = Math.max(items.length, 1);
-  const height = data.autoHeight ? calcBoxAutoHeight(width, itemCount) : data.height;
-  const itemRowH = data.autoHeight ? BOX_ITEM_ROW_H : Math.min((height - BOX_LOGO_H - BOX_KIT_H - BOX_PADDING) / itemCount, 10);
+  const height = data.autoHeight ? calcBoxAutoHeight(width, itemCount) + QR_H : data.height;
+  const itemRowH = data.autoHeight ? BOX_ITEM_ROW_H : Math.min((height - BOX_LOGO_H - BOX_KIT_H - BOX_PADDING - QR_H) / itemCount, 10);
   const itemFs = `${Math.max(9, Math.min(itemRowH * 0.85, width * 0.1))}px`;
   const kitFs = `${Math.max(16, width * 0.25)}px`;
   const phoneFs = `${Math.max(8, width * 0.09)}px`;
   const logoW = `${width * 0.55}mm`;
+  const qrSize = Math.min(width * 0.35, QR_H * 0.75);
+  const kitNumFs = `${Math.max(20, width * 0.3)}px`;
 
   const heightStyle = data.autoHeight ? { minHeight: `${height}mm` } : { height: `${height}mm` };
 
@@ -485,9 +491,15 @@ function BoxLabelContent({ data, items, isPreview = false }: { data: BoxFormValu
         <img src="/logo-black.png" alt="Filmværksted København" className="object-contain" style={{ maxWidth: logoW, maxHeight: '90%', filter: 'invert(1)' }} />
         <span className="font-bold tracking-wider whitespace-nowrap" style={{ fontSize: phoneFs }}>+45 71 99 33 66</span>
       </div>
-      <div className="bg-white text-black text-center flex-shrink-0 px-3" style={{ height: `${BOX_KIT_H}mm`, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+      <div className="bg-white text-black flex-shrink-0 px-3" style={{ height: `${BOX_KIT_H}mm`, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
         <div className="font-bold uppercase tracking-wider leading-tight" style={{ fontSize: kitFs }}>{data.kitName}</div>
       </div>
+      {hasNumber && (
+        <div className="bg-white text-black flex-shrink-0 flex flex-row items-center justify-center gap-4 border-t border-gray-200" style={{ height: `${QR_H}mm`, padding: '2mm 3mm' }}>
+          <QRCode value={data.kitNumber!} style={{ height: `${qrSize}mm`, width: `${qrSize}mm`, display: 'block', flexShrink: 0 }} viewBox="0 0 256 256" />
+          <div className="font-mono font-bold leading-none" style={{ fontSize: kitNumFs }}>#{data.kitNumber}</div>
+        </div>
+      )}
       <div className="p-2">
         <div className="flex flex-col gap-0.5">
           {items.map((item, idx) => (
@@ -730,6 +742,7 @@ export default function LabelGenerator() {
 
   const [boxData, setBoxData] = useState<BoxFormValues>({
     kitName: "Lys Kit 1",
+    kitNumber: "",
     width: 100,
     height: 200,
     autoHeight: true,
@@ -1290,6 +1303,18 @@ export default function LabelGenerator() {
                           boxForm.setValue("kitName", val);
                         }}
                         data-testid="input-box-kit"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <label className="text-sm font-medium leading-none">Kit / Kasse Nummer <span className="text-muted-foreground font-normal">(til QR kode)</span></label>
+                      <Input
+                        placeholder="F.eks. 42"
+                        value={boxData.kitNumber ?? ""}
+                        onChange={e => {
+                          const val = e.target.value;
+                          setBoxData(prev => ({ ...prev, kitNumber: val }));
+                          boxForm.setValue("kitNumber", val);
+                        }}
                       />
                     </div>
                     <div>
