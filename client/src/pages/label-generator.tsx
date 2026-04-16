@@ -36,7 +36,7 @@ const cableSchema = z.object({
   id: z.string().min(1, "ID nummer er påkrævet"),
   group: z.string().optional(),
   codeType: z.enum(["qr", "barcode", "none"]),
-  width: z.number().min(30, "Minimum bredde er 30mm").max(100, "Maksimum bredde er 100mm"),
+  width: z.number().min(30, "Minimum bredde er 30mm").max(300, "Maksimum bredde er 300mm"),
   height: z.number().min(5, "Minimum højde er 5mm").max(20, "Maksimum højde er 20mm"),
   preset: z.string().optional(),
 });
@@ -1395,9 +1395,9 @@ export default function LabelGenerator() {
                       <label className="text-sm font-medium leading-none">Label Type</label>
                       <div className="mt-2 grid grid-cols-3 gap-2">
                         {[
-                          { label: "Peli Air 1555", w: 100 },
-                          { label: "CRDBAG Half", w: 100 },
-                          { label: "CRDBAG Full", w: 100 },
+                          { label: "CRDBAG Half", w: 110 },
+                          { label: "CRDBAG Full", w: 210 },
+                          { label: "Peli Air 1555", w: 250 },
                         ].map(preset => (
                           <Button
                             key={preset.label}
