@@ -373,12 +373,19 @@ function CableLabelContent({ data, isPreview = false, fontScale = 1 }: { data: C
   const height = data.height;
   const s = fontScale;
 
-  const fontSize = `${Math.max(6, height * 0.55) * s}px`;
-  const smallFontSize = `${Math.max(5, height * 0.35)}px`;
-  const groupFontSize = `${Math.max(5, height * 0.35) * s}px`;
-  const logoH = `${Math.max(10, height * 1.8)}px`;
   const hasCode = data.codeType !== "none";
-  const codeSize = height * 0.85;
+  const codeSize = height * 0.82;
+
+  // Narrow = 2 per row or small preset (width < 60mm)
+  const isNarrow = width < 60;
+
+  const namePx = Math.max(5, height * 0.38) * s;
+  const idPx = Math.max(6, height * 0.48) * s;
+  const groupPx = Math.max(5, height * 0.32) * s;
+  const infoNamePx = Math.max(4, isNarrow ? height * 0.3 : height * 0.28);
+  const infoPhonePx = Math.max(4, isNarrow ? height * 0.26 : height * 0.24);
+  // Narrow company section: smaller and uses abbreviation
+  const companySectionW = isNarrow ? Math.max(12, width * 0.22) : Math.max(20, width * 0.3);
 
   return (
     <div
@@ -392,29 +399,27 @@ function CableLabelContent({ data, isPreview = false, fontScale = 1 }: { data: C
         border: isPreview ? '1px solid #e5e7eb' : 'none'
       }}
     >
-      {/* Left black section with logo + phone + company */}
+      {/* Left black section with company info */}
       <div
-        className="bg-black text-white flex items-center justify-center gap-1 flex-shrink-0 px-2"
-        style={{ width: `${Math.max(20, width * 0.3)}mm` }}
+        className="bg-black text-white flex items-center justify-center flex-shrink-0"
+        style={{ width: `${companySectionW}mm`, padding: '0 1mm' }}
       >
-        <div className="flex flex-col items-center leading-none">
-          <span className="font-bold whitespace-nowrap" style={{ fontSize: `${Math.max(5, height * 0.28)}px` }}>
-            Filmværksted København
+        <div className="flex flex-col items-center leading-none" style={{ gap: '0.5px' }}>
+          <span className="font-bold whitespace-nowrap uppercase" style={{ fontSize: `${infoNamePx}px` }}>
+            {isNarrow ? 'FVKBH' : 'Filmværksted København'}
           </span>
-          <span className="font-bold whitespace-nowrap" style={{ fontSize: `${Math.max(4, height * 0.24)}px` }}>
+          <span className="font-bold whitespace-nowrap" style={{ fontSize: `${infoPhonePx}px` }}>
             +45 71 99 33 66
           </span>
         </div>
       </div>
 
       {hasCode && data.id && (
-        <div className="flex items-center justify-center flex-shrink-0 bg-white px-1"
-          style={{ height: '100%' }}
-        >
+        <div className="flex items-center justify-center flex-shrink-0 bg-white" style={{ padding: '0.5mm' }}>
           {data.codeType === "qr" ? (
             <QRCode
               value={data.id}
-              style={{ height: `${codeSize}mm`, width: `${codeSize}mm` }}
+              style={{ height: `${codeSize}mm`, width: `${codeSize}mm`, display: 'block' }}
               viewBox="0 0 256 256"
             />
           ) : (
@@ -429,28 +434,25 @@ function CableLabelContent({ data, isPreview = false, fontScale = 1 }: { data: C
         </div>
       )}
 
-      {/* Main content - horizontal strip */}
-      <div data-label-content className="flex-1 flex items-center justify-between px-1 min-w-0" style={{ overflow: 'hidden' }}>
-        <div className="flex items-center gap-1 min-w-0 flex-1" style={{ overflow: 'hidden' }}>
-          <span className="font-bold uppercase" style={{ fontSize, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', minWidth: 0, flexShrink: 1 }} data-label-name>
+      {/* Main content — name stacked above ID */}
+      <div data-label-content className="flex-1 flex flex-col justify-center min-w-0 px-1" style={{ overflow: 'hidden', gap: '1px' }}>
+        {data.name && (
+          <span className="font-bold uppercase truncate" data-label-name style={{ fontSize: `${namePx}px`, lineHeight: 1.05 }}>
             {data.name}
           </span>
+        )}
+        <div className="flex items-center gap-1 min-w-0">
+          {data.id && (
+            <span className="font-mono font-bold truncate" data-label-id style={{ fontSize: `${idPx}px`, lineHeight: 1.05 }}>
+              {data.id}
+            </span>
+          )}
           {data.group && (
-            <span
-              className="bg-black text-white px-1 rounded-sm font-bold uppercase flex-shrink-0"
-              style={{ fontSize: groupFontSize, whiteSpace: 'nowrap' }}
-            >
+            <span className="bg-black text-white font-bold uppercase flex-shrink-0" style={{ fontSize: `${groupPx}px`, padding: '0px 2px', lineHeight: 1.1 }}>
               {data.group}
             </span>
           )}
         </div>
-        {data.id && (
-          <div className="flex items-center flex-shrink-0 ml-1">
-            <span className="font-mono font-bold" style={{ fontSize, whiteSpace: 'nowrap' }}>
-              {data.id}
-            </span>
-          </div>
-        )}
       </div>
     </div>
   );
