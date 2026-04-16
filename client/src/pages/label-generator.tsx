@@ -480,7 +480,7 @@ function BoxLabelContent({ data, items, isPreview = false }: { data: BoxFormValu
   const kitFs = `${Math.max(16, width * 0.25)}px`;
   const phoneFs = `${Math.max(8, width * 0.09)}px`;
   const logoW = `${width * 0.55}mm`;
-  const qrSize = Math.min(width * 0.35, QR_H * 0.75);
+  const qrSize = Math.min(width * 0.18, QR_H * 0.55);
   const kitNumFs = `${Math.max(20, width * 0.3)}px`;
 
   const heightStyle = data.autoHeight ? { minHeight: `${height}mm` } : { height: `${height}mm` };
