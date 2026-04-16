@@ -528,9 +528,39 @@ function RoundLabelContent({ data, isPreview = false, nameFontSize = 0, idFontSi
   const namePx = nameFontSize > 0 ? nameFontSize : autoNamePx;
   const idPx = idFontSize > 0 ? idFontSize : autoIdPx;
   const groupPx = groupFontSize > 0 ? groupFontSize : autoGroupPx;
-  const padV = isSmall ? '1.5mm' : '0.5rem';
-  const padH = isSmall ? '1mm' : '0.5rem';
-  const contentGap = isSmall ? '2px' : '0.5rem';
+  const isNarrow = width < 60;
+  const padV = '0.5rem';
+  const padH = '0.5rem';
+  const contentGap = '0.5rem';
+
+  // Strip layout for small labels (<15mm): QR | name/id stacked | company info
+  if (isSmall) {
+    const stripQrSize = height * 0.82;
+    const stripNamePx = Math.max(5, Math.min(width * 0.13, height * 0.3));
+    const stripIdPx = Math.max(6, Math.min(width * 0.18, height * 0.38));
+    const stripInfoFs = Math.max(5, height * 0.22);
+    return (
+      <div data-label-root className="bg-black text-white relative flex flex-col border-0"
+        style={{ width: `${width}mm`, height: `${height}mm`, boxSizing: 'border-box', pageBreakInside: 'avoid', border: isPreview ? '1px solid #e5e7eb' : 'none', overflow: 'hidden' }}>
+        <div className="flex flex-row items-stretch w-full h-full" style={{ padding: '0.4mm 0 0.4mm 1mm', gap: '1.5mm' }}>
+          {showQr && data.id && (
+            <div className="flex-shrink-0 bg-white self-center" style={{ width: `${stripQrSize}mm`, height: `${stripQrSize}mm`, padding: `${stripQrSize * 0.03}mm` }}>
+              <QRCode value={data.id} style={{ height: '100%', width: '100%', display: 'block' }} viewBox="0 0 256 256" />
+            </div>
+          )}
+          <span className="w-px bg-white flex-shrink-0 self-stretch opacity-60" />
+          <div className="flex flex-col justify-center flex-1 min-w-0" style={{ gap: '1px' }}>
+            {showName && data.name && <span className="font-bold uppercase truncate" data-label-name style={{ fontSize: `${stripNamePx}px`, lineHeight: 1.05 }}>{data.name}</span>}
+            {showId && data.id && <span className="font-mono font-bold truncate" data-label-id style={{ fontSize: `${stripIdPx}px`, lineHeight: 1.05 }}>#{data.id}</span>}
+          </div>
+          <div className="bg-white text-black flex flex-col items-end flex-shrink-0 justify-center self-stretch" style={{ padding: '0 1.5mm', gap: '0.5px' }}>
+            <span className="font-bold uppercase whitespace-nowrap" style={{ fontSize: `${stripInfoFs}px`, lineHeight: 1.1 }}>{isNarrow ? 'FVKBH' : 'Filmværksted København'}</span>
+            <span className="font-bold whitespace-nowrap" style={{ fontSize: `${stripInfoFs}px`, lineHeight: 1.1 }}>+45 71 99 33 66</span>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div data-label-root className="bg-black text-white relative flex flex-col border-0"
@@ -546,22 +576,22 @@ function RoundLabelContent({ data, isPreview = false, nameFontSize = 0, idFontSi
       <div data-label-content className="flex-1 flex items-stretch min-h-0"
         style={{ paddingTop: padV, paddingBottom: padV, paddingLeft: padH, paddingRight: padH, transform: contentOffset !== 0 ? `translateY(${contentOffset}mm)` : undefined }}>
         <div className="flex flex-row items-center h-full w-full" style={{ gap: contentGap }}>
-          {showQr && !isSmall && (
+          {showQr && (
             <>
               <div className="flex items-center justify-center flex-shrink-0 bg-white rounded"
-                style={{ width: `${qrSize}mm`, height: `${qrSize}mm`, padding: `${qrSize * 0.06}mm` }}>
+                style={{ width: `${qrSize}mm`, height: `${qrSize}mm`, padding: `${qrSize * 0.03}mm` }}>
                 <QRCode value={data.id} style={{ height: '100%', width: '100%', maxWidth: '100%' }} viewBox="0 0 256 256" />
               </div>
-              <div className="w-[2.5px] bg-white flex-shrink-0" style={{ height: `${qrSize}mm` }}></div>
+              <div className="w-[2px] bg-white flex-shrink-0" style={{ height: `${qrSize * 0.8}mm`, alignSelf: 'center' }}></div>
             </>
           )}
-          <div className="flex flex-col justify-start self-stretch min-w-0 flex-1 text-left" style={{ overflow: 'hidden', gap: lineGap > 0 ? `${lineGap}mm` : contentGap }}>
+          <div className="flex flex-col justify-center self-stretch min-w-0 flex-1 text-left" style={{ overflow: 'hidden', gap: lineGap > 0 ? `${lineGap}mm` : contentGap }}>
             {showName && <div className="font-bold uppercase leading-tight" data-label-name
               style={{ fontSize: `${namePx}px`, wordBreak: 'break-word', overflowWrap: 'break-word', lineHeight: 1.15 }}>{data.name}</div>}
             {showId && data.id && <div className="font-mono tracking-wider font-bold" data-label-id
               style={{ fontSize: `${idPx}px`, wordBreak: 'break-all', lineHeight: 1.1 }}>#{data.id}</div>}
             {showGroup && data.group && <div><span className="bg-white text-black font-bold uppercase tracking-wider rounded inline-block" data-label-group
-              style={{ fontSize: `${groupPx}px`, padding: isSmall ? '0px 2px' : '2px 8px', lineHeight: 1.15 }}>{data.group}</span></div>}
+              style={{ fontSize: `${groupPx}px`, padding: '2px 8px', lineHeight: 1.15 }}>{data.group}</span></div>}
           </div>
         </div>
       </div>
