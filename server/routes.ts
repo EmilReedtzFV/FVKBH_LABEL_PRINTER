@@ -31,9 +31,19 @@ export async function registerRoutes(
         // e.g. "Doku - Deity DLTX \t24088\tDeity 1"
         if (line.includes('\t')) {
           const parts = line.split('\t').map((p: string) => p.trim()).filter((p: string) => p.length > 0);
-          if (parts.length >= 2 && /^\d{3,6}$/.test(parts[1])) {
-            items.push({ id: parts[1], name: parts[0], group: parts[2] || '' });
-            continue;
+          if (parts.length >= 2) {
+            const secondCol = parts[1];
+            // If second column looks like a group token (e.g. "KIT2", "SET1"), treat as group
+            if (/^(KIT|SET|GRP|GRUPPE)\s*\d*/i.test(secondCol) || /^Kit\s*\d/i.test(secondCol)) {
+              items.push({ id: parts[2] || currentId, name: parts[0], group: secondCol });
+              currentId = '';
+              continue;
+            }
+            // Otherwise treat second column as ID (support any length ≥3 digits)
+            if (/^\d{3,}$/.test(secondCol)) {
+              items.push({ id: secondCol, name: parts[0], group: parts[2] || currentGroup });
+              continue;
+            }
           }
         }
 
@@ -52,7 +62,13 @@ export async function registerRoutes(
             currentGroup = line;
           }
         } else if (line.length > 2 && !skipPattern.test(line) && !/^\d+$/.test(line)) {
-          items.push({ id: currentId, name: line, group: currentGroup });
+          // Detect "Name          12345" format (name + ID on same line, 2+ spaces between)
+          const nameIdMatch = line.match(/^(.+?)\s{2,}(\d{3,})$/);
+          if (nameIdMatch) {
+            items.push({ id: nameIdMatch[2], name: nameIdMatch[1].trim(), group: currentGroup });
+          } else {
+            items.push({ id: currentId, name: line, group: currentGroup });
+          }
           currentId = "";
         }
       }
